@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/RTradeLtd/Temporal/config"
-	"github.com/RTradeLtd/Temporal/models"
-	"github.com/RTradeLtd/Temporal/utils"
+	"github.com/RTradeLtd/config"
+	"github.com/RTradeLtd/database/models"
+	"github.com/RTradeLtd/database/utils"
 	"github.com/jinzhu/gorm"
 )
 
