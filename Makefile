@@ -20,6 +20,10 @@ testenv:
 	curl $(TESTCOMPOSE) --output test/docker-compose.yml
 	$(COMPOSECOMMAND) up -d postgres
 
+.PHONY: clean
+clean:
+	$(COMPOSECOMMAND) down
+
 .PHONY: test
 test: vendor
 	go test -race -cover ./...
