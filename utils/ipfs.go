@@ -1,8 +1,8 @@
 package utils
 
 import (
-	au "github.com/ipfs/go-ipfs-addr"
-	ma "github.com/multiformats/go-multiaddr"
+	au "github.com/ipsn/go-ipfs/gxlibs/github.com/ipfs/go-ipfs-addr"
+	ma "github.com/ipsn/go-ipfs/gxlibs/github.com/multiformats/go-multiaddr"
 )
 
 func GenerateMultiAddrFromString(addr string) (ma.Multiaddr, error) {
