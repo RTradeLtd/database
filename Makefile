@@ -5,8 +5,12 @@ COMPOSECOMMAND=env ADDR_NODE1=1 ADDR_NODE2=2 docker-compose -f test/docker-compo
 
 all: build
 
+.PHONY: vendor
+vendor:
+	dep ensure
+
 .PHONY: build
-build:
+build: vendor
 	go build ./...
 
 .PHONY: testenv
@@ -17,9 +21,9 @@ testenv:
 	$(COMPOSECOMMAND) up -d postgres
 
 .PHONY: test
-test:
+test: vendor
 	go test -race -cover ./...
 
 .PHONY: lint
-lint:
+lint: vendor
 	golint $(go list ./... | grep -v /vendor/)
