@@ -1,9 +1,9 @@
-package utils
+package utils_test
 
 import (
 	"testing"
 
-	"github.com/RTradeLtd/Temporal/utils"
+	"github.com/RTradeLtd/database/utils"
 )
 
 var (
@@ -16,7 +16,7 @@ func TestGenerateMultiAddrAndParsePeerID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = utils.ParseMultiAddrForIPFSPeer(addr); err != nil {
+	if _, err = utils.ParsePeerIDFromIPFSMultiAddr(addr); err != nil {
 		t.Fatal(err)
 	}
 
@@ -25,7 +25,7 @@ func TestGenerateMultiAddrAndParsePeerID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err = utils.ParseMultiAddrForIPFSPeer(addr); err != nil {
+	if _, err = utils.ParsePeerIDFromIPFSMultiAddr(addr); err != nil {
 		t.Fatal(err)
 	}
 }
