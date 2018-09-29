@@ -6,7 +6,6 @@
 [[constraint]]
   branch = "feat/payments"
   name = "github.com/RTradeLtd/config"
-  version = "v1.0.0"
 
 [[constraint]]
   name = "github.com/jinzhu/gorm"
