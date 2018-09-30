@@ -166,20 +166,18 @@ func (um *UserManager) CheckIfKeyOwnedByUser(username, keyName string) (bool, er
 
 // CheckIfUserAccountEnabled is used to get whether or not a user account is enabled
 func (um *UserManager) CheckIfUserAccountEnabled(username string, db *gorm.DB) (bool, error) {
-	var user User
-	db.Where("user_name = ?", username).First(&user)
-	if user.CreatedAt == nilTime {
-		return false, errors.New("user account does not exist")
+	user := User{}
+	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
+		return false, check.Error
 	}
 	return user.AccountEnabled, nil
 }
 
 // ChangePassword is used to change a users password
 func (um *UserManager) ChangePassword(username, currentPassword, newPassword string) (bool, error) {
-	var user User
-	um.DB.Where("user_name = ?", username).First(&user)
-	if user.CreatedAt == nilTime {
-		return false, errors.New("user account does not exist")
+	user := User{}
+	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
+		return false, check.Error
 	}
 	decodedPassword, err := hex.DecodeString(user.HashedPassword)
 	if err != nil {
@@ -253,10 +251,9 @@ func (um *UserManager) SignIn(username, password string) (bool, error) {
 
 // ComparePlaintextPasswordToHash is a helper method used to validate the provided password
 func (um *UserManager) ComparePlaintextPasswordToHash(username, password string) (bool, error) {
-	var user User
-	um.DB.Where("user_name = ?", username).First(&user)
-	if user.CreatedAt == nilTime {
-		return false, errors.New("user account does not exist")
+	user := User{}
+	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
+		return false, check.Error
 	}
 	passwordBytes, err := hex.DecodeString(user.HashedPassword)
 	if err != nil {
@@ -271,13 +268,12 @@ func (um *UserManager) ComparePlaintextPasswordToHash(username, password string)
 }
 
 // FindByAddress is used to find a user by searching for their eth address
-func (um *UserManager) FindByAddress(address string) *User {
+func (um *UserManager) FindByAddress(address string) (*User, error) {
 	u := User{}
-	um.DB.Where("eth_address = ?", address).Find(&u)
-	if u.CreatedAt == nilTime {
-		return nil
+	if check := um.DB.Where("eth_address = ?", address).First(&u); check.Error != nil {
+		return nil, check.Error
 	}
-	return &u
+	return &u, nil
 }
 
 // FindEthAddressByUserName is used to find the eth address associated with a user account
@@ -293,8 +289,7 @@ func (um *UserManager) FindEthAddressByUserName(username string) (string, error)
 // the returned map contains their eth address as a key, and their email address as a value
 func (um *UserManager) FindEmailByUserName(username string) (map[string]string, error) {
 	u := User{}
-	check := um.DB.Where("user_name = ?", username).First(&u)
-	if check.Error != nil {
+	if check := um.DB.Where("user_name = ?", username).First(&u); check.Error != nil {
 		return nil, check.Error
 	}
 	emails := make(map[string]string)
