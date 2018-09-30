@@ -16,6 +16,7 @@ type Payments struct {
 	Type           string  `gorm:"type:varchar(255)"` // ETH, RTC, XMR, BTC, LTC
 	UserName       string  `gorm:"type:varchar(255)"`
 	Confirmed      bool    `gorm:"type:varchar(255)"`
+	Processing     bool    `gorm:"type:varchar(255)"`
 }
 
 // PaymentManager is used to interact with payment information in our database
@@ -55,6 +56,7 @@ func (pm *PaymentManager) NewPayment(depositAddress string, txHash string, usdVa
 		Type:           paymentType,
 		UserName:       username,
 		Confirmed:      false,
+		Processing:     false,
 	}
 
 	if check := pm.DB.Create(&p); check.Error != nil {
@@ -75,4 +77,20 @@ func (pm *PaymentManager) ConfirmPayment(txHash string) (*Payments, error) {
 		return nil, check.Error
 	}
 	return &p, nil
+}
+
+// MarkPaymentAsProcessing is sued to mark a payment as being processed
+func (pm *PaymentManager) MarkPaymentAsProcessing(txHash string) (*Payments, error) {
+	payment, err := pm.FindPaymentByTxHash(txHash)
+	if err != nil {
+		return nil, err
+	}
+	if payment.Processing {
+		return nil, errors.New("payment is already being processed")
+	}
+	payment.Processing = true
+	if check := pm.DB.Model(payment).Update("processing", payment.Processing); check.Error != nil {
+		return nil, check.Error
+	}
+	return payment, nil
 }
