@@ -10,36 +10,37 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User contains a user account
+// User is our user model for anyone who signs up with Temporal
 type User struct {
 	gorm.Model
-	EthAddress        string         `gorm:"type:varchar(255);unique"`
-	UserName          string         `gorm:"type:varchar(255);unique"`
-	EmailAddress      string         `gorm:"type:varchar(255);unique"`
-	EnterpriseEnabled bool           `gorm:"type:boolean"`
-	AccountEnabled    bool           `gorm:"type:boolean"`
-	APIAccess         bool           `gorm:"type:boolean"`
-	EmailEnabled      bool           `gorm:"type:boolean"`
-	HashedPassword    string         `gorm:"type:varchar(255)"`
-	Credits           float64        `gorm:"type:float"`
-	IPFSKeyNames      pq.StringArray `gorm:"type:text[];column:ipfs_key_names"`
-	IPFSKeyIDs        pq.StringArray `gorm:"type:text[];column:ipfs_key_ids"`
-	IPFSNetworkNames  pq.StringArray `gorm:"type:text[];column:ipfs_network_names"`
+	UserName          string  `gorm:"type:varchar(255);unique"`
+	EmailAddress      string  `gorm:"type:varchar(255);unique"`
+	EnterpriseEnabled bool    `gorm:"type:boolean"`
+	AccountEnabled    bool    `gorm:"type:boolean"`
+	APIAccess         bool    `gorm:"type:boolean"`
+	EmailEnabled      bool    `gorm:"type:boolean"`
+	AdminAccess       bool    `gorm:"type:boolean"`
+	HashedPassword    string  `gorm:"type:varchar(255)"`
+	Credits           float64 `gorm:"type:float;default:0"`
+	// IPFSKeyNames is an array of IPFS keys this user has created
+	IPFSKeyNames     pq.StringArray `gorm:"type:text[];column:ipfs_key_names"`
+	IPFSKeyIDs       pq.StringArray `gorm:"type:text[];column:ipfs_key_ids"`
+	IPFSNetworkNames pq.StringArray `gorm:"type:text[];column:ipfs_network_names"`
 }
 
-// UserManager is used to manage user accounts within the DB
+// UserManager is our helper to interact with our database
 type UserManager struct {
 	DB *gorm.DB
 }
 
-// NewUserManager is a method used to generate our user manager
+// NewUserManager is used to generate our user manager helper
 func NewUserManager(db *gorm.DB) *UserManager {
 	um := UserManager{}
 	um.DB = db
 	return &um
 }
 
-// GetPrivateIPFSNetworksForUser is used to get all the authorized private networks a user has access to
+// GetPrivateIPFSNetworksForUser is used to get a list of allowed private ipfs networks for a user
 func (um *UserManager) GetPrivateIPFSNetworksForUser(username string) ([]string, error) {
 	u := &User{}
 	if check := um.DB.Where("user_name = ?", username).First(u); check.Error != nil {
@@ -48,7 +49,7 @@ func (um *UserManager) GetPrivateIPFSNetworksForUser(username string) ([]string,
 	return u.IPFSNetworkNames, nil
 }
 
-// CheckIfUserHasAccessToNetwork is used to check if a user has access to a private IFPS network
+// CheckIfUserHasAccessToNetwork is used to check if a user has access to a private ipfs network
 func (um *UserManager) CheckIfUserHasAccessToNetwork(username, networkName string) (bool, error) {
 	u := &User{}
 	if check := um.DB.Where("user_name = ?", username).First(u); check.Error != nil {
@@ -62,7 +63,7 @@ func (um *UserManager) CheckIfUserHasAccessToNetwork(username, networkName strin
 	return false, nil
 }
 
-// AddIPFSNetworkForUser is used to add an IPFS network to a users authorized networks
+// AddIPFSNetworkForUser is used to update a users allowed private ipfs networks
 func (um *UserManager) AddIPFSNetworkForUser(username, networkName string) error {
 	u := &User{}
 	if check := um.DB.Where("user_name = ?", username).First(u); check.Error != nil {
@@ -81,7 +82,7 @@ func (um *UserManager) AddIPFSNetworkForUser(username, networkName string) error
 	return nil
 }
 
-// AddIPFSKeyForUser is used to add a key to a user account
+// AddIPFSKeyForUser is used to add a key to a user
 func (um *UserManager) AddIPFSKeyForUser(username, keyName, keyID string) error {
 	var user User
 	if errCheck := um.DB.Where("user_name = ?", username).First(&user); errCheck.Error != nil {
@@ -110,7 +111,7 @@ func (um *UserManager) AddIPFSKeyForUser(username, keyName, keyID string) error 
 	return nil
 }
 
-// GetKeysForUser is used to fetch all of the users keys
+// GetKeysForUser is used to get a mapping of a users keys
 func (um *UserManager) GetKeysForUser(username string) (map[string][]string, error) {
 	var user User
 	keys := make(map[string][]string)
@@ -127,7 +128,7 @@ func (um *UserManager) GetKeysForUser(username string) (map[string][]string, err
 	return keys, nil
 }
 
-// GetKeyIDByName is used to get the ID (public key hash) of a key
+// GetKeyIDByName is used to get the ID of a key by searching for its name
 func (um *UserManager) GetKeyIDByName(username, keyName string) (string, error) {
 	var user User
 	if errCheck := um.DB.Where("user_name = ?", username).First(&user); errCheck.Error != nil {
@@ -145,7 +146,7 @@ func (um *UserManager) GetKeyIDByName(username, keyName string) (string, error) 
 	return "", errors.New("key not found")
 }
 
-// CheckIfKeyOwnedByUser is used to check if a given user owns a key
+// CheckIfKeyOwnedByUser is used to check if a key is owned by a user
 func (um *UserManager) CheckIfKeyOwnedByUser(username, keyName string) (bool, error) {
 	var user User
 	if errCheck := um.DB.Where("user_name = ?", username).First(&user); errCheck.Error != nil {
@@ -164,9 +165,9 @@ func (um *UserManager) CheckIfKeyOwnedByUser(username, keyName string) (bool, er
 	return false, nil
 }
 
-// CheckIfUserAccountEnabled is used to get whether or not a user account is enabled
+// CheckIfUserAccountEnabled is used to check if a user account is enabled
 func (um *UserManager) CheckIfUserAccountEnabled(username string) (bool, error) {
-	user := User{}
+	var user User
 	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
 		return false, check.Error
 	}
@@ -175,9 +176,10 @@ func (um *UserManager) CheckIfUserAccountEnabled(username string) (bool, error) 
 
 // ChangePassword is used to change a users password
 func (um *UserManager) ChangePassword(username, currentPassword, newPassword string) (bool, error) {
-	user := User{}
-	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
-		return false, check.Error
+	var user User
+	um.DB.Where("user_name = ?", username).First(&user)
+	if user.CreatedAt == nilTime {
+		return false, errors.New("user account does not exist")
 	}
 	decodedPassword, err := hex.DecodeString(user.HashedPassword)
 	if err != nil {
@@ -197,8 +199,8 @@ func (um *UserManager) ChangePassword(username, currentPassword, newPassword str
 	return true, nil
 }
 
-// NewUserAccount is used to create a new user account, enabling API and account access
-func (um *UserManager) NewUserAccount(ethAddress, username, password, email string, enterpriseEnabled bool) (*User, error) {
+// NewUserAccount is used to create a new user account
+func (um *UserManager) NewUserAccount(username, password, email string, enterpriseEnabled bool) (*User, error) {
 	user := User{}
 	check := um.DB.Where("user_name = ?", username).First(&user)
 	if check.Error != nil && check.Error != gorm.ErrRecordNotFound {
@@ -211,17 +213,14 @@ func (um *UserManager) NewUserAccount(ethAddress, username, password, email stri
 	if err != nil {
 		return nil, err
 	}
-	if ethAddress == "" {
-		ethAddress = username
-	}
 	user = User{
 		UserName:          username,
-		EthAddress:        ethAddress,
 		EnterpriseEnabled: enterpriseEnabled,
 		HashedPassword:    hex.EncodeToString(hashedPass),
 		EmailAddress:      email,
 		AccountEnabled:    true,
 		APIAccess:         true,
+		AdminAccess:       false,
 	}
 	if check := um.DB.Create(&user); check.Error != nil {
 		return nil, check.Error
@@ -249,11 +248,12 @@ func (um *UserManager) SignIn(username, password string) (bool, error) {
 	return true, nil
 }
 
-// ComparePlaintextPasswordToHash is a helper method used to validate the provided password
+// ComparePlaintextPasswordToHash is a helper method used to validate a users password
 func (um *UserManager) ComparePlaintextPasswordToHash(username, password string) (bool, error) {
-	user := User{}
-	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
-		return false, check.Error
+	var user User
+	um.DB.Where("user_name = ?", username).First(&user)
+	if user.CreatedAt == nilTime {
+		return false, errors.New("user account does not exist")
 	}
 	passwordBytes, err := hex.DecodeString(user.HashedPassword)
 	if err != nil {
@@ -267,36 +267,6 @@ func (um *UserManager) ComparePlaintextPasswordToHash(username, password string)
 
 }
 
-// FindByAddress is used to find a user by searching for their eth address
-func (um *UserManager) FindByAddress(address string) (*User, error) {
-	u := User{}
-	if check := um.DB.Where("eth_address = ?", address).First(&u); check.Error != nil {
-		return nil, check.Error
-	}
-	return &u, nil
-}
-
-// FindEthAddressByUserName is used to find the eth address associated with a user account
-func (um *UserManager) FindEthAddressByUserName(username string) (string, error) {
-	u := User{}
-	if check := um.DB.Where("user_name = ?", username).First(&u); check.Error != nil {
-		return "", check.Error
-	}
-	return u.EthAddress, nil
-}
-
-// FindEmailByUserName is used to find an email address by searching for the users eth address
-// the returned map contains their eth address as a key, and their email address as a value
-func (um *UserManager) FindEmailByUserName(username string) (map[string]string, error) {
-	u := User{}
-	if check := um.DB.Where("user_name = ?", username).First(&u); check.Error != nil {
-		return nil, check.Error
-	}
-	emails := make(map[string]string)
-	emails[username] = u.EmailAddress
-	return emails, nil
-}
-
 // FindByUserName is used to find a user by their username
 func (um *UserManager) FindByUserName(username string) (*User, error) {
 	u := User{}
@@ -306,38 +276,34 @@ func (um *UserManager) FindByUserName(username string) (*User, error) {
 	return &u, nil
 }
 
-// ChangeEthereumAddress is used to change a user's ethereum address
-func (um *UserManager) ChangeEthereumAddress(username, ethAddress string) (*User, error) {
+// FindEmailByUserName is used to find an email address by searching for the users eth address
+// the returned map contains their eth address as a key, and their email address as a value
+func (um *UserManager) FindEmailByUserName(username string) (map[string]string, error) {
+	u := User{}
+	check := um.DB.Where("user_name = ?", username).First(&u)
+	if check.Error != nil {
+		return nil, check.Error
+	}
+	emails := make(map[string]string)
+	emails[username] = u.EmailAddress
+	return emails, nil
+}
+
+// AddCredits is used to add credits to a user account
+func (um *UserManager) AddCredits(username string, credits float64) (*User, error) {
 	u := User{}
 	if check := um.DB.Where("user_name = ?", username).First(&u); check.Error != nil {
 		return nil, check.Error
 	}
-	u.EthAddress = ethAddress
-	if check := um.DB.Model(u).Update("eth_address", ethAddress); check.Error != nil {
+	u.Credits = u.Credits + credits
+	if check := um.DB.Model(&u).Update("credits", u.Credits); check.Error != nil {
 		return nil, check.Error
 	}
 	return &u, nil
 }
 
-// AddCreditsForUser is used to add credits to a users account
-func (um *UserManager) AddCreditsForUser(username string, credits float64) (*User, error) {
-	u := User{}
-	if check := um.DB.Where("user_name = ?", username).First(&u); check.Error != nil {
-		return nil, check.Error
-	}
-	if u.Credits > 0 {
-		u.Credits = u.Credits + credits
-	} else {
-		u.Credits = credits
-	}
-	if check := um.DB.Model(u).Update("credits", credits); check.Error != nil {
-		return nil, check.Error
-	}
-	return &u, nil
-}
-
-// GetCreditsForUser is used to get the user's current credits
-func (um *UserManager) GetCreditsForUser(username string) (float64, error) {
+// GetCredits is used to get the user's current credits
+func (um *UserManager) GetCredits(username string) (float64, error) {
 	u := User{}
 	if check := um.DB.Where("user_name = ?", username).First(&u); check.Error != nil {
 		return 0, check.Error
@@ -359,4 +325,13 @@ func (um *UserManager) RemoveCredits(username string, credits float64) (*User, e
 		return nil, check.Error
 	}
 	return user, nil
+}
+
+// CheckIfAdmin is used to check if an account is an administrator
+func (um *UserManager) CheckIfAdmin(username string) (bool, error) {
+	user, err := um.FindByUserName(username)
+	if err != nil {
+		return false, err
+	}
+	return user.AdminAccess, nil
 }

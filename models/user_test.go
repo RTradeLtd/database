@@ -19,7 +19,6 @@ var (
 )
 
 type args struct {
-	ethAddress        string
 	userName          string
 	email             string
 	password          string
@@ -39,22 +38,21 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -79,22 +77,21 @@ func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -126,22 +123,21 @@ func TestUserManager_AddIPFSNetworkForUSer(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -175,22 +171,21 @@ func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -219,22 +214,21 @@ func TestUserManager_GetKeysForUser(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -259,22 +253,21 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -309,22 +302,21 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -361,22 +353,21 @@ func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -405,21 +396,20 @@ func TestUserManager_ChangePassword(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -448,22 +438,21 @@ func TestUserManager_NewAccount(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -485,22 +474,21 @@ func TestUserManager_SignIn(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -532,22 +520,21 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -566,98 +553,6 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 	}
 }
 
-func TestUserManager_FindByAddress(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
-	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
-	)
-
-	tests := []struct {
-		name string
-		args args
-	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer um.DB.Delete(user)
-			userCopy, err := um.FindByAddress(
-				tt.args.ethAddress,
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if userCopy.UserName != user.UserName {
-				t.Fatal("failed to find correct account")
-			}
-		})
-	}
-}
-
-func TestUserManager_FindEthAddressByUserName(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
-	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
-	)
-
-	tests := []struct {
-		name string
-		args args
-	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer um.DB.Delete(user)
-			address, err := um.FindEthAddressByUserName(
-				tt.args.userName,
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if address != user.EthAddress {
-				t.Fatal("failed to find correct account")
-			}
-		})
-	}
-}
-
 func TestUserManager_FindEmailByUserName(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
@@ -671,22 +566,21 @@ func TestUserManager_FindEmailByUserName(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -711,22 +605,21 @@ func TestUserManager_FindUserByUserName(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -739,49 +632,6 @@ func TestUserManager_FindUserByUserName(t *testing.T) {
 			}
 			if userCopy.UserName != user.UserName {
 				t.Fatal("failed to find correct account")
-			}
-		})
-	}
-}
-
-func TestUserManager_ChangeEthereumAddress(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
-	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
-	)
-
-	tests := []struct {
-		name string
-		args args
-	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer um.DB.Delete(user)
-			if _, err := um.ChangeEthereumAddress(
-				tt.args.userName,
-				tt.args.ethAddress,
-			); err != nil {
-				t.Fatal(err)
 			}
 		})
 	}
@@ -800,27 +650,26 @@ func TestUserManager_Credits(t *testing.T) {
 	um := models.NewUserManager(db)
 
 	var (
-		randUtils  = utils.GenerateRandomUtils()
-		username   = randUtils.GenerateString(10, utils.LetterBytes)
-		ethAddress = randUtils.GenerateString(10, utils.LetterBytes)
-		email      = randUtils.GenerateString(10, utils.LetterBytes)
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
 	)
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test1", args{ethAddress, username, email, "password123", false}},
+		{"Test1", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.ethAddress, tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
 			if err != nil {
 				t.Fatal(err)
 			}
 			defer um.DB.Delete(user)
-			userCopy, err := um.AddCreditsForUser(
+			userCopy, err := um.AddCredits(
 				tt.args.userName,
 				testCredits,
 			)
@@ -830,7 +679,7 @@ func TestUserManager_Credits(t *testing.T) {
 			if userCopy.Credits != testCredits {
 				t.Fatal("failed to add credits")
 			}
-			credits, err := um.GetCreditsForUser(
+			credits, err := um.GetCredits(
 				tt.args.userName,
 			)
 			if err != nil {
