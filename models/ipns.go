@@ -49,9 +49,8 @@ func (im *IpnsManager) FindByUserName(username string) (*[]IPNS, error) {
 // the public key hash of the key that was used to pulish a record
 func (im *IpnsManager) FindByIPNSHash(ipnsHash string) (*IPNS, error) {
 	var entry IPNS
-	im.DB.Table("ip_ns").Where("ipns_hash = ?", ipnsHash).First(&entry)
-	if entry.CreatedAt == nilTime {
-		return nil, errors.New("ipns hash does not exist")
+	if check := im.DB.Where("ipns_hash = ?", ipnsHash).First(&entry); check.Error != nil {
+		return nil, check.Error
 	}
 	return &entry, nil
 }
@@ -85,7 +84,7 @@ func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, key, networkName, use
 	// update the key used to sign
 	entry.Key = key
 	// only update  changed fields
-	check := im.DB.Table("ip_ns").Model(&entry).Updates(map[string]interface{}{
+	check := im.DB.Model(&entry).Updates(map[string]interface{}{
 		"sequence":          &entry.Sequence,
 		"ipfs_hashes":       &entry.IPFSHashes,
 		"current_ipfs_hash": &entry.CurrentIPFSHash,
