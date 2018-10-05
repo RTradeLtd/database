@@ -166,11 +166,10 @@ func (um *UserManager) CheckIfKeyOwnedByUser(username, keyName string) (bool, er
 }
 
 // CheckIfUserAccountEnabled is used to check if a user account is enabled
-func (um *UserManager) CheckIfUserAccountEnabled(username string, db *gorm.DB) (bool, error) {
+func (um *UserManager) CheckIfUserAccountEnabled(username string) (bool, error) {
 	var user User
-	db.Where("user_name = ?", username).First(&user)
-	if user.CreatedAt == nilTime {
-		return false, errors.New("user account does not exist")
+	if check := um.DB.Where("user_name = ?", username).First(&user); check.Error != nil {
+		return false, check.Error
 	}
 	return user.AccountEnabled, nil
 }
