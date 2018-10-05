@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/RTradeLtd/Temporal/models"
 	"github.com/RTradeLtd/config"
+	"github.com/RTradeLtd/database/models"
 )
 
 const (
