@@ -59,17 +59,8 @@ func (im *IpnsManager) FindByIPNSHash(ipnsHash string) (*IPNS, error) {
 func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, key, networkName, username string, lifetime, ttl time.Duration) (*IPNS, error) {
 	var entry IPNS
 	// search for an IPNS entry that matches the given ipns hash
-	if check := im.DB.Where("ipns_hash = ? AND network_name = ?", ipnsHash, networkName).First(&entry); check.Error != nil && check.Error != gorm.ErrRecordNotFound {
+	if check := im.DB.Where("ipns_hash = ? AND network_name = ?", ipnsHash, networkName).First(&entry); check.Error != nil {
 		return nil, check.Error
-	}
-	// if the returned model does not exist create it
-	if entry.CreatedAt == nilTime {
-		// Create the record
-		entry, err := im.CreateEntry(ipnsHash, ipfsHash, key, networkName, username, lifetime, ttl)
-		if err != nil {
-			return nil, err
-		}
-		return entry, nil
 	}
 	// increase the sequence number
 	entry.Sequence++
@@ -88,7 +79,7 @@ func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, key, networkName, use
 		"sequence":          &entry.Sequence,
 		"ipfs_hashes":       &entry.IPFSHashes,
 		"current_ipfs_hash": &entry.CurrentIPFSHash,
-		"lifeTime":          &entry.LifeTime,
+		"life_time":         &entry.LifeTime,
 		"ttl":               &entry.TTL,
 		"key":               &entry.Key,
 	})
