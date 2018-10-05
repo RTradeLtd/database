@@ -51,7 +51,7 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Delete(entry)
+			db.Delete(entry)
 		})
 	}
 }
