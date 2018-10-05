@@ -15,7 +15,7 @@ type IPNS struct {
 	// the ipns hash, is the peer id of the peer used to sign the entry
 	IPNSHash string `gorm:"type:varchar(255);unique;column:ipns_hash" json:"ipns_hash"`
 	// List of content hashes this IPNS entry has pointed to
-	IPFSHashes      pq.StringArray `gorm:"type:text[];column:ipfs_hash" json:"ipfs_hashes"`
+	IPFSHashes      pq.StringArray `gorm:"type:text[];column:ipfs_hashes" json:"ipfs_hashes"`
 	CurrentIPFSHash string         `gorm:"type:varchar(255);column:current_ipfs_hash" json:"current_ipfs_hash"`
 	LifeTime        string         `gorm:"type:varchar(255)" json:"life_time"`
 	TTL             string         `gorm:"type:varchar(255)" json:"ttl"`
