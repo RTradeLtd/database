@@ -56,7 +56,7 @@ func (im *IpnsManager) FindByIPNSHash(ipnsHash string) (*IPNS, error) {
 }
 
 // UpdateIPNSEntry is used to update an already existing IPNS entry, creating a no record matching the hash exists
-func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, key, networkName, username string, lifetime, ttl time.Duration) (*IPNS, error) {
+func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, networkName, username string, lifetime, ttl time.Duration) (*IPNS, error) {
 	var entry IPNS
 	// search for an IPNS entry that matches the given ipns hash
 	if check := im.DB.Where("ipns_hash = ? AND network_name = ?", ipnsHash, networkName).First(&entry); check.Error != nil {
@@ -72,8 +72,6 @@ func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, key, networkName, use
 	entry.LifeTime = lifetime.String()
 	// update the ttl
 	entry.TTL = ttl.String()
-	// update the key used to sign
-	entry.Key = key
 	// only update  changed fields
 	check := im.DB.Model(&entry).Updates(map[string]interface{}{
 		"sequence":          &entry.Sequence,
@@ -81,7 +79,6 @@ func (im *IpnsManager) UpdateIPNSEntry(ipnsHash, ipfsHash, key, networkName, use
 		"current_ipfs_hash": &entry.CurrentIPFSHash,
 		"life_time":         &entry.LifeTime,
 		"ttl":               &entry.TTL,
-		"key":               &entry.Key,
 	})
 
 	if check.Error != nil {

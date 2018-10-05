@@ -35,7 +35,7 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{"ipnsHash", "ipfsHash", "key", "public", time.Hour, time.Hour, "username"}},
+		{"Test1", args{"12D3KooWSev8mmycrPbCMs4Awe4AFGkUQKPh7CTuifh51U8iFEr8", "QmQxXGDe84eUjCg2ZspvduEZxjWZk5DCB2N7bwPjXahoXE", "key", "public", time.Hour, time.Hour, "username"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestIpnsManager_UpdateEntry(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{"ipnsHash", "ipfsHash", "key", "public", time.Hour, time.Hour, "username"}},
+		{"Test1", args{"12D3KooWSev8mmycrPbCMs4Awe4AFGkUQKPh7CTuifh51U8iFEr8", "QmQxXGDe84eUjCg2ZspvduEZxjWZk5DCB2N7bwPjXahoXE", "key", "public", time.Hour, time.Hour, "username"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -95,19 +95,19 @@ func TestIpnsManager_UpdateEntry(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Delete(entry)
 			entryCopy, err := im.UpdateIPNSEntry(
 				tt.args.ipnsHash,
 				newIpfsHash,
-				tt.args.key,
 				tt.args.networkName,
 				tt.args.userName,
 				tt.args.lifetime,
 				tt.args.ttl,
 			)
 			if err != nil {
+				db.Delete(entry)
 				t.Fatal(err)
 			}
+			defer db.Delete(entryCopy)
 			if entryCopy.IPNSHash != entry.IPNSHash {
 				t.Fatal("failed to update correct ipns record")
 			}
@@ -138,7 +138,7 @@ func TestIpnsManager_FindByIPNSHash(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{"ipnsHash", "ipfsHash", "key", "public", time.Hour, time.Hour, "username"}},
+		{"Test1", args{"12D3KooWSev8mmycrPbCMs4Awe4AFGkUQKPh7CTuifh51U8iFEr8", "QmQxXGDe84eUjCg2ZspvduEZxjWZk5DCB2N7bwPjXahoXE", "key", "public", time.Hour, time.Hour, "username"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -189,7 +189,7 @@ func TestIpnsManager_FindByUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{"ipnsHash", "ipfsHash", "key", "public", time.Hour, time.Hour, "username"}},
+		{"Test1", args{"12D3KooWSev8mmycrPbCMs4Awe4AFGkUQKPh7CTuifh51U8iFEr8", "QmQxXGDe84eUjCg2ZspvduEZxjWZk5DCB2N7bwPjXahoXE", "key", "public", time.Hour, time.Hour, "username"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
