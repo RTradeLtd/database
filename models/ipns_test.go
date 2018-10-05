@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/RTradeLtd/Temporal/models"
 	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
 const (
@@ -51,7 +51,7 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			db.Delete(entry)
+			im.DB.Unscoped().Delete(entry)
 		})
 	}
 }
@@ -95,6 +95,7 @@ func TestIpnsManager_UpdateEntry(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer im.DB.Unscoped().Delete(entry)
 			entryCopy, err := im.UpdateIPNSEntry(
 				tt.args.ipnsHash,
 				newIpfsHash,
@@ -104,12 +105,10 @@ func TestIpnsManager_UpdateEntry(t *testing.T) {
 				tt.args.ttl,
 			)
 			if err != nil {
-				db.Delete(entry)
 				t.Fatal(err)
 			}
-			defer db.Delete(entryCopy)
-			if entryCopy.IPNSHash != entry.IPNSHash {
-				t.Fatal("failed to update correct ipns record")
+			if entryCopy.Sequence <= entry.Sequence {
+				t.Fatal("failed to update sequence")
 			}
 		})
 	}
@@ -154,7 +153,7 @@ func TestIpnsManager_FindByIPNSHash(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Delete(entry)
+			defer im.DB.Unscoped().Delete(entry)
 			entryCopy, err := im.FindByIPNSHash(tt.args.ipnsHash)
 			if err != nil {
 				t.Fatal(err)
@@ -205,7 +204,7 @@ func TestIpnsManager_FindByUser(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Delete(entry)
+			defer im.DB.Unscoped().Delete(entry)
 			if _, err := im.FindByUserName(tt.args.userName); err != nil {
 				t.Fatal(err)
 			}
