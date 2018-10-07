@@ -5,7 +5,7 @@
 
 [[constraint]]
   name = "github.com/RTradeLtd/config"
-  version = "v1.0.1"
+  version = "v1.0.3-rc1"
   
 [[constraint]]
   name = "github.com/jinzhu/gorm"
