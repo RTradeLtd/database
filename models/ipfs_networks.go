@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"time"
 
 	"github.com/RTradeLtd/database/utils"
 	"github.com/jinzhu/gorm"
@@ -18,7 +19,7 @@ type HostedIPFSPrivateNetwork struct {
 	LocalNodePeerIDs       pq.StringArray `gorm:"type:text[];column:local_node_peer_ids"`
 	BootstrapPeerAddresses pq.StringArray `gorm:"type:text[]"`
 	BootstrapPeerIDs       pq.StringArray `gorm:"type:text[];column:bootstrap_peer_ids"`
-	Online                 bool           `gorm:"type:boolean"`
+	Activated              time.Time      `gorm:"type:time"`
 }
 
 type IPFSNetworkManager struct {
