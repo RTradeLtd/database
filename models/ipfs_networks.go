@@ -10,8 +10,7 @@ import (
 )
 
 type HostedIPFSPrivateNetwork struct {
-	gorm.Model
-	Name                   string         `gorm:"primary_key,type:varchar(255)"`
+	Name                   string         `gorm:"primary_key;type:varchar(255)"`
 	APIURL                 string         `gorm:"type:varchar(255)"`
 	SwarmKey               string         `gorm:"type:varchar(255)"`
 	Users                  pq.StringArray `gorm:"type:text[]"` // these are the users to which this IPFS network connection applies to specified by eth address
@@ -60,14 +59,12 @@ func (im *IPFSNetworkManager) UpdateNetworkByName(name string,
 	return nil
 }
 
-// TODO: Validate swarm key and API url
 func (im *IPFSNetworkManager) CreateHostedPrivateNetwork(name, apiURL, swarmKey string, arrayParameters map[string][]string, users []string) (*HostedIPFSPrivateNetwork, error) {
 	pnet := &HostedIPFSPrivateNetwork{}
 	if check := im.DB.Where("name = ?", name).First(pnet); check.Error != nil && check.Error != gorm.ErrRecordNotFound {
 		return nil, check.Error
 	}
-
-	if pnet.CreatedAt != nilTime {
+	if pnet.Name != "" {
 		return nil, errors.New("private network already exists")
 	}
 
