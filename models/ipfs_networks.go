@@ -11,7 +11,7 @@ import (
 
 type HostedIPFSPrivateNetwork struct {
 	gorm.Model
-	Name                   string         `gorm:"type:varchar(255)"`
+	Name                   string         `gorm:"primary_key,type:varchar(255)"`
 	APIURL                 string         `gorm:"type:varchar(255)"`
 	SwarmKey               string         `gorm:"type:varchar(255)"`
 	Users                  pq.StringArray `gorm:"type:text[]"` // these are the users to which this IPFS network connection applies to specified by eth address
