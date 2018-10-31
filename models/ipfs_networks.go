@@ -51,6 +51,15 @@ func (im *IPFSNetworkManager) UpdateNetwork(network *HostedIPFSPrivateNetwork) e
 	return check.Error
 }
 
+func (im *IPFSNetworkManager) UpdateNetworkByName(name string,
+	attrs map[string]interface{}) error {
+	var pnet HostedIPFSPrivateNetwork
+	if check := im.DB.Model(&pnet).Where("name = ?", name).First(&pnet).Update(attrs); check.Error != nil {
+		return check.Error
+	}
+	return nil
+}
+
 // TODO: Validate swarm key and API url
 func (im *IPFSNetworkManager) CreateHostedPrivateNetwork(name, apiURL, swarmKey string, arrayParameters map[string][]string, users []string) (*HostedIPFSPrivateNetwork, error) {
 	pnet := &HostedIPFSPrivateNetwork{}
