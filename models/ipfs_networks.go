@@ -19,7 +19,7 @@ type HostedIPFSPrivateNetwork struct {
 	LocalNodePeerIDs       pq.StringArray `gorm:"type:text[];column:local_node_peer_ids"`
 	BootstrapPeerAddresses pq.StringArray `gorm:"type:text[]"`
 	BootstrapPeerIDs       pq.StringArray `gorm:"type:text[];column:bootstrap_peer_ids"`
-	Activated              time.Time      `gorm:"type:time"`
+	Activated              time.Time
 }
 
 type IPFSNetworkManager struct {
