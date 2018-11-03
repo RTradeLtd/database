@@ -46,11 +46,6 @@ func (im *IPFSNetworkManager) GetAPIURLByName(name string) (string, error) {
 	return pnet.APIURL, nil
 }
 
-func (im *IPFSNetworkManager) UpdateNetwork(network *HostedIPFSPrivateNetwork) error {
-	check := im.DB.Save(network)
-	return check.Error
-}
-
 func (im *IPFSNetworkManager) UpdateNetworkByName(name string,
 	attrs map[string]interface{}) error {
 	var pnet HostedIPFSPrivateNetwork
