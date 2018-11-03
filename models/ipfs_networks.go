@@ -10,7 +10,9 @@ import (
 )
 
 type HostedIPFSPrivateNetwork struct {
-	gorm.Model
+	ID                     uint `gorm:"primary_key"`
+	CreatedAt              time.Time
+	UpdatedAt              time.Time
 	Name                   string         `gorm:"unique;type:varchar(255)"`
 	APIURL                 string         `gorm:"type:varchar(255)"`
 	SwarmKey               string         `gorm:"type:varchar(255)"`
