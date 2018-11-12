@@ -12,7 +12,7 @@ var (
 	testNetwork = "test_network"
 	testKeyName = "test_key_name"
 	testKeyID   = "test_key_id"
-	testCredits = 10.5
+	testCredits = float64(99999999)
 )
 
 type args struct {
@@ -668,12 +668,12 @@ func TestUserManager_Credits(t *testing.T) {
 			defer um.DB.Delete(user)
 			userCopy, err := um.AddCredits(
 				tt.args.userName,
-				testCredits,
+				float64(1),
 			)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if userCopy.Credits != testCredits {
+			if userCopy.Credits != testCredits+1 {
 				t.Fatal("failed to add credits")
 			}
 			credits, err := um.GetCreditsForUser(
