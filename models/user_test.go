@@ -22,6 +22,20 @@ type args struct {
 	enterpriseEnabled bool
 }
 
+func TestMigration_User(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.User{}); check.Error != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
@@ -682,7 +696,7 @@ func TestUserManager_Credits(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if credits != testCredits {
+			if credits != testCredits+1 {
 				t.Fatal("failed to get credits")
 			}
 			userCopy, err = um.RemoveCredits(
@@ -692,7 +706,7 @@ func TestUserManager_Credits(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if userCopy.Credits != 0 {
+			if userCopy.Credits != 1 {
 				t.Fatal("failed to remove credits")
 			}
 		})

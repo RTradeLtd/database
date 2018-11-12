@@ -18,6 +18,20 @@ var (
 	testCfgPath = "../test/config.json"
 )
 
+func TestMigration_IPNS(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.IPNS{}); check.Error != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestIpnsManager_NewEntry(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {

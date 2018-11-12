@@ -7,6 +7,19 @@ import (
 	"github.com/RTradeLtd/database/models"
 )
 
+func TestMigration_Drop(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.Drop{}); check.Error != nil {
+		t.Fatal(err)
+	}
+}
 func TestDrop(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
@@ -38,6 +51,7 @@ func TestDrop(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer db.Delete(drop1)
 			drop2, err := dropManager.FindByDropID(drop1.DropID)
 			if err != nil {
 				t.Fatal(err)

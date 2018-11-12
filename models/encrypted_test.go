@@ -8,6 +8,20 @@ import (
 	"github.com/RTradeLtd/database/models"
 )
 
+func TestMigration_EncryptedUpload(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.EncryptedUpload{}); check.Error != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestEncryptedUploads(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
