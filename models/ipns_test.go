@@ -1,16 +1,36 @@
 package models_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/RTradeLtd/config"
 	"github.com/RTradeLtd/database/models"
+	"github.com/jinzhu/gorm"
 )
 
 const (
 	newIpfsHash = "newHash"
 )
+
+var (
+	testCfgPath = "../test/config.json"
+)
+
+func TestMigration_IPNS(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.IPNS{}); check.Error != nil {
+		t.Fatal(err)
+	}
+}
 
 func TestIpnsManager_NewEntry(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
@@ -210,4 +230,16 @@ func TestIpnsManager_FindByUser(t *testing.T) {
 			}
 		})
 	}
+}
+
+func openDatabaseConnection(t *testing.T, cfg *config.TemporalConfig) (*gorm.DB, error) {
+	dbConnURL := fmt.Sprintf("host=127.0.0.1 port=%s user=postgres dbname=temporal password=%s sslmode=disable",
+		cfg.Database.Port, cfg.Database.Password)
+
+	db, err := gorm.Open("postgres", dbConnURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	//db.LogMode(true)
+	return db, nil
 }

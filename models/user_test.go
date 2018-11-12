@@ -1,21 +1,18 @@
 package models_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/RTradeLtd/config"
 	"github.com/RTradeLtd/database/models"
 	"github.com/RTradeLtd/database/utils"
-	"github.com/jinzhu/gorm"
 )
 
 var (
-	testCfgPath = "../test/config.json"
 	testNetwork = "test_network"
 	testKeyName = "test_key_name"
 	testKeyID   = "test_key_id"
-	testCredits = 10.5
+	testCredits = float64(99999999)
 )
 
 type args struct {
@@ -23,6 +20,20 @@ type args struct {
 	email             string
 	password          string
 	enterpriseEnabled bool
+}
+
+func TestMigration_User(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.User{}); check.Error != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
@@ -671,21 +682,21 @@ func TestUserManager_Credits(t *testing.T) {
 			defer um.DB.Delete(user)
 			userCopy, err := um.AddCredits(
 				tt.args.userName,
-				testCredits,
+				float64(1),
 			)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if userCopy.Credits != testCredits {
+			if userCopy.Credits != testCredits+1 {
 				t.Fatal("failed to add credits")
 			}
-			credits, err := um.GetCredits(
+			credits, err := um.GetCreditsForUser(
 				tt.args.userName,
 			)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if credits != testCredits {
+			if credits != testCredits+1 {
 				t.Fatal("failed to get credits")
 			}
 			userCopy, err = um.RemoveCredits(
@@ -695,20 +706,9 @@ func TestUserManager_Credits(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if userCopy.Credits != 0 {
+			if userCopy.Credits != 1 {
 				t.Fatal("failed to remove credits")
 			}
 		})
 	}
-}
-
-func openDatabaseConnection(t *testing.T, cfg *config.TemporalConfig) (*gorm.DB, error) {
-	dbConnURL := fmt.Sprintf("host=127.0.0.1 port=5433 user=postgres dbname=temporal password=%s sslmode=disable",
-		cfg.Database.Password)
-
-	db, err := gorm.Open("postgres", dbConnURL)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return db, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 )
 
+// HostedIPFSPrivateNetwork is a private network for which we are responsible of the infrastructure
 type HostedIPFSPrivateNetwork struct {
 	ID                     uint `gorm:"primary_key"`
 	CreatedAt              time.Time
@@ -24,14 +25,17 @@ type HostedIPFSPrivateNetwork struct {
 	Activated              time.Time
 }
 
+// IPFSNetworkManager is used to manipulate IPFS network models in the database
 type IPFSNetworkManager struct {
 	DB *gorm.DB
 }
 
+// NewHostedIPFSNetworkManager is used to initialize our database connection
 func NewHostedIPFSNetworkManager(db *gorm.DB) *IPFSNetworkManager {
 	return &IPFSNetworkManager{DB: db}
 }
 
+// GetNetworkByName is used to retrieve a network from the database based off of its name
 func (im *IPFSNetworkManager) GetNetworkByName(name string) (*HostedIPFSPrivateNetwork, error) {
 	var pnet HostedIPFSPrivateNetwork
 	if check := im.DB.Model(&pnet).Where("name = ?", name).First(&pnet); check.Error != nil {
@@ -40,6 +44,7 @@ func (im *IPFSNetworkManager) GetNetworkByName(name string) (*HostedIPFSPrivateN
 	return &pnet, nil
 }
 
+// GetAPIURLByName is used to retrieve the API url for a private network by its network name
 func (im *IPFSNetworkManager) GetAPIURLByName(name string) (string, error) {
 	pnet, err := im.GetNetworkByName(name)
 	if err != nil {

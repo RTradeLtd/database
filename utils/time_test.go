@@ -1,7 +1,15 @@
-package utils
+package utils_test
 
-import "testing"
+import (
+	"testing"
+	"time"
 
-func TestCalculateGarbageCollectionDate(t *testing.T) {
-	_ = CalculateGarbageCollectDate(1)
+	"github.com/RTradeLtd/database/utils"
+)
+
+func TestCalculateGarbageCollectDate(t *testing.T) {
+	esimatedTime := utils.CalculateGarbageCollectDate(5)
+	if esimatedTime == time.Now() {
+		t.Fatal("invalid time retrieved")
+	}
 }

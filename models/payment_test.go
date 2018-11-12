@@ -7,6 +7,20 @@ import (
 	"github.com/RTradeLtd/database/models"
 )
 
+func TestMigration_Payment(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if check := db.AutoMigrate(&models.Payments{}); check.Error != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestPaymentManager_NewPayment(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
@@ -42,6 +56,7 @@ func TestPaymentManager_NewPayment(t *testing.T) {
 				tt.args.depositAddress,
 				tt.args.txHash,
 				tt.args.usdValue,
+				tt.args.usdValue,
 				tt.args.blockchain,
 				tt.args.paymentType,
 				tt.args.username,
@@ -59,6 +74,7 @@ func TestPaymentManager_NewPayment(t *testing.T) {
 				newPaymentNumber,
 				tt.args.depositAddress,
 				"new tx hash",
+				tt.args.usdValue,
 				tt.args.usdValue,
 				tt.args.blockchain,
 				tt.args.paymentType,
