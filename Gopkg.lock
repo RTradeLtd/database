@@ -157,12 +157,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:e54be212eca970f4d5d39899666aef429c437969783e360a0cab075ba1423a80"
+  branch = "master"
+  digest = "1:98cb90fb2d7d6c9bbc259eaa71a73a8ab6bc9608523be07a974a1050433ad612"
   name = "github.com/multiformats/go-multiaddr"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2b4e098f3e0aa2c8bc960f0e4bdc3247efc3749c"
-  version = "v1.3.0"
+  revision = "ec8630b6b7436b5d7f6c1c2366d3d7214d1b29e2"
 
 [[projects]]
   digest = "1:c0ea71365e7d0e63a2e8f48e6fc2ba92f2f2b739bbeb3cdabdcd719037e175c2"
