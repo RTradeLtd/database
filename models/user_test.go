@@ -3,9 +3,9 @@ package models_test
 import (
 	"testing"
 
-	"github.com/RTradeLtd/Temporal/utils"
 	"github.com/RTradeLtd/config"
 	"github.com/RTradeLtd/database/models"
+	"github.com/RTradeLtd/database/utils"
 )
 
 type args struct {
