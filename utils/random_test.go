@@ -20,4 +20,5 @@ func TestRandomUtils(t *testing.T) {
 	if random1 == random2 {
 		t.Fatal("generated two random strings that were the same")
 	}
+
 }
