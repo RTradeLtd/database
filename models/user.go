@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/RTradeLtd/database/eh"
 	"github.com/RTradeLtd/database/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
@@ -226,11 +225,11 @@ func (um *UserManager) FindByEmail(email string) (*User, error) {
 func (um *UserManager) NewUserAccount(username, password, email string, enterpriseEnabled bool) (*User, error) {
 	user, err := um.FindByEmail(email)
 	if err == nil {
-		return nil, errors.New(eh.DuplicateEmailError)
+		return nil, errors.New("email address already taken")
 	}
 	user, err = um.FindByUserName(username)
 	if err == nil {
-		return nil, errors.New(eh.DuplicateUserNameError)
+		return nil, errors.New("username is already taken")
 	}
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
