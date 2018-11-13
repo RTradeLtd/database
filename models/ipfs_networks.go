@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/RTradeLtd/Temporal/utils"
+	"github.com/RTradeLtd/database/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 )
