@@ -58,7 +58,7 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -97,7 +97,7 @@ func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -143,7 +143,7 @@ func TestUserManager_AddIPFSNetworkForUSer(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -191,7 +191,7 @@ func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -234,7 +234,7 @@ func TestUserManager_GetKeysForUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -273,7 +273,7 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -322,7 +322,7 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -373,7 +373,7 @@ func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -416,7 +416,7 @@ func TestUserManager_ChangePassword(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -458,7 +458,7 @@ func TestUserManager_NewAccount(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -494,7 +494,7 @@ func TestUserManager_SignIn(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -540,7 +540,7 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -586,7 +586,7 @@ func TestUserManager_FindEmailByUserName(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -625,7 +625,7 @@ func TestUserManager_FindUserByUserName(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -670,7 +670,7 @@ func TestUserManager_Credits(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 
 	for _, tt := range tests {
@@ -734,7 +734,7 @@ func TestUserManager_ResetPassword(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123", false}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
