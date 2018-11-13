@@ -712,3 +712,44 @@ func TestUserManager_Credits(t *testing.T) {
 		})
 	}
 }
+func TestUserManager_ResetPassword(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	um := models.NewUserManager(db)
+
+	var (
+		randUtils = utils.GenerateRandomUtils()
+		username  = randUtils.GenerateString(10, utils.LetterBytes)
+		email     = randUtils.GenerateString(10, utils.LetterBytes)
+	)
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"Test1", args{username, email, "password123", false}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer um.DB.Delete(user)
+			newPass, err := um.ResetPassword(tt.args.userName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if newPass == "" {
+				t.Fatal("failed to reset password")
+			}
+		})
+	}
+}
