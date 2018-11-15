@@ -64,6 +64,9 @@ func TestPaymentManager_NewPayment(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			if payment.USDValue != payment.ChargeAmount {
+				t.Fatal("failed to recover valid usd value and charge amount")
+			}
 			defer pm.DB.Unscoped().Delete(payment)
 			lastNumber, err := pm.GetLatestPaymentNumber(tt.args.username)
 			if err != nil {
@@ -82,6 +85,9 @@ func TestPaymentManager_NewPayment(t *testing.T) {
 			)
 			if err != nil {
 				t.Fatal(err)
+			}
+			if payment2.USDValue != payment2.ChargeAmount {
+				t.Fatal("failed to recover valid usd value and charge amount")
 			}
 			defer pm.DB.Unscoped().Delete(payment2)
 		})
