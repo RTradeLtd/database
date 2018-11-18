@@ -121,7 +121,7 @@ func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
 	}
 }
 
-func TestUserManager_AddIPFSNetworkForUSer(t *testing.T) {
+func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
 		t.Fatal(err)
@@ -160,6 +160,12 @@ func TestUserManager_AddIPFSNetworkForUSer(t *testing.T) {
 				t.Fatal(err)
 			}
 			if _, err := um.CheckIfUserHasAccessToNetwork(
+				tt.args.userName,
+				testNetwork,
+			); err != nil {
+				t.Fatal(err)
+			}
+			if err = um.RemoveIPFSNetworkForUser(
 				tt.args.userName,
 				testNetwork,
 			); err != nil {
