@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	testCfgPath = "../test/config.json"
+	testCfgPath = "../testenv/config.json"
 )
 
 func TestMigration_IPNS(t *testing.T) {
