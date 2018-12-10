@@ -10,7 +10,6 @@ import (
 // Zone is a TNS zone
 type Zone struct {
 	gorm.Model
-	UserName             string         `gorm:"type:varchar(255)"`
 	Name                 string         `gorm:"type:varchar(255)"`
 	ManagerPublicKeyName string         `gorm:"type:varchar(255)"`
 	ZonePublicKeyName    string         `gorm:"type:varchar(255)"`
@@ -29,8 +28,8 @@ func NewZoneManager(db *gorm.DB) *ZoneManager {
 }
 
 // NewZone is used to create a new zone in the database
-func (zm *ZoneManager) NewZone(username, name, managerPK, zonePK, latestIPFSHash string) (*Zone, error) {
-	zone, err := zm.FindZoneByNameAndUser(name, username)
+func (zm *ZoneManager) NewZone(name, managerPK, zonePK, latestIPFSHash string) (*Zone, error) {
+	zone, err := zm.FindZoneByName(name)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -38,7 +37,6 @@ func (zm *ZoneManager) NewZone(username, name, managerPK, zonePK, latestIPFSHash
 		return nil, errors.New("zone already exists for user")
 	}
 	zone = &Zone{
-		UserName:             username,
 		Name:                 name,
 		ManagerPublicKeyName: managerPK,
 		ZonePublicKeyName:    zonePK,
@@ -50,18 +48,18 @@ func (zm *ZoneManager) NewZone(username, name, managerPK, zonePK, latestIPFSHash
 	return zone, nil
 }
 
-// FindZoneByNameAndUser is used to lookup a zone by name and user
-func (zm *ZoneManager) FindZoneByNameAndUser(name, username string) (*Zone, error) {
+// FindZoneByName is used to lookup a zone by name
+func (zm *ZoneManager) FindZoneByName(name string) (*Zone, error) {
 	z := Zone{}
-	if check := zm.DB.Where("name = ? AND user_name = ?", name, username).First(&z); check.Error != nil {
+	if check := zm.DB.Where("name = ?", name).First(&z); check.Error != nil {
 		return nil, check.Error
 	}
 	return &z, nil
 }
 
 // UpdateLatestIPFSHashForZone is used to update the latest IPFS hash for a zone file
-func (zm *ZoneManager) UpdateLatestIPFSHashForZone(name, username, hash string) (*Zone, error) {
-	z, err := zm.FindZoneByNameAndUser(name, username)
+func (zm *ZoneManager) UpdateLatestIPFSHashForZone(name, hash string) (*Zone, error) {
+	z, err := zm.FindZoneByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -73,12 +71,12 @@ func (zm *ZoneManager) UpdateLatestIPFSHashForZone(name, username, hash string) 
 }
 
 // AddRecordForZone is used to add a record to a zone
-func (zm *ZoneManager) AddRecordForZone(zoneName, recordName, username string) (*Zone, error) {
-	z, err := zm.FindZoneByNameAndUser(zoneName, username)
+func (zm *ZoneManager) AddRecordForZone(zoneName, recordName string) (*Zone, error) {
+	z, err := zm.FindZoneByName(zoneName)
 	if err != nil {
 		return nil, err
 	}
-	present, err := zm.CheckIfRecordExistsInZone(zoneName, recordName, username)
+	present, err := zm.CheckIfRecordExistsInZone(zoneName, recordName)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +91,8 @@ func (zm *ZoneManager) AddRecordForZone(zoneName, recordName, username string) (
 }
 
 // CheckIfRecordExistsInZone is used to check if a record exists in a particular zone
-func (zm *ZoneManager) CheckIfRecordExistsInZone(zoneName, recordName, username string) (bool, error) {
-	z, err := zm.FindZoneByNameAndUser(zoneName, username)
+func (zm *ZoneManager) CheckIfRecordExistsInZone(zoneName, recordName string) (bool, error) {
+	z, err := zm.FindZoneByName(zoneName)
 	if err != nil {
 		return false, err
 	}

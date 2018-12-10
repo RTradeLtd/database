@@ -32,7 +32,6 @@ func TestRecord(t *testing.T) {
 	}
 	rm := models.NewRecordManager(db)
 	type args struct {
-		username      string
 		recordName    string
 		recordKeyName string
 		zoneName      string
@@ -43,8 +42,8 @@ func TestRecord(t *testing.T) {
 		name string
 		args args
 	}{
-		{"NoMetaData", args{"testuser1", "testrecord1", "testkey1", "testzone1", "testhash1", nil}},
-		{"YesMetaData", args{"testuser2", "testrecord2", "testkey2", "testzone2", "testhash2", map[string]interface{}{
+		{"NoMetaData", args{"testrecord1", "testkey1", "testzone1", "testhash1", nil}},
+		{"YesMetaData", args{"testrecord2", "testkey2", "testzone2", "testhash2", map[string]interface{}{
 			"food": "pizza",
 			"pet":  "dog",
 		}}},
@@ -52,7 +51,6 @@ func TestRecord(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			record1, err := rm.AddRecord(
-				tt.args.username,
 				tt.args.recordName,
 				tt.args.recordKeyName,
 				tt.args.zoneName,
@@ -66,7 +64,6 @@ func TestRecord(t *testing.T) {
 				t.Fatal("latest ipfs hash should be empty")
 			}
 			record2, err := rm.UpdateLatestIPFSHash(
-				tt.args.username,
 				tt.args.recordName,
 				tt.args.ipfsHash,
 			)
@@ -76,14 +73,14 @@ func TestRecord(t *testing.T) {
 			if record2.LatestIPFSHash != tt.args.ipfsHash {
 				t.Fatal("bad ipfs hash set")
 			}
-			record3, err := rm.FindRecordByNameAndUser(tt.args.username, tt.args.recordName)
+			record3, err := rm.FindRecordByName(tt.args.recordName)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if record3.LatestIPFSHash != tt.args.ipfsHash {
 				t.Fatal("bad record recovered")
 			}
-			records, err := rm.FindRecordsByZone(tt.args.username, tt.args.zoneName)
+			records, err := rm.FindRecordsByZone(tt.args.zoneName)
 			if err != nil {
 				t.Fatal(err)
 			}

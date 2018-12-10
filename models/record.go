@@ -10,7 +10,6 @@ import (
 // Record is an entry within a tns zone
 type Record struct {
 	gorm.Model
-	UserName       string      `gorm:"type:varchar(255)"`
 	Name           string      `gorm:"type:varchar(255)"`
 	RecordKeyName  string      `gorm:"type:varchar(255)"`
 	LatestIPFSHash string      `gorm:"type:varchar(255)"`
@@ -29,8 +28,8 @@ func NewRecordManager(db *gorm.DB) *RecordManager {
 }
 
 // UpdateLatestIPFSHash is used to update the latest IPFS hash that can be used to examine this record
-func (rm *RecordManager) UpdateLatestIPFSHash(username, recordName, ipfsHash string) (*Record, error) {
-	r, err := rm.FindRecordByNameAndUser(username, recordName)
+func (rm *RecordManager) UpdateLatestIPFSHash(recordName, ipfsHash string) (*Record, error) {
+	r, err := rm.FindRecordByName(recordName)
 	if err != nil {
 		return nil, err
 	}
@@ -42,21 +41,20 @@ func (rm *RecordManager) UpdateLatestIPFSHash(username, recordName, ipfsHash str
 }
 
 // FindRecordByNameAndUser is used to search fro a record by name and user
-func (rm *RecordManager) FindRecordByNameAndUser(username, name string) (*Record, error) {
+func (rm *RecordManager) FindRecordByName(name string) (*Record, error) {
 	r := Record{}
-	if check := rm.DB.Where("user_name = ? AND name = ?", username, name).First(&r); check.Error != nil {
+	if check := rm.DB.Where("user_name = ?", name).First(&r); check.Error != nil {
 		return nil, check.Error
 	}
 	return &r, nil
 }
 
 // AddRecord is used to save a record to our database
-func (rm *RecordManager) AddRecord(username, recordName, recordKeyName, zoneName string, metadata map[string]interface{}) (*Record, error) {
-	if _, err := rm.FindRecordByNameAndUser(username, recordName); err == nil {
+func (rm *RecordManager) AddRecord(recordName, recordKeyName, zoneName string, metadata map[string]interface{}) (*Record, error) {
+	if _, err := rm.FindRecordByName(recordName); err == nil {
 		return nil, errors.New("record already exists")
 	}
 	r := Record{
-		UserName:      username,
 		Name:          recordName,
 		RecordKeyName: recordKeyName,
 		ZoneName:      zoneName,
@@ -71,9 +69,9 @@ func (rm *RecordManager) AddRecord(username, recordName, recordKeyName, zoneName
 }
 
 // FindRecordsByZone is used to find records by zone
-func (rm *RecordManager) FindRecordsByZone(username, zoneName string) (*[]Record, error) {
+func (rm *RecordManager) FindRecordsByZone(zoneName string) (*[]Record, error) {
 	records := []Record{}
-	if check := rm.DB.Where("user_name = ? AND zone_name = ?", username, zoneName).Find(&records); check.Error != nil {
+	if check := rm.DB.Where("zone_name = ?", zoneName).Find(&records); check.Error != nil {
 		return nil, check.Error
 	}
 	return &records, nil
