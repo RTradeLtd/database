@@ -497,28 +497,31 @@ func TestUserManager_SignIn(t *testing.T) {
 	)
 
 	tests := []struct {
-		name string
-		args args
+		name      string
+		args      args
+		wantErr   bool
+		wantValid bool
 	}{
-		{"Success", args{username, email, "password123"}},
+		{"Success", args{username, email, "password123"}, false, true},
+		{"Failure", args{"notarealuser", "notarealemail", "password123"}, true, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
-			if err != nil {
-				t.Fatal(err)
+			if tt.name == "Success" {
+				user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer um.DB.Delete(user)
 			}
-			defer um.DB.Delete(user)
-			valid, err := um.SignIn(
+			if valid, err := um.SignIn(
 				tt.args.userName,
 				tt.args.password,
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !valid {
-				t.Fatal("failed to sign user in")
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("SignIn() wantErr = %v, error = %v", tt.wantErr, err.Error())
+			} else if valid != tt.wantValid {
+				t.Fatalf("SignIn() wantValid = %v, valid = %v", tt.wantValid, valid)
 			}
 		})
 	}
