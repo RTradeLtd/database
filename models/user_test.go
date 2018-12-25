@@ -16,10 +16,9 @@ var (
 )
 
 type args struct {
-	userName          string
-	email             string
-	password          string
-	enterpriseEnabled bool
+	userName string
+	email    string
+	password string
 }
 
 func TestMigration_User(t *testing.T) {
@@ -58,12 +57,12 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -97,12 +96,12 @@ func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -143,12 +142,12 @@ func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -197,12 +196,12 @@ func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -240,12 +239,12 @@ func TestUserManager_GetKeysForUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -279,12 +278,12 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -328,12 +327,12 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -379,12 +378,12 @@ func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -422,11 +421,11 @@ func TestUserManager_ChangePassword(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -464,12 +463,12 @@ func TestUserManager_NewAccount(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -500,12 +499,12 @@ func TestUserManager_SignIn(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -546,12 +545,12 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -592,12 +591,12 @@ func TestUserManager_FindEmailByUserName(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -631,12 +630,12 @@ func TestUserManager_FindUserByUserName(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -676,12 +675,12 @@ func TestUserManager_Credits(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -740,11 +739,11 @@ func TestUserManager_ResetPassword(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Success", args{username, email, "password123", false}},
+		{"Success", args{username, email, "password123"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email, tt.args.enterpriseEnabled)
+			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
 			if err != nil {
 				t.Fatal(err)
 			}
