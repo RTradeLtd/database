@@ -64,11 +64,13 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
-			if err != nil {
-				t.Fatal(err)
+			if tt.name == "Success" {
+				user, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer um.DB.Delete(user)
 			}
-			defer um.DB.Delete(user)
 			if _, err := um.GetPrivateIPFSNetworksForUser(tt.args.userName); (err != nil) != tt.wantErr {
 				t.Fatalf("GetPrivateIPFSNetworksForUser() wantErr = %v, error = %v", tt.wantErr, err.Error())
 			}
