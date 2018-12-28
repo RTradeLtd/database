@@ -1,7 +1,6 @@
 package models_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/RTradeLtd/config"
@@ -23,9 +22,6 @@ func TestMigration_EncryptedUpload(t *testing.T) {
 }
 
 func TestEncryptedUploads(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
 		t.Fatal(err)
@@ -41,46 +37,31 @@ func TestEncryptedUploads(t *testing.T) {
 		network string
 		hash    string
 	}
-	tests := []args{
-		{"user1", "file1", "network1", "hash1"},
-		{"user1", "file2", "public", "hash2"},
+	tests := []struct {
+		name        string
+		args        args
+		wantUploads bool
+		wantErr     bool
+	}{
+		{"Success", args{"user", "suchfilemuchspaceverydisk", "public", "dathashdoe"}, true, false},
+		{"Failure", args{"notarealuser", "notarealfile", "notarealnetwork", "notarealhash"}, false, true},
 	}
-	upload1, err := ecm.NewUpload(tests[0].user, tests[0].file, tests[0].network, tests[0].hash)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.Delete(upload1)
-	if upload1.FileNameUpper != strings.ToUpper(tests[0].file) {
-		t.Fatal("file name to upper failed")
-
-	}
-	if upload1.FileNameLower != strings.ToLower(tests[0].file) {
-		t.Fatal("file name to lower failed")
-	}
-	uploads, err := ecm.FindUploadsByUser(tests[0].user)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(*uploads) != 1 {
-		t.Fatal("user should only have 1 upload")
-	}
-	upload2, err := ecm.NewUpload(tests[1].user, tests[1].file, tests[1].network, tests[1].hash)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.Delete(upload2)
-	if upload2.FileNameUpper != strings.ToUpper(tests[1].file) {
-		t.Fatal("file name to upper failed")
-
-	}
-	if upload2.FileNameLower != strings.ToLower(tests[1].file) {
-		t.Fatal("file name to lower failed")
-	}
-	uploads, err = ecm.FindUploadsByUser(tests[0].user)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(*uploads) != 2 {
-		t.Fatal("user should have exactly 2 uploads")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.name == "Success" {
+				if _, err := ecm.NewUpload(
+					tt.args.user, tt.args.file, tt.args.network, tt.args.hash,
+				); (err != nil) != tt.wantErr {
+					t.Fatalf("NewUpload err = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+			uploads, err := ecm.FindUploadsByUser(tt.args.user)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if (len(*uploads) != 0) != tt.wantUploads {
+				t.Fatalf("FineUploadsByUser uploads = %v, wantUploads %v", len(*uploads) != 0, tt.wantUploads)
+			}
+		})
 	}
 }
