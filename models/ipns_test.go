@@ -55,7 +55,7 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 		name string
 		args args
 	}{
-		{"Test1", args{"12D3KooWSev8mmycrPbCMs4Awe4AFGkUQKPh7CTuifh51U8iFEr8", "QmQxXGDe84eUjCg2ZspvduEZxjWZk5DCB2N7bwPjXahoXE", "key", "public", time.Hour, time.Hour, "username"}},
+		{"Test1", args{"12D3KooWSev8mmycrPbCMs4Awe4AFGkUQKPh7CTuifh51U8iFEr8", "QmQxXGDe84eUjCg2ZspvduEZxjWZk5DCB2N7bwPjXahoXE", "keybrooooooooo", "public", time.Hour, time.Hour, "username"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
