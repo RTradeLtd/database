@@ -22,9 +22,6 @@ func TestMigration_Payment(t *testing.T) {
 }
 
 func TestPaymentManager_NewPayment(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
 		t.Fatal(err)
