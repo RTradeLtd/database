@@ -96,6 +96,29 @@ func NewUsageManager(db *gorm.DB) *UsageManager {
 	return &UsageManager{DB: db}
 }
 
+// NewUsageEntry is used to create a new usage entry in our database
+// if tier is free, limit to 3GB monthly otherwise set to 1TB
+func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usage, error) {
+	usage := &Usage{
+		UserName:                username,
+		CurrentDataUsedGB:       0,
+		IPNSRecordsPublished:    0,
+		PubSubMessagesSent:      0,
+		PrivateNetworkTrialUsed: false,
+		TrialEndTime:            0,
+		Tier:                    tier,
+	}
+	if tier == Free {
+		usage.MonthlyDataLimitGB = datasize.GB.GBytes()
+	} else {
+		usage.MonthlyDataLimitGB = datasize.TB.GBytes()
+	}
+	if err := bm.DB.Create(usage).Error; err != nil {
+		return nil, err
+	}
+	return usage, nil
+}
+
 // FindByUserName is used to find a Usage model by the associated username
 func (bm *UsageManager) FindByUserName(username string) (*Usage, error) {
 	b := Usage{}
@@ -152,10 +175,6 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSize float64) err
 	}
 	// update size
 	b.CurrentDataUsedGB = b.CurrentDataUsedGB + uploadSize
-	// check for the max upload limit of 1TB
-	if b.CurrentDataUsedGB >= datasize.TB.TBytes()*1 {
-		return errors.New("max upload limit of 1TB reached, contact support")
-	}
 	if b.Tier == Free {
 		// if they are free, they will need to upgrade their plan
 		if b.CurrentDataUsedGB >= datasize.GB.GBytes()*3 {
@@ -168,6 +187,10 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSize float64) err
 			// update tear
 			b.Tier = Plus
 		}
+	}
+	// check for the max upload limit of 1TB
+	if b.CurrentDataUsedGB >= datasize.TB.GBytes() {
+		return errors.New("max upload limit of 1TB reached, contact support")
 	}
 	// save updated columns and return
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
