@@ -209,7 +209,7 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSize float64) err
 }
 
 // UpdateTier is used to update the Usage tier associated with an account
-func (bm *UsageManager) UpdateTier(username, tier string) error {
+func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	b, err := bm.FindByUserName(username)
 	if err != nil {
 		return err

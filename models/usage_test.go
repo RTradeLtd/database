@@ -89,6 +89,14 @@ func TestUsage(t *testing.T) {
 			if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {
 				t.Fatalf("UpdateDataUsage() err = %v, wantErr %v", err, tt.wantErr)
 			}
+			// test update tiers for all tier types
+			// an account may never enter free status once exiting
+			tiers := []models.DataUsageTier{models.Partner, models.Light, models.Plus}
+			for _, tier := range tiers {
+				if err := bm.UpdateTier(tt.args.username, tier); (err != nil) != tt.wantErr {
+					t.Fatalf("UpdateTier() err = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
 			if tt.name == "Light" && !tt.wantErr {
 				// validate that the tier was upgraded
 				usage, err = bm.FindByUserName(tt.args.username)
