@@ -109,7 +109,7 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		Tier:                    tier,
 	}
 	if tier == Free {
-		usage.MonthlyDataLimitGB = datasize.GB.GBytes()
+		usage.MonthlyDataLimitGB = datasize.GB.GBytes() * 3
 	} else {
 		usage.MonthlyDataLimitGB = datasize.TB.GBytes()
 	}
