@@ -47,15 +47,22 @@ func TestUsage(t *testing.T) {
 		{"Partner", args{"partner", models.Partner, datasize.GB.GBytes() * 10}, false},
 		{"Light", args{"light", models.Light, datasize.GB.GBytes() * 100}, false},
 		{"Plus", args{"plus", models.Plus, datasize.GB.GBytes() * 10}, false},
+		{"Fail", args{"fail", models.Free, 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// test create usage
-			usage, err := bm.NewUsageEntry(tt.args.username, tt.args.tier)
-			if (err != nil) != tt.wantErr {
-				t.Fatalf("NewUsage() err = %v, wantErr %v", err, tt.wantErr)
+			var (
+				usage *models.Usage
+				err   error
+			)
+			if !tt.wantErr {
+				// test create usage
+				usage, err = bm.NewUsageEntry(tt.args.username, tt.args.tier)
+				if (err != nil) != tt.wantErr {
+					t.Fatalf("NewUsage() err = %v, wantErr %v", err, tt.wantErr)
+				}
+				defer bm.DB.Delete(usage)
 			}
-			defer bm.DB.Delete(usage)
 			// test find by username
 			if _, err := bm.FindByUserName(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("FindByUserName() err = %v, wantErr %v", err, tt.wantErr)
@@ -69,13 +76,13 @@ func TestUsage(t *testing.T) {
 			// test ipns publish check
 			if canPub, err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !canPub {
+			} else if !tt.wantErr && !canPub {
 				t.Fatal("error occured validating ipns publish")
 			}
 			// test ipns publish check
 			if canPub, err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishPubSub() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !canPub {
+			} else if !tt.wantErr && !canPub {
 				t.Fatal("error occured validating ipns publish")
 			}
 			// test update data usage
@@ -91,6 +98,14 @@ func TestUsage(t *testing.T) {
 				if usage.Tier != models.Plus {
 					t.Fatal("failed to correctly set usage tier")
 				}
+			}
+			if started, err := bm.HasStartedPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
+				t.Fatalf("HasStartedPrivateNetworkTrial() err = %v, wantErr %v", err, tt.wantErr)
+			} else if !tt.wantErr && started {
+				t.Fatal("expected non started private network trial")
+			}
+			if err := bm.StartPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
+				t.Fatalf("StartPrivateNetworkTrail() err = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

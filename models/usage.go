@@ -80,7 +80,7 @@ type Usage struct {
 	PrivateNetworkTrialUsed bool `gorm:"type:boolean;default:false"`
 	// Used to determine when their private network trial ends
 	// good until 2038 <- ticket is open in JIRA so we do not forget about this
-	// trial is 800 hours in unix nano
+	// trial is 800 hours in unix timestamp
 	TrialEndTime int64 `gorm:"type:integer;default:0"`
 	// keeps track of the tier the user belongs to
 	Tier DataUsageTier `gorm:"type:varchar(255)"`
@@ -163,6 +163,15 @@ func (bm *UsageManager) CanPublishPubSub(username string) (bool, error) {
 	return true, nil
 }
 
+// HasStartedPrivateNetworkTrial is used to check if the user has started their private network trial
+func (bm *UsageManager) HasStartedPrivateNetworkTrial(username string) (bool, error) {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return false, err
+	}
+	return b.PrivateNetworkTrialUsed, nil
+}
+
 // UpdateDataUsage is used to update the users' data usage amount
 // If the account is non free, and the upload pushes their total monthly usage
 // above the tier limit, they will be upgraded to the next tier to receive the discounted price
@@ -199,15 +208,6 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSize float64) err
 	}).Error
 }
 
-// HasStartedPrivateNetworkTrial is used to check if the user has started their private network trial
-func (bm *UsageManager) HasStartedPrivateNetworkTrial(username string) (bool, error) {
-	b, err := bm.FindByUserName(username)
-	if err != nil {
-		return false, err
-	}
-	return b.PrivateNetworkTrialUsed, nil
-}
-
 // UpdateTier is used to update the Usage tier associated with an account
 func (bm *UsageManager) UpdateTier(username, tier string) error {
 	b, err := bm.FindByUserName(username)
@@ -238,7 +238,7 @@ func (bm *UsageManager) StartPrivateNetworkTrial(username string) error {
 	if alreadyStarted {
 		return errors.New("user has already started their private network trial")
 	}
-	b.TrialEndTime = time.Now().Add(time.Hour * 800).UnixNano()
+	b.TrialEndTime = time.Now().Add(time.Hour * 800).Unix()
 	// update user model and return error
 	return bm.DB.Model(b).Update("trial_end_time", b.TrialEndTime).Error
 }
