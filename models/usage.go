@@ -215,11 +215,11 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 		return err
 	}
 	switch tier {
-	case "partner":
+	case Partner:
 		b.Tier = Partner
-	case "light":
+	case Light:
 		b.Tier = Light
-	case "plus":
+	case Plus:
 		b.Tier = Plus
 	}
 	return bm.DB.Model(b).Update("tier", b.Tier).Error
