@@ -61,6 +61,19 @@ var (
 	// 			* on-demand data encryption
 	//			* $0.165
 	Plus DataUsageTier = "plus"
+
+	// FreeUploadLimit is the maximum data usage for free accounts
+	// Currrently set to 3GB
+	FreeUploadLimit = datasize.GB.GBytes() * 3
+
+	// NonFreeUploadLimit is the maximum data usage for non-free accounts
+	// Currently set to 1TB
+	NonFreeUploadLimit = datasize.TB.GBytes()
+
+	// PlusTierMinimumUpload is the current data usage
+	// needed to upgrade from Light -> Plus
+	// currently set to 100GB
+	PlusTierMinimumUpload = datasize.GB.GBytes() * 100
 )
 
 // Usage is used to handle Usage of Temporal accounts
@@ -108,9 +121,9 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		Tier:                    tier,
 	}
 	if tier == Free {
-		usage.MonthlyDataLimitGB = datasize.GB.GBytes() * 3
+		usage.MonthlyDataLimitGB = FreeUploadLimit
 	} else {
-		usage.MonthlyDataLimitGB = datasize.TB.GBytes()
+		usage.MonthlyDataLimitGB = NonFreeUploadLimit
 	}
 	if err := bm.DB.Create(usage).Error; err != nil {
 		return nil, err
@@ -181,24 +194,29 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSize float64) err
 	if err != nil {
 		return err
 	}
-	// update size
+	// update total data used
 	b.CurrentDataUsedGB = b.CurrentDataUsedGB + uploadSize
-	if b.Tier == Free {
-		// if they are free, they will need to upgrade their plan
-		if b.CurrentDataUsedGB >= datasize.GB.GBytes()*3 {
-			return errors.New("upload limit will be reached, please upload smaller content or upgrade your plan")
-		}
-	} else if b.Tier == Light {
+	// perform a tier check for light accounts
+	// if they use more than 100GB, upgrade them to Plus tier
+	if b.Tier == Light {
 		// if they are light plan, and this upload takes them over 100GB
-		// upad their tier to plus to allow for free uploads
-		if b.CurrentDataUsedGB >= datasize.GB.GBytes()*100 {
-			// update tear
+		// update their tier to plus, enabling cheaper data rates
+		if b.CurrentDataUsedGB >= PlusTierMinimumUpload {
+			// update tier
 			b.Tier = Plus
 		}
 	}
-	// check for the max upload limit of 1TB
-	if b.CurrentDataUsedGB >= datasize.TB.GBytes() {
-		return errors.New("max upload limit of 1TB reached, contact support")
+	// perform upload limit checks
+	if b.Tier == Free {
+		// if they are free, they will need to upgrade their plan
+		if b.CurrentDataUsedGB >= FreeUploadLimit {
+			return errors.New("upload limit will be reached, please upload smaller content or upgrade your plan")
+		}
+	} else {
+		// check for the max upload limit of 1TB
+		if b.CurrentDataUsedGB >= NonFreeUploadLimit {
+			return errors.New("max upload limit of 1TB reached, contact support")
+		}
 	}
 	// save updated columns and return
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
