@@ -275,7 +275,12 @@ func (bm *UsageManager) StartPrivateNetworkTrial(username string) error {
 	if alreadyStarted {
 		return errors.New("user has already started their private network trial")
 	}
+	// update trial end time
 	b.TrialEndTime = time.Now().Add(time.Hour * 800).Unix()
+	// mark trial as started
+	b.PrivateNetworkTrialUsed = true
 	// update user model and return error
-	return bm.DB.Model(b).Update("trial_end_time", b.TrialEndTime).Error
+	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
+		"private_network_trial_used": b.PrivateNetworkTrialUsed,
+		"trial_end_time":             b.TrialEndTime}).Error
 }
