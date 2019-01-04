@@ -97,6 +97,7 @@ func TestUsage(t *testing.T) {
 					t.Fatalf("UpdateTier() err = %v, wantErr %v", err, tt.wantErr)
 				}
 			}
+			// test that the light tier was upgraded
 			if tt.name == "Light" && !tt.wantErr {
 				// validate that the tier was upgraded
 				usage, err = bm.FindByUserName(tt.args.username)
@@ -107,6 +108,7 @@ func TestUsage(t *testing.T) {
 					t.Fatal("failed to correctly set usage tier")
 				}
 			}
+			// test private network trial start
 			if started, err := bm.HasStartedPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("HasStartedPrivateNetworkTrial() err = %v, wantErr %v", err, tt.wantErr)
 			} else if !tt.wantErr && started {
@@ -114,6 +116,34 @@ func TestUsage(t *testing.T) {
 			}
 			if err := bm.StartPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("StartPrivateNetworkTrail() err = %v, wantErr %v", err, tt.wantErr)
+			}
+			// test pubsub increment
+			if err := bm.IncrementPubSubUsage(tt.args.username, 5); (err != nil) != tt.wantErr {
+				t.Fatalf("IncrementPubSubUsage() err = %v, wantErr %v", err, tt.wantErr)
+			}
+			// if no error is expected, validate the pubsub count
+			if !tt.wantErr {
+				usage, err := bm.FindByUserName(tt.args.username)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if usage.PubSubMessagesSent != 5 {
+					t.Fatal("failed to count pubsub usage")
+				}
+			}
+			// test ipns increment
+			if err := bm.IncrementIPNSUsage(tt.args.username, 5); (err != nil) != tt.wantErr {
+				t.Fatalf("IncrementIPNSUsage() err = %v, wantErr %v", err, tt.wantErr)
+			}
+			// if no error is expected, validate the ipns count
+			if !tt.wantErr {
+				usage, err := bm.FindByUserName(tt.args.username)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if usage.IPNSRecordsPublished != 5 {
+					t.Fatal("failed to count ipns usage")
+				}
 			}
 		})
 	}

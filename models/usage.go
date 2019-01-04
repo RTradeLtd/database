@@ -19,7 +19,6 @@ func (d DataUsageTier) String() string {
 }
 
 // PricePerGB returns the price per gb of a usage tier
-// rtc indicates whether or not its an RTC based paymetn
 func (d DataUsageTier) PricePerGB() float64 {
 	switch d {
 	case Light:
@@ -223,6 +222,26 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 		b.Tier = Plus
 	}
 	return bm.DB.Model(b).Update("tier", b.Tier).Error
+}
+
+// IncrementPubSubUsage is used to increment the pubsub publish counter
+func (bm *UsageManager) IncrementPubSubUsage(username string, count int64) error {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	b.PubSubMessagesSent = b.PubSubMessagesSent + count
+	return bm.DB.Model(b).Update("pub_sub_messages_sent", b.PubSubMessagesSent).Error
+}
+
+// IncrementIPNSUsage is used to increment the ipns record publish counter
+func (bm *UsageManager) IncrementIPNSUsage(username string, count int64) error {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	b.IPNSRecordsPublished = b.IPNSRecordsPublished + count
+	return bm.DB.Model(b).Update("ipns_records_published", b.IPNSRecordsPublished).Error
 }
 
 // StartPrivateNetworkTrial is used to start a users private network trial
