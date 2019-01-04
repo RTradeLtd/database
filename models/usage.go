@@ -241,7 +241,7 @@ func (bm *UsageManager) IncrementIPNSUsage(username string, count int64) error {
 		return err
 	}
 	b.IPNSRecordsPublished = b.IPNSRecordsPublished + count
-	return bm.DB.Model(b).Update("ipns_records_published", b.IPNSRecordsPublished).Error
+	return bm.DB.Model(b).Update("ip_ns_records_published", b.IPNSRecordsPublished).Error
 }
 
 // StartPrivateNetworkTrial is used to start a users private network trial
