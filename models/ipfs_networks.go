@@ -22,7 +22,7 @@ type HostedIPFSPrivateNetwork struct {
 	SwarmAddr string `gorm:"type:varchar(255)"`
 	SwarmKey  string `gorm:"type:varchar(255)"`
 
-	APIOrigins []string `gorm:"type:text[]"`
+	APIAllowedOrigin string `gorm:"type:varchar(255)"`
 
 	GatewayPublic bool `gorm:"type:boolean"`
 
@@ -75,7 +75,7 @@ func (im *IPFSNetworkManager) GetSwarmDetails(network string) (*SwarmDetails, er
 
 // APIDetails provides data about IPFS API connection
 type APIDetails struct {
-	AllowedOrigins []string
+	AllowedOrigin string
 }
 
 // GetAPIDetails is used to retrieve data about IPFS API connection
@@ -85,7 +85,7 @@ func (im *IPFSNetworkManager) GetAPIDetails(network string) (*APIDetails, error)
 		return nil, err
 	}
 	return &APIDetails{
-		AllowedOrigins: pnet.APIOrigins,
+		AllowedOrigin: pnet.APIAllowedOrigin,
 	}, nil
 }
 
@@ -108,9 +108,9 @@ func (im *IPFSNetworkManager) SaveNetwork(n *HostedIPFSPrivateNetwork) error {
 
 // NetworkAccessOptions configures access to a hosted private network
 type NetworkAccessOptions struct {
-	Users             []string
-	APIAllowedOrigins []string
-	PublicGateway     bool
+	Users            []string
+	APIAllowedOrigin string
+	PublicGateway    bool
 }
 
 // CreateHostedPrivateNetwork is used to store a new hosted private network in the database
@@ -169,7 +169,7 @@ func (im *IPFSNetworkManager) CreateHostedPrivateNetwork(name, swarmKey string, 
 	// assign misc details
 	pnet.Name = name
 	pnet.SwarmKey = swarmKey
-	pnet.APIOrigins = access.APIAllowedOrigins
+	pnet.APIAllowedOrigin = access.APIAllowedOrigin
 	pnet.GatewayPublic = access.PublicGateway
 
 	// create network entry
