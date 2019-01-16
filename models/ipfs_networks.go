@@ -98,6 +98,14 @@ func (im *IPFSNetworkManager) UpdateNetworkByName(name string, attrs map[string]
 	return nil
 }
 
+// SaveNetwork saves the given HostedIPFSPrivateNetwork in the database
+func (im *IPFSNetworkManager) SaveNetwork(n *HostedIPFSPrivateNetwork) error {
+	if check := im.DB.Save(n); check != nil && check.Error != nil {
+		return check.Error
+	}
+	return nil
+}
+
 // NetworkAccessOptions configures access to a hosted private network
 type NetworkAccessOptions struct {
 	Users             []string
