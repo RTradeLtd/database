@@ -16,23 +16,31 @@ type HostedIPFSPrivateNetwork struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Name      string `gorm:"unique;type:varchar(255)"`
-	Activated time.Time
+	Name      string    `gorm:"unique;type:varchar(255)"` // Name of the network node
+	Activated time.Time // Activated represents the most recent activation, 0-value if offline
 
+	// SwarmAddr is the address of swarm port. Slated for deprecation if HTTP path
+	// support is added to the multiaddr spec and go-multiaddr
 	SwarmAddr string `gorm:"type:varchar(255)"`
-	SwarmKey  string `gorm:"type:varchar(255)"`
+	// SwarmKey is the key used to connect to this peer
+	SwarmKey string `gorm:"type:varchar(255)"`
 
+	// Used to set Allowed-Origin headers on API requests
 	APIAllowedOrigin string `gorm:"type:varchar(255)"`
 
+	// Toggles whether gateway should be exposed through Nexus delegator
 	GatewayPublic bool `gorm:"type:boolean"`
 
+	// Peers to bootstrap node onto
 	BootstrapPeerAddresses pq.StringArray `gorm:"type:text[]"`
 	BootstrapPeerIDs       pq.StringArray `gorm:"type:text[];column:bootstrap_peer_ids"`
 
+	// Resources for deployed node
 	ResourcesCPUs     int
 	ResourcesDiskGB   int
 	ResourcesMemoryGB int
 
+	// Users allowed to control this node. Includes API access.
 	Users pq.StringArray `gorm:"type:text[]"` // these are the users to which this IPFS network connection applies to specified by eth address
 }
 
