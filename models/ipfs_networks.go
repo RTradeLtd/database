@@ -19,7 +19,7 @@ type HostedIPFSPrivateNetwork struct {
 	Name      string    `gorm:"unique;type:varchar(255)"` // Name of the network node
 	Activated time.Time // Activated represents the most recent activation, 0-value if offline
 
-	PeerID string // PeerID of this network node
+	PeerKey string // Private key used to generate peerID for this network node
 
 	// SwarmAddr is the address of swarm port. Slated for deprecation if HTTP path
 	// support is added to the multiaddr spec and go-multiaddr
