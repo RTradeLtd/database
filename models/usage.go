@@ -6,7 +6,7 @@ import (
 
 	"github.com/c2h5oh/datasize"
 
-	"github.com/jinzhu/gorm"
+	"github.com/RTradeLtd/gorm"
 )
 
 // DataUsageTier is a type of usage tier
