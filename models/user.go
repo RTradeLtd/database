@@ -262,27 +262,14 @@ func (um *UserManager) NewUserAccount(username, password, email string) (*User, 
 		AccountEnabled: true,
 		AdminAccess:    false,
 		Free:           true,
-		Credits:        99999999, // this is temporary and will need to be removed before production
 	}
 	// create user model
 	if check := um.DB.Create(user); check.Error != nil {
 		return nil, check.Error
 	}
-	// create usage entry
-	usage := &Usage{
-		UserName: username,
-		// default data limit of 3GB
-		MonthlyDataLimitGB:      3.0,
-		CurrentDataUsedGB:       0.0,
-		PrivateNetworkTrialUsed: false,
-		// if this is 0, they have not started
-		// otherwise it is in unix nano
-		TrialEndTime: 0,
-		// all accounts start our as free
-		Tier: Free,
-	}
-	if check := um.DB.Create(usage); check.Error != nil {
-		return nil, check.Error
+	usageManager := NewUsageManager(um.DB)
+	if _, err := usageManager.NewUsageEntry(username, Free); err != nil {
+		return nil, err
 	}
 	return user, nil
 }
