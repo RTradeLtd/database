@@ -11,7 +11,7 @@ var (
 	testNetwork = "test_network"
 	testKeyName = "test_key_name"
 	testKeyID   = "test_key_id"
-	testCredits = float64(99999999)
+	testCredits = float64(0)
 	username    = "muchuserverywow"
 	email       = "muchemailverysmtp@gmail.com"
 	password    = "password123"
