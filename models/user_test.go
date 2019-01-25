@@ -616,3 +616,68 @@ func TestUserManager_ResetPassword(t *testing.T) {
 		})
 	}
 }
+
+func TestUserManager_RemoveIPFSKeys(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	um := models.NewUserManager(db)
+	type args struct {
+		userName string
+		email    string
+		password string
+		keyName  string
+		keyID    string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"Success", args{username, email, "password123", "keynamedelete", "keyidelete"}, false},
+		{"Failure", args{"notarealuser", "notarealemail", "password123", "", ""}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := um.AddIPFSKeyForUser(
+				tt.args.userName,
+				tt.args.keyName,
+				tt.args.keyID,
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("AddIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err := um.RemoveIPFSKeyForUser(
+				tt.args.userName,
+				tt.args.keyName,
+				tt.args.keyID,
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("RemoveIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
+			}
+			// do not do any more processing for expected error tests
+			if tt.wantErr {
+				return
+			}
+			user, err := um.FindByUserName(tt.args.userName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, name := range user.IPFSKeyNames {
+				if name == tt.args.keyName {
+					t.Fatal("failed to corectly delete key name")
+				}
+			}
+			for _, id := range user.IPFSKeyIDs {
+				if id == tt.args.keyID {
+					t.Fatal("failed to correctly delete key id")
+				}
+			}
+		})
+	}
+}
