@@ -36,17 +36,17 @@ func TestUsage(t *testing.T) {
 	type args struct {
 		username       string
 		tier           models.DataUsageTier
-		testUploadSize float64
+		testUploadSize uint64
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"Free", args{"free", models.Free, datasize.GB.GBytes()}, false},
-		{"Partner", args{"partner", models.Partner, datasize.GB.GBytes() * 10}, false},
-		{"Light", args{"light", models.Light, datasize.GB.GBytes() * 100}, false},
-		{"Plus", args{"plus", models.Plus, datasize.GB.GBytes() * 10}, false},
+		{"Free", args{"free", models.Free, datasize.GB.Bytes()}, false},
+		{"Partner", args{"partner", models.Partner, datasize.GB.Bytes() * 10}, false},
+		{"Light", args{"light", models.Light, datasize.GB.Bytes() * 100}, false},
+		{"Plus", args{"plus", models.Plus, datasize.GB.Bytes() * 10}, false},
 		{"Fail", args{"fail", models.Free, 1}, true},
 	}
 	for _, tt := range tests {
