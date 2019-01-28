@@ -74,16 +74,12 @@ func TestUsage(t *testing.T) {
 				t.Fatal("failed to get correct price per gb")
 			}
 			// test ipns publish check
-			if canPub, err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
+			if err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && !canPub {
-				t.Fatal("error occured validating ipns publish")
 			}
 			// test ipns publish check
-			if canPub, err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
+			if err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishPubSub() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && !canPub {
-				t.Fatal("error occured validating ipns publish")
 			}
 			// test update data usage
 			if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {

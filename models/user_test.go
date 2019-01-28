@@ -466,35 +466,6 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 	}
 }
 
-func TestUserManager_FindEmailByUserName(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"Success", args{username, email, "password123"}, false},
-		{"Failure", args{"notarealuser", "notarealuser", "password123"}, true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if _, err := um.FindEmailByUserName(tt.args.userName); (err != nil) != tt.wantErr {
-				t.Fatalf("FindEmailByUsername err = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestUserManager_FindUserByUserName(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
