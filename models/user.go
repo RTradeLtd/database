@@ -417,3 +417,16 @@ func (um *UserManager) ResetPassword(username string) (string, error) {
 	}
 	return newPassword, nil
 }
+
+// ToggleAdmin toggles the admin permissions of given user
+func (um *UserManager) ToggleAdmin(username string) (bool, error) {
+	var user User
+	um.DB.Where("user_name = ?", username).First(&user)
+	if user.CreatedAt == nilTime {
+		return false, errors.New("user account does not exist")
+	}
+	if check := um.DB.Model(&user).Update("admin_access", !user.AdminAccess); check.Error != nil {
+		return false, check.Error
+	}
+	return true, nil
+}
