@@ -78,6 +78,7 @@ var (
 
 // Usage is used to handle Usage of Temporal accounts
 type Usage struct {
+	gorm.Model
 	UserName string `gorm:"type:varchar(255);unique"`
 	// keeps track of the max monthly upload limit for the user
 	MonthlyDataLimitGB uint64 `gorm:"type:numeric;default:0"`
