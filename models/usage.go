@@ -95,7 +95,7 @@ type Usage struct {
 	// keeps track of how many keys the user has created
 	KeysCreated int64 `gorm:"type:integer;default:0"`
 	// keeps track of how many keys the user is allowed to create
-	KeysAllowed int64 `gorm:"type:integer:default;0"`
+	KeysAllowed int64 `gorm:"type:integer;default:0"`
 	// Used to indicate whether or not the user
 	// has consumed their free private network trial
 	PrivateNetworkTrialUsed bool `gorm:"type:boolean;default:false"`
