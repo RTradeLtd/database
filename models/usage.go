@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"time"
 
 	"github.com/c2h5oh/datasize"
 
@@ -96,13 +95,6 @@ type Usage struct {
 	KeysCreated int64 `gorm:"type:integer;default:0"`
 	// keeps track of how many keys the user is allowed to create
 	KeysAllowed int64 `gorm:"type:integer;default:0"`
-	// Used to indicate whether or not the user
-	// has consumed their free private network trial
-	PrivateNetworkTrialUsed bool `gorm:"type:boolean;default:false"`
-	// Used to determine when their private network trial ends
-	// good until 2038 <- ticket is open in JIRA so we do not forget about this
-	// trial is 800 hours in unix timestamp
-	TrialEndTime int64 `gorm:"type:integer;default:0"`
 	// keeps track of the tier the user belongs to
 	Tier DataUsageTier `gorm:"type:varchar(255)"`
 }
@@ -121,13 +113,11 @@ func NewUsageManager(db *gorm.DB) *UsageManager {
 // if tier is free, limit to 3GB monthly otherwise set to 1TB
 func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usage, error) {
 	usage := &Usage{
-		UserName:                username,
-		CurrentDataUsedGB:       0,
-		IPNSRecordsPublished:    0,
-		PubSubMessagesSent:      0,
-		PrivateNetworkTrialUsed: false,
-		TrialEndTime:            0,
-		Tier:                    tier,
+		UserName:             username,
+		CurrentDataUsedGB:    0,
+		IPNSRecordsPublished: 0,
+		PubSubMessagesSent:   0,
+		Tier:                 tier,
 	}
 	if tier == Free {
 		usage.MonthlyDataLimitGB = FreeUploadLimit
@@ -211,38 +201,6 @@ func (bm *UsageManager) CanCreateKey(username string) error {
 		return errors.New("too many keys created, please wait until next billing cycle")
 	}
 	return nil
-}
-
-// HasStartedPrivateNetworkTrial is used to check if the user has started their private network trial
-func (bm *UsageManager) HasStartedPrivateNetworkTrial(username string) (bool, error) {
-	b, err := bm.FindByUserName(username)
-	if err != nil {
-		return false, err
-	}
-	return b.PrivateNetworkTrialUsed, nil
-}
-
-// StartPrivateNetworkTrial is used to start a users private network trial
-func (bm *UsageManager) StartPrivateNetworkTrial(username string) error {
-	b, err := bm.FindByUserName(username)
-	if err != nil {
-		return err
-	}
-	alreadyStarted, err := bm.HasStartedPrivateNetworkTrial(username)
-	if err != nil {
-		return err
-	}
-	if alreadyStarted {
-		return errors.New("user has already started their private network trial")
-	}
-	// update trial end time
-	b.TrialEndTime = time.Now().Add(time.Hour * 800).Unix()
-	// mark trial as started
-	b.PrivateNetworkTrialUsed = true
-	// update user model and return error
-	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
-		"private_network_trial_used": b.PrivateNetworkTrialUsed,
-		"trial_end_time":             b.TrialEndTime}).Error
 }
 
 // UpdateDataUsage is used to update the users' data usage amount

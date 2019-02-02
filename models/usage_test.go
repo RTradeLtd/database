@@ -104,23 +104,6 @@ func TestUsage(t *testing.T) {
 					t.Fatal("failed to correctly set usage tier")
 				}
 			}
-			// test private network trial start detection
-			if started, err := bm.HasStartedPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("HasStartedPrivateNetworkTrial() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && started {
-				t.Fatal("expected non started private network trial")
-			}
-			// test private network trial start
-			if err := bm.StartPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("StartPrivateNetworkTrail() err = %v, wantErr %v", err, tt.wantErr)
-			}
-			// re-test private network trial start detection
-			// test private network trial start detection
-			if started, err := bm.HasStartedPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("HasStartedPrivateNetworkTrial() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && !started {
-				t.Fatal("expected started private network trial")
-			}
 			// test pubsub increment
 			if err := bm.IncrementPubSubUsage(tt.args.username, 5); (err != nil) != tt.wantErr {
 				t.Fatalf("IncrementPubSubUsage() err = %v, wantErr %v", err, tt.wantErr)
