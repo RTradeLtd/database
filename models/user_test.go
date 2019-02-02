@@ -319,14 +319,14 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := um.AddIPFSKeyForUser(
 				tt.args.userName,
-				testKeyName,
-				testKeyID,
+				tt.args.keyName,
+				tt.args.keyID,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("AddIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
 			}
 			if valid, err := um.CheckIfKeyOwnedByUser(
 				tt.args.userName,
-				testKeyName,
+				tt.args.keyName,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("CheckIfKeyOwnedByUser err = %v, wantErr %v", err, tt.wantErr)
 			} else if valid != tt.wantValid {
