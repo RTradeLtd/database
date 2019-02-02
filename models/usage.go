@@ -222,6 +222,29 @@ func (bm *UsageManager) HasStartedPrivateNetworkTrial(username string) (bool, er
 	return b.PrivateNetworkTrialUsed, nil
 }
 
+// StartPrivateNetworkTrial is used to start a users private network trial
+func (bm *UsageManager) StartPrivateNetworkTrial(username string) error {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	alreadyStarted, err := bm.HasStartedPrivateNetworkTrial(username)
+	if err != nil {
+		return err
+	}
+	if alreadyStarted {
+		return errors.New("user has already started their private network trial")
+	}
+	// update trial end time
+	b.TrialEndTime = time.Now().Add(time.Hour * 800).Unix()
+	// mark trial as started
+	b.PrivateNetworkTrialUsed = true
+	// update user model and return error
+	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
+		"private_network_trial_used": b.PrivateNetworkTrialUsed,
+		"trial_end_time":             b.TrialEndTime}).Error
+}
+
 // UpdateDataUsage is used to update the users' data usage amount
 // If the account is non free, and the upload pushes their total monthly usage
 // above the tier limit, they will be upgraded to the next tier to receive the discounted price
@@ -291,6 +314,20 @@ func (bm *UsageManager) ReduceDataUsage(username string, uploadSizeBytes uint64)
 	}).Error
 }
 
+// ReduceKeyCount is used to reduce the number of keys a user has created
+func (bm *UsageManager) ReduceKeyCount(username string, count int64) error {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	if b.KeysCreated > count {
+		b.KeysCreated = 0
+	} else {
+		b.KeysCreated = b.KeysCreated - count
+	}
+	return bm.DB.Model(b).Update("keys_created", b.KeysCreated).Error
+}
+
 // UpdateTier is used to update the Usage tier associated with an account
 func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	b, err := bm.FindByUserName(username)
@@ -338,25 +375,19 @@ func (bm *UsageManager) IncrementKeyCount(username string, count int64) error {
 	return bm.DB.Model(b).Update("keys_created", b.KeysCreated).Error
 }
 
-// StartPrivateNetworkTrial is used to start a users private network trial
-func (bm *UsageManager) StartPrivateNetworkTrial(username string) error {
+// ResetCounts is used to reset monthly usage counts.
+// This does not apply to keys, as keys are a fixed limitation
+func (bm *UsageManager) ResetCounts(username string) error {
 	b, err := bm.FindByUserName(username)
 	if err != nil {
 		return err
 	}
-	alreadyStarted, err := bm.HasStartedPrivateNetworkTrial(username)
-	if err != nil {
-		return err
-	}
-	if alreadyStarted {
-		return errors.New("user has already started their private network trial")
-	}
-	// update trial end time
-	b.TrialEndTime = time.Now().Add(time.Hour * 800).Unix()
-	// mark trial as started
-	b.PrivateNetworkTrialUsed = true
-	// update user model and return error
+	b.CurrentDataUsedGB = 0
+	b.IPNSRecordsPublished = 0
+	b.PubSubMessagesSent = 0
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
-		"private_network_trial_used": b.PrivateNetworkTrialUsed,
-		"trial_end_time":             b.TrialEndTime}).Error
+		"current_data_used_gb":    b.CurrentDataUsedGB,
+		"ip_ns_records_published": b.IPNSRecordsPublished,
+		"pub_sub_messages_sent":   b.PubSubMessagesSent,
+	}).Error
 }

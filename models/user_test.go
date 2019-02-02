@@ -252,28 +252,34 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 		t.Fatal(err)
 	}
 	um := models.NewUserManager(db)
-
+	type args struct {
+		userName string
+		email    string
+		password string
+		keyName  string
+		keyID    string
+	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"Success", args{username, email, "password123"}, false},
-		{"Failure", args{"notarealuser", "notarealuser", "password123"}, true},
+		{"Success", args{username, email, "password123", "randomkeya", "randomkeyaid"}, false},
+		{"Failure", args{"notarealuser", "notarealuser", "password123", "blah", "blah"}, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := um.AddIPFSKeyForUser(
 				tt.args.userName,
-				testKeyName,
-				testKeyID,
+				tt.args.keyName,
+				tt.args.keyID,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("AddIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
 			}
 			if _, err := um.GetKeyIDByName(
 				tt.args.userName,
-				testKeyName,
+				tt.args.keyName,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("GetKeyIDByName err = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -292,15 +298,21 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 		t.Fatal(err)
 	}
 	um := models.NewUserManager(db)
-
+	type args struct {
+		userName string
+		email    string
+		password string
+		keyName  string
+		keyID    string
+	}
 	tests := []struct {
 		name      string
 		args      args
 		wantValid bool
 		wantErr   bool
 	}{
-		{"Success", args{username, email, "password123"}, true, false},
-		{"Failure", args{"notarealuser", "notarealuser", "password123"}, false, true},
+		{"Success", args{username, email, "password123", "randomkeyb", "randomkeybid"}, true, false},
+		{"Failure", args{"notarealuser", "notarealuser", "password123", "blah", "blah"}, false, true},
 	}
 
 	for _, tt := range tests {
