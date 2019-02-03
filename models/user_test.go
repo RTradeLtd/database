@@ -11,7 +11,7 @@ var (
 	testNetwork = "test_network"
 	testKeyName = "test_key_name"
 	testKeyID   = "test_key_id"
-	testCredits = float64(99999999)
+	testCredits = float64(0)
 	username    = "muchuserverywow"
 	email       = "muchemailverysmtp@gmail.com"
 	password    = "password123"
@@ -252,28 +252,34 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 		t.Fatal(err)
 	}
 	um := models.NewUserManager(db)
-
+	type args struct {
+		userName string
+		email    string
+		password string
+		keyName  string
+		keyID    string
+	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"Success", args{username, email, "password123"}, false},
-		{"Failure", args{"notarealuser", "notarealuser", "password123"}, true},
+		{"Success", args{username, email, "password123", "randomkeya", "randomkeyaid"}, false},
+		{"Failure", args{"notarealuser", "notarealuser", "password123", "blah", "blah"}, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := um.AddIPFSKeyForUser(
 				tt.args.userName,
-				testKeyName,
-				testKeyID,
+				tt.args.keyName,
+				tt.args.keyID,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("AddIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
 			}
 			if _, err := um.GetKeyIDByName(
 				tt.args.userName,
-				testKeyName,
+				tt.args.keyName,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("GetKeyIDByName err = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -292,29 +298,35 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 		t.Fatal(err)
 	}
 	um := models.NewUserManager(db)
-
+	type args struct {
+		userName string
+		email    string
+		password string
+		keyName  string
+		keyID    string
+	}
 	tests := []struct {
 		name      string
 		args      args
 		wantValid bool
 		wantErr   bool
 	}{
-		{"Success", args{username, email, "password123"}, true, false},
-		{"Failure", args{"notarealuser", "notarealuser", "password123"}, false, true},
+		{"Success", args{username, email, "password123", "randomkeyb", "randomkeybid"}, true, false},
+		{"Failure", args{"notarealuser", "notarealuser", "password123", "blah", "blah"}, false, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := um.AddIPFSKeyForUser(
 				tt.args.userName,
-				testKeyName,
-				testKeyID,
+				tt.args.keyName,
+				tt.args.keyID,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("AddIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
 			}
 			if valid, err := um.CheckIfKeyOwnedByUser(
 				tt.args.userName,
-				testKeyName,
+				tt.args.keyName,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("CheckIfKeyOwnedByUser err = %v, wantErr %v", err, tt.wantErr)
 			} else if valid != tt.wantValid {
@@ -466,35 +478,6 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 	}
 }
 
-func TestUserManager_FindEmailByUserName(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"Success", args{username, email, "password123"}, false},
-		{"Failure", args{"notarealuser", "notarealuser", "password123"}, true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if _, err := um.FindEmailByUserName(tt.args.userName); (err != nil) != tt.wantErr {
-				t.Fatalf("FindEmailByUsername err = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestUserManager_FindUserByUserName(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
@@ -612,6 +595,71 @@ func TestUserManager_ResetPassword(t *testing.T) {
 			}
 			if !tt.wantErr && newPass == "" {
 				t.Fatal("failed to reset password")
+			}
+		})
+	}
+}
+
+func TestUserManager_RemoveIPFSKeys(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	um := models.NewUserManager(db)
+	type args struct {
+		userName string
+		email    string
+		password string
+		keyName  string
+		keyID    string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"Success", args{username, email, "password123", "keynamedelete", "keyidelete"}, false},
+		{"Failure", args{"notarealuser", "notarealemail", "password123", "", ""}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := um.AddIPFSKeyForUser(
+				tt.args.userName,
+				tt.args.keyName,
+				tt.args.keyID,
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("AddIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err := um.RemoveIPFSKeyForUser(
+				tt.args.userName,
+				tt.args.keyName,
+				tt.args.keyID,
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("RemoveIPFSKeyForUser err = %v, wantErr %v", err, tt.wantErr)
+			}
+			// do not do any more processing for expected error tests
+			if tt.wantErr {
+				return
+			}
+			user, err := um.FindByUserName(tt.args.userName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, name := range user.IPFSKeyNames {
+				if name == tt.args.keyName {
+					t.Fatal("failed to corectly delete key name")
+				}
+			}
+			for _, id := range user.IPFSKeyIDs {
+				if id == tt.args.keyID {
+					t.Fatal("failed to correctly delete key id")
+				}
 			}
 		})
 	}

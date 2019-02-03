@@ -36,17 +36,17 @@ func TestUsage(t *testing.T) {
 	type args struct {
 		username       string
 		tier           models.DataUsageTier
-		testUploadSize float64
+		testUploadSize uint64
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"Free", args{"free", models.Free, datasize.GB.GBytes()}, false},
-		{"Partner", args{"partner", models.Partner, datasize.GB.GBytes() * 10}, false},
-		{"Light", args{"light", models.Light, datasize.GB.GBytes() * 100}, false},
-		{"Plus", args{"plus", models.Plus, datasize.GB.GBytes() * 10}, false},
+		{"Free", args{"free", models.Free, datasize.GB.Bytes()}, false},
+		{"Partner", args{"partner", models.Partner, datasize.GB.Bytes() * 10}, false},
+		{"Light", args{"light", models.Light, datasize.GB.Bytes() * 100}, false},
+		{"Plus", args{"plus", models.Plus, datasize.GB.Bytes() * 10}, false},
 		{"Fail", args{"fail", models.Free, 1}, true},
 	}
 	for _, tt := range tests {
@@ -74,16 +74,12 @@ func TestUsage(t *testing.T) {
 				t.Fatal("failed to get correct price per gb")
 			}
 			// test ipns publish check
-			if canPub, err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
+			if err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && !canPub {
-				t.Fatal("error occured validating ipns publish")
 			}
 			// test ipns publish check
-			if canPub, err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
+			if err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishPubSub() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && !canPub {
-				t.Fatal("error occured validating ipns publish")
 			}
 			// test update data usage
 			if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {
@@ -107,23 +103,6 @@ func TestUsage(t *testing.T) {
 				if usage.Tier != models.Plus {
 					t.Fatal("failed to correctly set usage tier")
 				}
-			}
-			// test private network trial start detection
-			if started, err := bm.HasStartedPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("HasStartedPrivateNetworkTrial() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && started {
-				t.Fatal("expected non started private network trial")
-			}
-			// test private network trial start
-			if err := bm.StartPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("StartPrivateNetworkTrail() err = %v, wantErr %v", err, tt.wantErr)
-			}
-			// re-test private network trial start detection
-			// test private network trial start detection
-			if started, err := bm.HasStartedPrivateNetworkTrial(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("HasStartedPrivateNetworkTrial() err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && !started {
-				t.Fatal("expected started private network trial")
 			}
 			// test pubsub increment
 			if err := bm.IncrementPubSubUsage(tt.args.username, 5); (err != nil) != tt.wantErr {
