@@ -63,7 +63,7 @@ var (
 
 	// FreeUploadLimit is the maximum data usage for free accounts
 	// Currrently set to 3GB
-	FreeUploadLimit = datasize.GB.Bytes() * 3
+	FreeUploadLimit = 3 * datasize.GB.Bytes()
 
 	// NonFreeUploadLimit is the maximum data usage for non-free accounts
 	// Currently set to 1TB
@@ -72,7 +72,7 @@ var (
 	// PlusTierMinimumUpload is the current data usage
 	// needed to upgrade from Light -> Plus
 	// currently set to 100GB
-	PlusTierMinimumUpload = datasize.GB.Bytes() * 100
+	PlusTierMinimumUpload = 100 * datasize.GB.Bytes()
 )
 
 // Usage is used to handle Usage of Temporal accounts
@@ -119,28 +119,27 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		PubSubMessagesSent:   0,
 		Tier:                 tier,
 	}
+	// set tier
+	usage.Tier = tier
+	// set tier based restrictions
 	switch tier {
 	case Free:
-		usage.Tier = Free
 		usage.MonthlyDataLimitGB = FreeUploadLimit
 		usage.KeysAllowed = 5
 		usage.PubSubMessagesAllowed = 100
 		usage.IPNSRecordsAllowed = 5
 	case Partner:
 		usage.MonthlyDataLimitGB = NonFreeUploadLimit
-		usage.Tier = Partner
 		usage.KeysAllowed = 200
 		usage.PubSubMessagesAllowed = 20000
 		usage.IPNSRecordsAllowed = 200
 	case Light:
 		usage.MonthlyDataLimitGB = NonFreeUploadLimit
-		usage.Tier = Light
 		usage.KeysAllowed = 100
 		usage.PubSubMessagesAllowed = 10000
 		usage.IPNSRecordsAllowed = 100
 	case Plus:
 		usage.MonthlyDataLimitGB = NonFreeUploadLimit
-		usage.Tier = Plus
 		usage.KeysAllowed = 150
 		usage.PubSubMessagesAllowed = 15000
 		usage.IPNSRecordsAllowed = 150
