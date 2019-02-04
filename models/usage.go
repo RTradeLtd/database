@@ -332,7 +332,12 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 		return errors.New("unsupported tier provided")
 	}
 
-	return bm.DB.Model(b).Update("tier", b.Tier).Error
+	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
+		"tier":                     b.Tier,
+		"keys_allowed":             b.KeysAllowed,
+		"pub_sub_messages_allowed": b.PubSubMessagesAllowed,
+		"ip_ns_records_allowed":    b.IPNSRecordsAllowed},
+	).Error
 }
 
 // IncrementPubSubUsage is used to increment the pubsub publish counter
