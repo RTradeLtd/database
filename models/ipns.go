@@ -46,7 +46,7 @@ func (im *IpnsManager) FindByUserName(username string) (*[]IPNS, error) {
 }
 
 // FindAll is used to find all IPNS records
-func (im *IpnsManager) FindAll() (*[]IPNS, error) {
+func (im *IpnsManager) FindAll() ([]IPNS, error) {
 	entries := &[]IPNS{}
 	if err := im.DB.Model(&IPNS{}).Find(entries).Error; err != nil {
 		return nil, err
