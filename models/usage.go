@@ -239,6 +239,9 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSizeBytes uint64)
 		if b.CurrentDataUsedBytes >= PlusTierMinimumUpload {
 			// update tier
 			b.Tier = Plus
+			b.KeysAllowed = 150
+			b.PubSubMessagesAllowed = 15000
+			b.IPNSRecordsAllowed = 150
 		}
 	}
 	// perform upload limit checks
@@ -255,8 +258,11 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSizeBytes uint64)
 	}
 	// save updated columns and return
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
-		"tier":                    b.Tier,
-		"current_data_used_bytes": b.CurrentDataUsedBytes,
+		"tier":                     b.Tier,
+		"current_data_used_bytes":  b.CurrentDataUsedBytes,
+		"keys_allowed":             b.KeysAllowed,
+		"ip_ns_records_allowed":    b.IPNSRecordsAllowed,
+		"pub_sub_messages_allowed": b.IPNSRecordsAllowed,
 	}).Error
 }
 
