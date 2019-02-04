@@ -71,6 +71,13 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			entries, err := im.FindAll()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(*entries) != 1 {
+				t.Fatal("failed to find correct amount of entries")
+			}
 			im.DB.Unscoped().Delete(entry)
 		})
 	}
