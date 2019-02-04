@@ -78,6 +78,15 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 			if len(entries) != 1 {
 				t.Fatal("failed to find correct amount of entries")
 			}
+			if entries[0].CurrentIPFSHash != tt.args.ipfsHash {
+				t.Fatal("bad ipfs hash recovered")
+			}
+			if entries[0].TTL != tt.args.ttl.String() {
+				t.Fatal("bad ttl recovered")
+			}
+			if entries[0].LifeTime != tt.args.lifetime.String() {
+				t.Fatal("bad lifetime recovered")
+			}
 			im.DB.Unscoped().Delete(entry)
 		})
 	}
