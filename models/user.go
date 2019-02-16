@@ -22,6 +22,7 @@ type User struct {
 	HashedPassword         string  `gorm:"type:varchar(255)"`
 	Free                   bool    `gorm:"type:boolean"`
 	Credits                float64 `gorm:"type:float;default:0"`
+	CustomerObjectHash     string  `gorm:"type:varchar(255)"`
 	// IPFSKeyNames is an array of IPFS key name this user has created
 	IPFSKeyNames pq.StringArray `gorm:"type:text[];column:ipfs_key_names"`
 	// IPFSKeyIDs is an array of public key hashes for IPFS keys this user has created
@@ -432,4 +433,23 @@ func (um *UserManager) ToggleAdmin(username string) (bool, error) {
 		return false, check.Error
 	}
 	return true, nil
+}
+
+// GetCustomerObjectHash is used to retrieve the object hash of a customer
+func (um *UserManager) GetCustomerObjectHash(username string) (string, error) {
+	user, err := um.FindByUserName(username)
+	if err != nil {
+		return "", err
+	}
+	return user.CustomerObjectHash, nil
+}
+
+// UpdateCustomerObjectHash is used to update the customer object hash associated with the user
+func (um *UserManager) UpdateCustomerObjectHash(username, newHash string) error {
+	user, err := um.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	user.CustomerObjectHash = newHash
+	return um.DB.Model(user).Update("customer_object_hash", newHash).Error
 }
