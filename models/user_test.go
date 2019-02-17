@@ -621,19 +621,28 @@ func TestUserManager_Customer_Hash(t *testing.T) {
 		args    newArgs
 		wantErr bool
 	}{
-		{"Success", newArgs{args{username, email, "password123"}, "firsthash", "secondhash"}, false},
+		{"Success", newArgs{args{username, email, "password123"}, "firsthash", models.EmptyCustomerObjectHash}, false},
 		{"Failure", newArgs{args{"notarealusername", "notarealemail", "password123"}, "firsthash", "secondhash"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// test getting the default customer object hash
+			if hash, err := um.GetCustomerObjectHash(tt.args.userName); (err != nil) != tt.wantErr {
+				t.Fatalf("GetCustomerObjectHash err = %v, wantErr %v", err, tt.wantErr)
+			} else if !tt.wantErr && hash != models.EmptyCustomerObjectHash {
+				t.Fatal("failed to get correct customer object hash")
+			}
+			// test updating it
 			if err := um.UpdateCustomerObjectHash(tt.args.userName, tt.args.firstHash); (err != nil) != tt.wantErr {
 				t.Fatalf("UpdateCustomerObjectHash err = %v, wantErr %v", err, tt.wantErr)
 			}
+			// test getting the new updated hash
 			if hash, err := um.GetCustomerObjectHash(tt.args.userName); (err != nil) != tt.wantErr {
 				t.Fatalf("GetCustomerOBjectHash err = %v, wantErr %v", err, tt.wantErr)
 			} else if !tt.wantErr && hash != tt.args.firstHash {
 				t.Fatal("failed to get correct hash")
 			}
+			// reset the customer hash to the default one
 			if err := um.UpdateCustomerObjectHash(tt.args.userName, tt.args.secondHash); (err != nil) != tt.wantErr {
 				t.Fatalf("UpdateCustomerObjectHash err = %v, wantErr %v", err, tt.wantErr)
 			}
