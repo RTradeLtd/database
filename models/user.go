@@ -12,7 +12,7 @@ import (
 
 var (
 	// EmptyCustomerObjectHash is an empty customer object published to ipfs
-	EmptyCustomerObjectHash = "zdpuAqqxwWeP8Ri7MYEEk9vB7SAqNJowt1d2HWeqtbBABbKFX"
+	EmptyCustomerObjectHash = "zdpuAnUGSDoNQoHQ2jpjhPePHEvg26mYLsAAGxr4jkzCWUpde"
 )
 
 // User is our user model for anyone who signs up with Temporal
