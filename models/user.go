@@ -10,6 +10,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	// EmptyCustomerObjectHash is an empty customer object published to ipfs
+	EmptyCustomerObjectHash = "zdpuAqqxwWeP8Ri7MYEEk9vB7SAqNJowt1d2HWeqtbBABbKFX"
+)
+
 // User is our user model for anyone who signs up with Temporal
 type User struct {
 	gorm.Model
@@ -251,12 +256,13 @@ func (um *UserManager) NewUserAccount(username, password, email string) (*User, 
 		return nil, err
 	}
 	user = &User{
-		UserName:       username,
-		HashedPassword: hex.EncodeToString(hashedPass),
-		EmailAddress:   email,
-		AccountEnabled: true,
-		AdminAccess:    false,
-		Free:           true,
+		UserName:           username,
+		HashedPassword:     hex.EncodeToString(hashedPass),
+		EmailAddress:       email,
+		AccountEnabled:     true,
+		AdminAccess:        false,
+		Free:               true,
+		CustomerObjectHash: EmptyCustomerObjectHash,
 	}
 	// create user model
 	if check := um.DB.Create(user); check.Error != nil {
