@@ -1,6 +1,7 @@
 package models_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -22,6 +23,63 @@ func TestMigration_Upload(t *testing.T) {
 	}
 }
 
+func TestExtendGCD(t *testing.T) {
+	cfg, err := config.LoadConfig(testCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err := openDatabaseConnection(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	um := models.NewUploadManager(db)
+	upload, err := um.NewUpload("testcontenthash", "file", models.UploadOptions{
+		NetworkName: "public",
+		Username:    "testuser1",
+		Encrypted:   false,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(upload)
+	// get the current GCD, and truncate it
+	currentGCD := upload.GarbageCollectDate.Truncate(time.Hour)
+	// extend GCD by 2 months
+	if err := um.ExtendGarbageCollectionPeriod("testuser1", "testcontenthash", "public", 2); err != nil {
+		t.Fatal(err)
+	}
+	// find the upload
+	uploadCheck, err := um.FindUploadByHashAndUserAndNetwork("testuser1", "testcontenthash", "public")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// get the new gcd
+	newGCD := uploadCheck.GarbageCollectDate
+	// reduce the new gcd by 2 months, which should in theory get us back
+	// to the time of the old gcd. We need to round here due to minute differences
+	difference := newGCD.AddDate(0, -2, 0).Truncate(time.Hour)
+	// check that the new gcd, minus 2, and truncated an hour is not
+	// before the "currentGCD".
+	if difference.Before(currentGCD) {
+		fmt.Println("current gcd")
+		fmt.Println(currentGCD)
+		fmt.Println("new gcd")
+		fmt.Println(newGCD)
+		fmt.Println("difference")
+		fmt.Println(difference)
+		t.Fatal("failed to properly extend garbage collection period")
+	}
+	// After reducing by 2 months, and truncating the value by an hour
+	// both times should be equal. that is the `difference` should be the same
+	// as the currentGCD which is the value before we xtended the gcd by 2 months
+	if !difference.Equal(currentGCD) {
+		fmt.Println("difference")
+		fmt.Println(difference)
+		fmt.Println("current gcd")
+		fmt.Println(currentGCD)
+		t.Fatal("failed to properly calculate difference")
+	}
+}
 func TestUpload(t *testing.T) {
 	cfg, err := config.LoadConfig(testCfgPath)
 	if err != nil {
