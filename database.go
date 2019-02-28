@@ -63,7 +63,7 @@ func (dbm *Manager) RunMigrations() {
 		&models.User{},
 		&models.Payments{},
 		&models.IPNS{},
-		&models.HostedIPFSPrivateNetwork{},
+		&models.HostedNetwork{},
 		&models.Zone{},
 		&models.Record{},
 		&models.Usage{},
