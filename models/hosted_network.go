@@ -10,14 +10,15 @@ import (
 	"github.com/lib/pq"
 )
 
-// HostedIPFSPrivateNetwork is a private network for which we are responsible of the infrastructure
-type HostedIPFSPrivateNetwork struct {
+// HostedNetwork is a private network for which we are responsible of the infrastructure
+type HostedNetwork struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Name      string    `gorm:"unique;type:varchar(255)"` // Name of the network node
-	Activated time.Time // Activated represents the most recent activation, null if offline
+	Name      string     `gorm:"unique;type:varchar(255)"` // Name of the network node
+	Activated *time.Time // Activated represents the most recent activation, null if offline
+	Disabled  bool
 
 	PeerKey string // Private key used to generate peerID for this network node
 
@@ -46,19 +47,19 @@ type HostedIPFSPrivateNetwork struct {
 	Users pq.StringArray `gorm:"type:text[]"` // these are the users to which this IPFS network connection applies to specified by eth address
 }
 
-// IPFSNetworkManager is used to manipulate IPFS network models in the database
-type IPFSNetworkManager struct {
+// HostedNetworkManager is used to manipulate IPFS network models in the database
+type HostedNetworkManager struct {
 	DB *gorm.DB
 }
 
-// NewHostedIPFSNetworkManager is used to initialize our database connection
-func NewHostedIPFSNetworkManager(db *gorm.DB) *IPFSNetworkManager {
-	return &IPFSNetworkManager{DB: db}
+// NewHostedNetworkManager is used to initialize our database connection
+func NewHostedNetworkManager(db *gorm.DB) *HostedNetworkManager {
+	return &HostedNetworkManager{DB: db}
 }
 
 // GetNetworkByName is used to retrieve a network from the database based off of its name
-func (im *IPFSNetworkManager) GetNetworkByName(name string) (*HostedIPFSPrivateNetwork, error) {
-	var pnet HostedIPFSPrivateNetwork
+func (im *HostedNetworkManager) GetNetworkByName(name string) (*HostedNetwork, error) {
+	var pnet HostedNetwork
 	if check := im.DB.Model(&pnet).Where("name = ?", name).First(&pnet); check.Error != nil {
 		return nil, check.Error
 	}
@@ -72,7 +73,7 @@ type SwarmDetails struct {
 }
 
 // GetSwarmDetails is used to retrieve data about IPFS swarm connection
-func (im *IPFSNetworkManager) GetSwarmDetails(network string) (*SwarmDetails, error) {
+func (im *HostedNetworkManager) GetSwarmDetails(network string) (*SwarmDetails, error) {
 	pnet, err := im.GetNetworkByName(network)
 	if err != nil {
 		return nil, err
@@ -89,7 +90,7 @@ type APIDetails struct {
 }
 
 // GetAPIDetails is used to retrieve data about IPFS API connection
-func (im *IPFSNetworkManager) GetAPIDetails(network string) (*APIDetails, error) {
+func (im *HostedNetworkManager) GetAPIDetails(network string) (*APIDetails, error) {
 	pnet, err := im.GetNetworkByName(network)
 	if err != nil {
 		return nil, err
@@ -100,20 +101,30 @@ func (im *IPFSNetworkManager) GetAPIDetails(network string) (*APIDetails, error)
 }
 
 // UpdateNetworkByName updates the given network with given attributes
-func (im *IPFSNetworkManager) UpdateNetworkByName(name string, attrs map[string]interface{}) error {
-	var pnet HostedIPFSPrivateNetwork
+func (im *HostedNetworkManager) UpdateNetworkByName(name string, attrs map[string]interface{}) error {
+	var pnet HostedNetwork
 	if check := im.DB.Model(&pnet).Where("name = ?", name).First(&pnet).Update(attrs); check.Error != nil {
 		return check.Error
 	}
 	return nil
 }
 
-// SaveNetwork saves the given HostedIPFSPrivateNetwork in the database
-func (im *IPFSNetworkManager) SaveNetwork(n *HostedIPFSPrivateNetwork) error {
+// SaveNetwork saves the given HostedNetwork in the database
+func (im *HostedNetworkManager) SaveNetwork(n *HostedNetwork) error {
 	if check := im.DB.Save(n); check != nil && check.Error != nil {
 		return check.Error
 	}
 	return nil
+}
+
+// GetOfflineNetworks returns all currently offline networks
+func (im *HostedNetworkManager) GetOfflineNetworks(disabled bool) ([]*HostedNetwork, error) {
+	var networks = []*HostedNetwork{}
+	var check = im.DB.Model(&HostedNetwork{}).
+		Where("activated = ?", nil).
+		Where("disabled = ?", disabled).
+		Find(&networks)
+	return networks, check.Error
 }
 
 // NetworkAccessOptions configures access to a hosted private network
@@ -124,9 +135,13 @@ type NetworkAccessOptions struct {
 }
 
 // CreateHostedPrivateNetwork is used to store a new hosted private network in the database
-func (im *IPFSNetworkManager) CreateHostedPrivateNetwork(name, swarmKey string, peers []string, access NetworkAccessOptions) (*HostedIPFSPrivateNetwork, error) {
+func (im *HostedNetworkManager) CreateHostedPrivateNetwork(
+	name, swarmKey string,
+	peers []string,
+	access NetworkAccessOptions,
+) (*HostedNetwork, error) {
 	// check if network exists
-	pnet := &HostedIPFSPrivateNetwork{}
+	pnet := &HostedNetwork{}
 	if check := im.DB.Where("name = ?", name).First(pnet); check.Error != nil && check.Error != gorm.ErrRecordNotFound {
 		return nil, check.Error
 	}
@@ -190,7 +205,7 @@ func (im *IPFSNetworkManager) CreateHostedPrivateNetwork(name, swarmKey string, 
 }
 
 // Delete is used to remove a network from the database
-func (im *IPFSNetworkManager) Delete(name string) error {
+func (im *HostedNetworkManager) Delete(name string) error {
 	net, err := im.GetNetworkByName(name)
 	if err != nil {
 		return err
