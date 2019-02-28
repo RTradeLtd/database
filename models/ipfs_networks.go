@@ -16,8 +16,9 @@ type HostedIPFSPrivateNetwork struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Name      string    `gorm:"unique;type:varchar(255)"` // Name of the network node
-	Activated time.Time // Activated represents the most recent activation, 0-value if offline
+	Name      string     `gorm:"unique;type:varchar(255)"` // Name of the network node
+	Activated *time.Time // Activated represents the most recent activation, null if offline
+	Disabled  bool
 
 	PeerKey string // Private key used to generate peerID for this network node
 
@@ -114,6 +115,16 @@ func (im *IPFSNetworkManager) SaveNetwork(n *HostedIPFSPrivateNetwork) error {
 		return check.Error
 	}
 	return nil
+}
+
+// GetAllOfflineNetworks returns all currently offline networks
+func (im *IPFSNetworkManager) GetAllOfflineNetworks(disabled bool) ([]HostedIPFSPrivateNetwork, error) {
+	var networks = make([]HostedIPFSPrivateNetwork, 0)
+	var check = im.DB.Model(&HostedIPFSPrivateNetwork{}).
+		Where("activated = ?", nil).
+		Where("disabled = ?", disabled).
+		Find(&networks)
+	return networks, check.Error
 }
 
 // NetworkAccessOptions configures access to a hosted private network
