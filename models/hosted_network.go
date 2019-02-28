@@ -121,7 +121,7 @@ func (im *HostedNetworkManager) SaveNetwork(n *HostedNetwork) error {
 func (im *HostedNetworkManager) GetOfflineNetworks(disabled bool) ([]*HostedNetwork, error) {
 	var networks = []*HostedNetwork{}
 	var check = im.DB.Model(&HostedNetwork{}).
-		Where("activated = ?", nil).
+		Where("activated is null").
 		Where("disabled = ?", disabled).
 		Find(&networks)
 	return networks, check.Error
