@@ -1,59 +1,34 @@
-package database_test
+package database
 
 import (
-	"os"
 	"testing"
 
 	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database"
-	"github.com/RTradeLtd/gorm"
+	"go.uber.org/zap"
 )
 
-var (
-	travis = os.Getenv("TRAVIS") != ""
-	dbPass string
-)
-
-func TestDatabase(t *testing.T) {
-	db, err := gorm.Open(
-		"postgres", "host=127.0.0.1 port=5433 user=postgres dbname=temporal password=password123 sslmode=disable")
-	if err != nil {
-		t.Fatal(err)
-	}
-	db.Close()
-}
-
-func TestDatabaseMigrations(t *testing.T) {
-	db, err := database.OpenDBConnection(database.DBOptions{
-		User:           "postgres",
-		Password:       "password123",
-		Address:        "127.0.0.1",
-		Port:           "5433",
-		SSLModeDisable: true,
+func TestNew(t *testing.T) {
+	t.Run("invalid argument", func(t *testing.T) {
+		if _, err := New(nil, Options{}); err == nil {
+			t.Error("expected error")
+		}
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	db.AutoMigrate(database.UploadObj)
-	db.AutoMigrate(database.UserObj)
-	db.AutoMigrate(database.PaymentObj)
-	db.Close()
-}
-
-func TestDatabaseInitialize_withMigrations(t *testing.T) {
-	db, err := database.Initialize(&config.TemporalConfig{
-		Database: config.Database{
-			Name:     "temporal",
-			URL:      "127.0.0.1",
-			Port:     "5433",
-			Username: "postgres",
-			Password: "password123",
-		},
-	}, database.Options{
-		RunMigrations:  true,
-		SSLModeDisable: true})
-	if err != nil {
-		t.Fatal(err)
-	}
-	db.Close()
+	t.Run("with migrations and logger", func(t *testing.T) {
+		db, err := New(&config.TemporalConfig{
+			Database: config.Database{
+				Name:     "temporal",
+				URL:      "127.0.0.1",
+				Port:     "5433",
+				Username: "postgres",
+				Password: "password123",
+			},
+		}, Options{
+			RunMigrations:  true,
+			SSLModeDisable: true,
+			Logger:         NewZapLogger(LogLevelInfo, zap.NewExample().Sugar())})
+		if err != nil {
+			t.Fatal(err)
+		}
+		db.Close()
+	})
 }
