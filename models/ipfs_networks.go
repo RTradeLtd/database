@@ -17,7 +17,7 @@ type HostedIPFSPrivateNetwork struct {
 	UpdatedAt time.Time
 
 	Name      string    `gorm:"unique;type:varchar(255)"` // Name of the network node
-	Activated time.Time // Activated represents the most recent activation, 0-value if offline
+	Activated time.Time // Activated represents the most recent activation, null if offline
 
 	PeerKey string // Private key used to generate peerID for this network node
 

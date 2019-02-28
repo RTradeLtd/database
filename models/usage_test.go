@@ -1,41 +1,16 @@
-package models_test
+package models
 
 import (
 	"testing"
 
 	"github.com/c2h5oh/datasize"
-
-	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
-func TestMigration_Usage(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if check := db.AutoMigrate(&models.Usage{}); check.Error != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestUsage(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	bm := models.NewUsageManager(db)
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
 	type args struct {
 		username       string
-		tier           models.DataUsageTier
+		tier           DataUsageTier
 		testUploadSize uint64
 	}
 	tests := []struct {
@@ -43,16 +18,16 @@ func TestUsage(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"Free", args{"free", models.Free, datasize.GB.Bytes()}, false},
-		{"Partner", args{"partner", models.Partner, datasize.GB.Bytes() * 10}, false},
-		{"Light", args{"light", models.Light, datasize.GB.Bytes() * 100}, false},
-		{"Plus", args{"plus", models.Plus, datasize.GB.Bytes() * 10}, false},
-		{"Fail", args{"fail", models.Free, 1}, true},
+		{"Free", args{"free", Free, datasize.GB.Bytes()}, false},
+		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
+		{"Light", args{"light", Light, datasize.GB.Bytes() * 100}, false},
+		{"Plus", args{"plus", Plus, datasize.GB.Bytes() * 10}, false},
+		{"Fail", args{"fail", Free, 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var (
-				usage *models.Usage
+				usage *Usage
 				err   error
 			)
 			if !tt.wantErr {
@@ -87,7 +62,7 @@ func TestUsage(t *testing.T) {
 			}
 			// test update tiers for all tier types
 			// an account may never enter free status once exiting
-			tiers := []models.DataUsageTier{models.Partner, models.Light, models.Plus}
+			tiers := []DataUsageTier{Partner, Light, Plus}
 			for _, tier := range tiers {
 				if err := bm.UpdateTier(tt.args.username, tier); (err != nil) != tt.wantErr {
 					t.Fatalf("UpdateTier() err = %v, wantErr %v", err, tt.wantErr)
@@ -100,7 +75,7 @@ func TestUsage(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if usage.Tier != models.Plus {
+				if usage.Tier != Plus {
 					t.Fatal("failed to correctly set usage tier")
 				}
 			}

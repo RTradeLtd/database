@@ -1,37 +1,11 @@
-package models_test
+package models
 
 import (
 	"testing"
-
-	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
-func TestMigration_Payment(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if check := db.AutoMigrate(&models.Payments{}); check.Error != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestPaymentManager_NewPayment(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	pm := models.NewPaymentManager(db)
+	var pm = NewPaymentManager(newTestDB(t, &Payments{}))
 	type args struct {
 		depositAddress string
 		txHash         string

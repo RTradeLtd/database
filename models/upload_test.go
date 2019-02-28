@@ -1,39 +1,14 @@
-package models_test
+package models
 
 import (
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
-func TestMigration_Upload(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if check := db.AutoMigrate(&models.Upload{}); check.Error != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestExtendGCD(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUploadManager(db)
-	upload, err := um.NewUpload("testcontenthash", "file", models.UploadOptions{
+	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	upload, err := um.NewUpload("testcontenthash", "file", UploadOptions{
 		NetworkName: "public",
 		Username:    "testuser1",
 		Encrypted:   false,
@@ -81,15 +56,7 @@ func TestExtendGCD(t *testing.T) {
 	}
 }
 func TestUpload(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUploadManager(db)
+	var um = NewUploadManager(newTestDB(t, &Upload{}))
 	type args struct {
 		hash       string
 		uploadType string
@@ -113,7 +80,7 @@ func TestUpload(t *testing.T) {
 			upload1, err := um.NewUpload(
 				tt.args.hash,
 				tt.args.uploadType,
-				models.UploadOptions{
+				UploadOptions{
 					NetworkName:      tt.args.network,
 					Username:         tt.args.userName1,
 					HoldTimeInMonths: tt.args.holdTime,
@@ -127,7 +94,7 @@ func TestUpload(t *testing.T) {
 			upload2, err := um.NewUpload(
 				tt.args.hash,
 				tt.args.uploadType,
-				models.UploadOptions{
+				UploadOptions{
 					NetworkName:      tt.args.network,
 					Username:         tt.args.userName2,
 					HoldTimeInMonths: tt.args.holdTime,
@@ -141,7 +108,7 @@ func TestUpload(t *testing.T) {
 			if _, err := um.NewUpload(
 				tt.args.hash,
 				tt.args.uploadType,
-				models.UploadOptions{
+				UploadOptions{
 					NetworkName:      tt.args.network,
 					Username:         tt.args.userName2,
 					HoldTimeInMonths: tt.args.holdTime,
@@ -149,13 +116,13 @@ func TestUpload(t *testing.T) {
 				},
 			); err == nil {
 				t.Fatal("expected error")
-			} else if err.Error() != models.ErrAlreadyExistingUpload {
+			} else if err.Error() != ErrAlreadyExistingUpload {
 				t.Fatal("wrong error message received")
 			}
 			// test update which triggers shorter gcd error
 			if _, err := um.UpdateUpload(1, tt.args.userName1, tt.args.hash, tt.args.network); err == nil {
 				t.Fatal("expected error")
-			} else if err.Error() != models.ErrShorterGCD {
+			} else if err.Error() != ErrShorterGCD {
 				t.Fatal("wrong error returned")
 			}
 			// test update which passes

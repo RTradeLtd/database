@@ -1,35 +1,11 @@
-package models_test
+package models
 
 import (
 	"testing"
-
-	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
-func TestMigration_TNS(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = db.AutoMigrate(&models.Zone{}).Error; err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestZone(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
+	var zm = NewZoneManager(newTestDB(t, &Zone{}))
 	args := struct {
 		username           string
 		zoneName           string
@@ -37,7 +13,6 @@ func TestZone(t *testing.T) {
 		zonePublicKeyName  string
 		ipfshash           string
 	}{"testuser", "testzone", "testzonemanager", "testzonepublic", "testhash"}
-	zm := models.NewZoneManager(db)
 	zone1, err := zm.NewZone(
 		args.username,
 		args.zoneName,
@@ -48,7 +23,7 @@ func TestZone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.Delete(zone1)
+	defer zm.DB.Delete(zone1)
 	zone2, err := zm.FindZoneByNameAndUser(args.zoneName, args.username)
 	if err != nil {
 		t.Fatal(err)

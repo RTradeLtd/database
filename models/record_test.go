@@ -1,36 +1,11 @@
-package models_test
+package models
 
 import (
 	"testing"
-
-	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
-func TestMigration_Record(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = db.AutoMigrate(&models.Record{}).Error; err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestRecord(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rm := models.NewRecordManager(db)
+	var rm = NewRecordManager(newTestDB(t, &Record{}))
 	type args struct {
 		username      string
 		recordName    string
@@ -61,7 +36,7 @@ func TestRecord(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer db.Delete(record1)
+			defer rm.DB.Delete(record1)
 			if record1.LatestIPFSHash != "" {
 				t.Fatal("latest ipfs hash should be empty")
 			}

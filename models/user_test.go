@@ -1,10 +1,7 @@
-package models_test
+package models
 
 import (
 	"testing"
-
-	"github.com/RTradeLtd/config"
-	"github.com/RTradeLtd/database/models"
 )
 
 var (
@@ -23,32 +20,8 @@ type args struct {
 	password string
 }
 
-func TestMigration_User(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if check := db.AutoMigrate(&models.User{}); check.Error != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestUserManager_NewAccount(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -69,16 +42,7 @@ func TestUserManager_NewAccount(t *testing.T) {
 }
 
 func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -87,7 +51,6 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 		{"Success", args{username, email, "password123"}, false},
 		{"Failure", args{"notarealuser", "notarealemail", "password123"}, true},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// add a private network for testing purposes
@@ -105,17 +68,7 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 }
 
 func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -135,17 +88,7 @@ func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
 }
 
 func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -169,7 +112,7 @@ func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("CheckIfUserHasAccessToNetwork err = %v, want %v", err, tt.wantErr)
 			}
-			if err = um.RemoveIPFSNetworkForUser(
+			if err := um.RemoveIPFSNetworkForUser(
 				tt.args.userName,
 				testNetwork,
 			); (err != nil) != tt.wantErr {
@@ -180,16 +123,7 @@ func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
 }
 
 func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -213,16 +147,7 @@ func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
 }
 
 func TestUserManager_GetKeysForUser(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -242,16 +167,7 @@ func TestUserManager_GetKeysForUser(t *testing.T) {
 }
 
 func TestUserManager_GetKeyIDByName(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	type args struct {
 		userName string
 		email    string
@@ -288,16 +204,7 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 }
 
 func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	type args struct {
 		userName string
 		email    string
@@ -337,17 +244,7 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 }
 
 func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name        string
 		args        args
@@ -372,17 +269,7 @@ func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
 }
 
 func TestUserManager_ChangePassword(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name        string
 		args        args
@@ -406,16 +293,7 @@ func TestUserManager_ChangePassword(t *testing.T) {
 }
 
 func TestUserManager_SignIn(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name      string
 		args      args
@@ -441,17 +319,7 @@ func TestUserManager_SignIn(t *testing.T) {
 }
 
 func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name      string
 		args      args
@@ -479,17 +347,7 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 }
 
 func TestUserManager_FindUserByUserName(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -513,17 +371,7 @@ func TestUserManager_FindUserByUserName(t *testing.T) {
 }
 
 func TestUserManager_Credits(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -532,7 +380,6 @@ func TestUserManager_Credits(t *testing.T) {
 		{"Success", args{username, email, "password123"}, false},
 		{"Failure", args{"notarealuser", "notarealemail", "password123"}, true},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userCopy, err := um.AddCredits(
@@ -568,17 +415,7 @@ func TestUserManager_Credits(t *testing.T) {
 	}
 }
 func TestUserManager_ResetPassword(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
-
+	var um = NewUserManager(newTestDB(t, &User{}))
 	tests := []struct {
 		name    string
 		args    args
@@ -601,16 +438,7 @@ func TestUserManager_ResetPassword(t *testing.T) {
 }
 
 func TestUserManager_Customer_Hash(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	type newArgs struct {
 		args
 		firstHash  string
@@ -621,7 +449,7 @@ func TestUserManager_Customer_Hash(t *testing.T) {
 		args    newArgs
 		wantErr bool
 	}{
-		{"Success", newArgs{args{username, email, "password123"}, "firsthash", models.EmptyCustomerObjectHash}, false},
+		{"Success", newArgs{args{username, email, "password123"}, "firsthash", EmptyCustomerObjectHash}, false},
 		{"Failure", newArgs{args{"notarealusername", "notarealemail", "password123"}, "firsthash", "secondhash"}, true},
 	}
 	for _, tt := range tests {
@@ -629,7 +457,7 @@ func TestUserManager_Customer_Hash(t *testing.T) {
 			// test getting the default customer object hash
 			if hash, err := um.GetCustomerObjectHash(tt.args.userName); (err != nil) != tt.wantErr {
 				t.Fatalf("GetCustomerObjectHash err = %v, wantErr %v", err, tt.wantErr)
-			} else if !tt.wantErr && hash != models.EmptyCustomerObjectHash {
+			} else if !tt.wantErr && hash != EmptyCustomerObjectHash {
 				t.Fatal("failed to get correct customer object hash")
 			}
 			// test updating it
@@ -656,16 +484,7 @@ func TestUserManager_Customer_Hash(t *testing.T) {
 }
 
 func TestUserManager_RemoveIPFSKeys(t *testing.T) {
-	cfg, err := config.LoadConfig(testCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := openDatabaseConnection(t, cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	um := models.NewUserManager(db)
+	var um = NewUserManager(newTestDB(t, &User{}))
 	type args struct {
 		userName string
 		email    string
