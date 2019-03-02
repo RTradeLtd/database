@@ -46,7 +46,7 @@ func TestAutoMigrate(t *testing.T) {
 		args args
 	}{
 		{"encrypted upload", args{&EncryptedUpload{}}},
-		{"ipfs networks", args{&HostedIPFSPrivateNetwork{}}},
+		{"ipfs networks", args{&HostedNetwork{}}},
 		{"ipns", args{&IPNS{}}},
 		{"payment", args{&Payments{}}},
 		{"record", args{&Record{}}},
