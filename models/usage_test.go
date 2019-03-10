@@ -78,10 +78,6 @@ func TestUsage(t *testing.T) {
 				if usage.Tier != Plus {
 					t.Fatal("failed to correctly set usage tier")
 				}
-				// test monthly data limit upgrade
-				if usage.MonthlyDataLimitBytes != NonFreeUploadLimit {
-					t.Fatal("failed to set correct monthly data usage")
-				}
 			}
 			// test pubsub increment
 			if err := bm.IncrementPubSubUsage(tt.args.username, 5); (err != nil) != tt.wantErr {
@@ -112,5 +108,32 @@ func TestUsage(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_Tier_Upgrade(t *testing.T) {
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	b, err := bm.NewUsageEntry("testuser", Free)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.Tier != Free {
+		t.Fatal("bad tier set")
+	}
+	if b.MonthlyDataLimitBytes != FreeUploadLimit {
+		t.Fatal("bad upload limit set")
+	}
+	if err := bm.UpdateTier("testuser", Light); err != nil {
+		t.Fatal(err)
+	}
+	b, err = bm.FindByUserName("testuser")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.Tier != Light {
+		t.Fatal("bad tier set")
+	}
+	if b.MonthlyDataLimitBytes != NonFreeUploadLimit {
+		t.Fatal("bad upload limit set")
 	}
 }
