@@ -11,7 +11,7 @@ func TestZone(t *testing.T) {
 		zoneManagerKeyName string
 		zonePublicKeyName  string
 		ipfshash           string
-	}{"testuser", "testzone", "testzonemanager", "testzonepublic", "testhash"}
+	}{"testzone", "testzonemanager", "testzonepublic", "testhash"}
 	zone1, err := zm.NewZone(
 		args.zoneName,
 		args.zoneManagerKeyName,
@@ -22,7 +22,7 @@ func TestZone(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer zm.DB.Delete(zone1)
-	zone2, err := zm.FindZoneByNameAndUser(args.zoneName, args.username)
+	zone2, err := zm.FindZoneByName(args.zoneName)
 	if err != nil {
 		t.Fatal(err)
 	}
