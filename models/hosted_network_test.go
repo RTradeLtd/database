@@ -8,7 +8,7 @@ import (
 func TestHostedNetworkManager_Access(t *testing.T) {
 	var hm = NewHostedNetworkManager(newTestDB(t, &HostedNetwork{}))
 	defer hm.DB.Close()
-	if network, err := hm.CreateHostedPrivateNetwork(
+	network, err := hm.CreateHostedPrivateNetwork(
 		"myveryrandomnetworkname",
 		"such swarm much protec",
 		nil,
@@ -16,10 +16,20 @@ func TestHostedNetworkManager_Access(t *testing.T) {
 			Owner: "testuserguy1",
 			Users: []string{"testuserguy1", "testuserguy2"},
 		},
-	); err != nil {
+	)
+	if err != nil {
 		t.Fatal(err)
-	} else if network.Owner != "testuserguy1" {
-		t.Fatal("failed to correctly set network owner")
+	}
+	defer hm.Delete("myveryrandomnetworkname")
+	var found bool
+	for _, owner := range network.Owners {
+		if owner == "testuserguy1" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("failed to correctly set network owner during creation")
 	}
 }
 
