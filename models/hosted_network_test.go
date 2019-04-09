@@ -5,6 +5,24 @@ import (
 	"time"
 )
 
+func TestHostedNetworkManager_Access(t *testing.T) {
+	var hm = NewHostedNetworkManager(newTestDB(t, &HostedNetwork{}))
+	defer hm.DB.Close()
+	if network, err := hm.CreateHostedPrivateNetwork(
+		"myveryrandomnetworkname",
+		"such swarm much protec",
+		nil,
+		NetworkAccessOptions{
+			Owner: "testuserguy1",
+			Users: []string{"testuserguy1", "testuserguy2"},
+		},
+	); err != nil {
+		t.Fatal(err)
+	} else if network.Owner != "testuserguy1" {
+		t.Fatal("failed to correctly set network owner")
+	}
+}
+
 func TestHostedNetworkManager_GetOfflineNetworks(t *testing.T) {
 	var hm = NewHostedNetworkManager(newTestDB(t, &HostedNetwork{}))
 	defer hm.DB.Close()
