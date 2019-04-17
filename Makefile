@@ -4,7 +4,7 @@ all: build
 
 .PHONY: vendor
 vendor:
-	dep ensure
+	GO111MODULE=on go mod vendor
 
 .PHONY: build
 build: vendor
