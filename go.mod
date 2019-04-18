@@ -1,4 +1,4 @@
-module github.com/RTradeLtd/database
+module github.com/RTradeLtd/database/v2
 
 go 1.12
 

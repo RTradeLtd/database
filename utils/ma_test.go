@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/RTradeLtd/database/utils"
+	"github.com/RTradeLtd/database/v2/utils"
 )
 
 var testIpfsMultiAddrString = "/ip4/192.168.1.242/tcp/4001/ipfs/QmXivHtDyAe8nS7cbQiS7ri9haUM2wGvbinjKws3a4EstT"

@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/RTradeLtd/database/utils"
+	"github.com/RTradeLtd/database/v2/utils"
 	"github.com/RTradeLtd/gorm"
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
