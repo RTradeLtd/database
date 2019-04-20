@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/RTradeLtd/database/utils"
+	"github.com/RTradeLtd/database/v2/utils"
 )
 
 func TestCalculateGarbageCollectDate(t *testing.T) {

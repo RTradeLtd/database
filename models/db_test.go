@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/RTradeLtd/config"
+	"github.com/RTradeLtd/config/v2"
 	"github.com/RTradeLtd/gorm"
 )
 

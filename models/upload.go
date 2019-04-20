@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/RTradeLtd/database/utils"
+	"github.com/RTradeLtd/database/v2/utils"
 	"github.com/RTradeLtd/gorm"
 )
 

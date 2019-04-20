@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/RTradeLtd/database/utils"
+	"github.com/RTradeLtd/database/v2/utils"
 )
 
 const (
