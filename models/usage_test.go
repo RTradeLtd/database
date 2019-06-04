@@ -219,3 +219,38 @@ func Test_ReduceDataUsage(t *testing.T) {
 		t.Fatal("bad reduction in datasize")
 	}
 }
+
+func Test_ReduceKeyCount(t *testing.T) {
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	b, err := bm.NewUsageEntry("testuser", Paid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
+	if b.Tier != Paid {
+		t.Fatal("bad tier set")
+	}
+	if err := bm.IncrementKeyCount("testuser", 5); err != nil {
+		t.Fatal(err)
+	}
+	if err := bm.ReduceKeyCount("testuser", 4); err != nil {
+		t.Fatal(err)
+	}
+	b, err = bm.FindByUserName("testuser")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.KeysCreated != 1 {
+		t.Fatal("bad key count")
+	}
+	if err := bm.ReduceKeyCount("testuser", 3); err != nil {
+		t.Fatal(err)
+	}
+	b, err = bm.FindByUserName("testuser")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.KeysCreated != 0 {
+		t.Fatal("bad key count")
+	}
+}
