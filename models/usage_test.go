@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/c2h5oh/datasize"
@@ -54,6 +55,9 @@ func TestUsage(t *testing.T) {
 			// test ipns publish check
 			if err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
 				t.Fatalf("CanPublishPubSub() err = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err := bm.CanCreateKey(tt.args.username); (err != nil) != tt.wantErr {
+				t.Fatalf("CanCreateKey() err = %v, wantErr %v", err, tt.wantErr)
 			}
 			// test update data usage
 			if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {
@@ -176,5 +180,39 @@ func Test_UpdateDataUsage_Free(t *testing.T) {
 	}
 	if err := bm.UpdateDataUsage("testuser", datasize.MB.Bytes()*100); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func Test_ReduceDataUsage(t *testing.T) {
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	b, err := bm.NewUsageEntry("testuser", Paid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
+	if b.Tier != Paid {
+		t.Fatal("bad tier set")
+	}
+	if err := bm.UpdateDataUsage(
+		"testuser",
+		datasize.GB.Bytes()+datasize.MB.Bytes()*100,
+	); err != nil {
+		t.Fatal(err)
+	}
+	b, err = bm.FindByUserName("testuser")
+	if err != nil {
+		t.Fatal(err)
+	}
+	currentSize := b.CurrentDataUsedBytes
+	expectedSize := b.CurrentDataUsedBytes - datasize.MB.Bytes()*100
+	if err := bm.ReduceDataUsage("testuser", datasize.MB.Bytes()*100); err != nil {
+		t.Fatal(err)
+	}
+	b, err = bm.FindByUserName("testuser")
+	if b.CurrentDataUsedBytes != expectedSize {
+		fmt.Println("current size", currentSize)
+		fmt.Println("got size", b.CurrentDataUsedBytes)
+		fmt.Println("expected size", expectedSize)
+		t.Fatal("bad reduction in datasize")
 	}
 }
