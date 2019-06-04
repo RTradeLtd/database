@@ -249,8 +249,7 @@ func (bm *UsageManager) ReduceDataUsage(username string, uploadSizeBytes uint64)
 		b.CurrentDataUsedBytes = b.CurrentDataUsedBytes - uploadSizeBytes
 	}
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
-		"tier":                    b.Tier,
-		"current_data_used_Bytes": b.CurrentDataUsedBytes,
+		"current_data_used_bytes": b.CurrentDataUsedBytes,
 	}).Error
 }
 
