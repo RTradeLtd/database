@@ -106,6 +106,20 @@ func TestUsage(t *testing.T) {
 					t.Fatal("failed to count ipns usage")
 				}
 			}
+			if !tt.wantErr {
+				if err := bm.ResetCounts(tt.args.username); err != nil {
+					t.Fatal(err)
+				}
+				usage, err := bm.FindByUserName(tt.args.username)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if usage.CurrentDataUsedBytes != 0 ||
+					usage.IPNSRecordsPublished != 0 ||
+					usage.PubSubMessagesSent != 0 {
+					t.Fatal("should be 0")
+				}
+			}
 		})
 	}
 }
