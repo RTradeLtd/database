@@ -259,7 +259,7 @@ func (bm *UsageManager) ReduceKeyCount(username string, count int64) error {
 	if err != nil {
 		return err
 	}
-	if b.KeysCreated > count {
+	if b.KeysCreated < count {
 		b.KeysCreated = 0
 	} else {
 		b.KeysCreated = b.KeysCreated - count
