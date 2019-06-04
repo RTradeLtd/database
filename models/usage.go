@@ -179,7 +179,7 @@ func (bm *UsageManager) CanPublishIPNS(username string) error {
 		return err
 	}
 	if b.IPNSRecordsPublished >= b.IPNSRecordsAllowed {
-		return errors.New("too many records published")
+		return errors.New("too many records published, please wait until next billing cycle")
 	}
 	return nil
 }
@@ -203,7 +203,7 @@ func (bm *UsageManager) CanCreateKey(username string) error {
 		return err
 	}
 	if b.KeysCreated >= b.KeysAllowed {
-		return errors.New("too many keys created, please wait until next billing cycle")
+		return errors.New("too many keys created")
 	}
 	return nil
 }
