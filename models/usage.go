@@ -181,18 +181,6 @@ func (bm *UsageManager) CanPublishIPNS(username string) error {
 	return nil
 }
 
-// CanUpload is used to check if a user can upload an object with the given data size
-func (bm *UsageManager) CanUpload(username string, dataSizeBytes uint64) error {
-	b, err := bm.FindByUserName(username)
-	if err != nil {
-		return err
-	}
-	if b.CurrentDataUsedBytes+dataSizeBytes > b.MonthlyDataLimitBytes {
-		return errors.New("upload will breach max monthly data usage, please upload a smaller file")
-	}
-	return nil
-}
-
 // CanPublishPubSub is used to check if a user can publish pubsub messages
 func (bm *UsageManager) CanPublishPubSub(username string) error {
 	b, err := bm.FindByUserName(username)
