@@ -20,8 +20,7 @@ func TestUsage(t *testing.T) {
 	}{
 		{"Free", args{"free", Free, datasize.GB.Bytes()}, false},
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
-		{"Light", args{"light", Light, datasize.GB.Bytes() * 100}, false},
-		{"Plus", args{"plus", Plus, datasize.GB.Bytes() * 10}, false},
+		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
 		{"Fail", args{"fail", Free, 1}, true},
 	}
 	for _, tt := range tests {
@@ -62,20 +61,20 @@ func TestUsage(t *testing.T) {
 			}
 			// test update tiers for all tier types
 			// an account may never enter free status once exiting
-			tiers := []DataUsageTier{Partner, Light, Plus}
+			tiers := []DataUsageTier{Partner, Paid}
 			for _, tier := range tiers {
 				if err := bm.UpdateTier(tt.args.username, tier); (err != nil) != tt.wantErr {
 					t.Fatalf("UpdateTier() err = %v, wantErr %v", err, tt.wantErr)
 				}
 			}
 			// test that the light tier was upgraded
-			if tt.name == "Light" && !tt.wantErr {
+			if tt.name == "Paid" && !tt.wantErr {
 				// validate that the tier was upgraded
 				usage, err = bm.FindByUserName(tt.args.username)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if usage.Tier != Plus {
+				if usage.Tier != Partner {
 					t.Fatal("failed to correctly set usage tier")
 				}
 			}
@@ -123,14 +122,14 @@ func Test_Tier_Upgrade(t *testing.T) {
 	if b.MonthlyDataLimitBytes != FreeUploadLimit {
 		t.Fatal("bad upload limit set")
 	}
-	if err := bm.UpdateTier("testuser", Light); err != nil {
+	if err := bm.UpdateTier("testuser", Paid); err != nil {
 		t.Fatal(err)
 	}
 	b, err = bm.FindByUserName("testuser")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if b.Tier != Light {
+	if b.Tier != Paid {
 		t.Fatal("bad tier set")
 	}
 	if b.MonthlyDataLimitBytes != NonFreeUploadLimit {
