@@ -114,9 +114,7 @@ func TestUsage(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if usage.CurrentDataUsedBytes != 0 ||
-					usage.IPNSRecordsPublished != 0 ||
-					usage.PubSubMessagesSent != 0 {
+				if usage.IPNSRecordsPublished != 0 || usage.PubSubMessagesSent != 0 {
 					t.Fatal("should be 0")
 				}
 			}

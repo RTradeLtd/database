@@ -351,17 +351,17 @@ func (bm *UsageManager) IncrementKeyCount(username string, count int64) error {
 }
 
 // ResetCounts is used to reset monthly usage counts.
-// This does not apply to keys, as keys are a fixed limitation
+// This does not apply to keys created as that is a fixed limit.
+// Instead, it applies to rate-limited features as as IPNS
+// record publishing, and sending of PubSub messages
 func (bm *UsageManager) ResetCounts(username string) error {
 	b, err := bm.FindByUserName(username)
 	if err != nil {
 		return err
 	}
-	b.CurrentDataUsedBytes = 0
 	b.IPNSRecordsPublished = 0
 	b.PubSubMessagesSent = 0
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
-		"current_data_used_bytes": b.CurrentDataUsedBytes,
 		"ip_ns_records_published": b.IPNSRecordsPublished,
 		"pub_sub_messages_sent":   b.PubSubMessagesSent,
 	}).Error
