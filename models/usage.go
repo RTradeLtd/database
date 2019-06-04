@@ -56,7 +56,10 @@ var (
 	FreeUploadLimit = 3 * datasize.GB.Bytes()
 
 	// NonFreeUploadLimit is the maximum data usage for non-free accounts
-	// Currently set to 1000TB
+	// Currently set to 1000TB or 1PB.
+	// We dont impose a usage limit to non-free accounts
+	// but since usage limit checking is needed for free
+	// accounts, we set an artificial limit.
 	NonFreeUploadLimit = datasize.TB.Bytes() * 1000
 
 	// FreeKeyLimit defines how many keys free accounts can create
@@ -223,19 +226,10 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSizeBytes uint64)
 		if b.CurrentDataUsedBytes >= FreeUploadLimit {
 			return errors.New("upload limit will be reached, please upload smaller content or upgrade your plan")
 		}
-	} else {
-		// check for the max upload limit of 1TB
-		if b.CurrentDataUsedBytes >= NonFreeUploadLimit {
-			return errors.New("max upload limit of 1TB reached, contact support")
-		}
 	}
 	// save updated columns and return
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
-		"tier":                     b.Tier,
-		"current_data_used_bytes":  b.CurrentDataUsedBytes,
-		"keys_allowed":             b.KeysAllowed,
-		"ip_ns_records_allowed":    b.IPNSRecordsAllowed,
-		"pub_sub_messages_allowed": b.PubSubMessagesAllowed,
+		"current_data_used_bytes": b.CurrentDataUsedBytes,
 	}).Error
 }
 
