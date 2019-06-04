@@ -35,7 +35,7 @@ func TestUsage(t *testing.T) {
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("NewUsage() err = %v, wantErr %v", err, tt.wantErr)
 				}
-				defer bm.DB.Delete(usage)
+				defer bm.DB.Unscoped().Delete(usage)
 			}
 			// test find by username
 			if _, err := bm.FindByUserName(tt.args.username); (err != nil) != tt.wantErr {
@@ -128,6 +128,7 @@ func Test_Tier_Upgrade(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer bm.DB.Unscoped().Delete(b)
 	if b.Tier != Free {
 		t.Fatal("bad tier set")
 	}
@@ -146,5 +147,34 @@ func Test_Tier_Upgrade(t *testing.T) {
 	}
 	if b.MonthlyDataLimitBytes != NonFreeUploadLimit {
 		t.Fatal("bad upload limit set")
+	}
+}
+
+func Test_UpdateDataUsage_Free(t *testing.T) {
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	b, err := bm.NewUsageEntry("testuser", Free)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
+	if b.Tier != Free {
+		t.Fatal("bad tier set")
+	}
+	b.CurrentDataUsedBytes = datasize.GB.Bytes() * 2
+	if err := bm.DB.Save(b).Error; err != nil {
+		t.Fatal(err)
+	}
+	b, err = bm.FindByUserName("testuser")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.CurrentDataUsedBytes != datasize.GB.Bytes()*2 {
+		t.Fatal("bad usage set")
+	}
+	if err := bm.UpdateDataUsage("testuser", datasize.GB.Bytes()*2); err == nil {
+		t.Fatal("error expected")
+	}
+	if err := bm.UpdateDataUsage("testuser", datasize.MB.Bytes()*100); err != nil {
+		t.Fatal(err)
 	}
 }
