@@ -61,7 +61,7 @@ func TestUsage(t *testing.T) {
 			}
 			// test update tiers for all tier types
 			// an account may never enter free status once exiting
-			tiers := []DataUsageTier{Partner, Paid}
+			tiers := []DataUsageTier{Paid, Partner}
 			for _, tier := range tiers {
 				if err := bm.UpdateTier(tt.args.username, tier); (err != nil) != tt.wantErr {
 					t.Fatalf("UpdateTier() err = %v, wantErr %v", err, tt.wantErr)
