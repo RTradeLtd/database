@@ -203,6 +203,9 @@ func Test_ReduceDataUsage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if b.CurrentDataUsedBytes != datasize.GB.Bytes()+datasize.MB.Bytes()*100 {
+		t.Fatal("bad datasize")
+	}
 	currentSize := b.CurrentDataUsedBytes
 	expectedSize := b.CurrentDataUsedBytes - datasize.MB.Bytes()*100
 	if err := bm.ReduceDataUsage("testuser", datasize.MB.Bytes()*100); err != nil {
