@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/RTradeLtd/config/v2"
-	"github.com/RTradeLtd/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type testLogger struct{ t *testing.T }

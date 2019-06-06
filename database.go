@@ -6,10 +6,10 @@ import (
 
 	"github.com/RTradeLtd/config/v2"
 	"github.com/RTradeLtd/database/v2/models"
-	"github.com/RTradeLtd/gorm"
+	"github.com/jinzhu/gorm"
 
 	// import our postgres dialect used to talk with a postgres databse
-	_ "github.com/RTradeLtd/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // Manager is used to manage databases

@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/RTradeLtd/database/v2/utils"
-	"github.com/RTradeLtd/gorm"
+	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
