@@ -3,7 +3,7 @@ package models
 import (
 	"errors"
 
-	"github.com/RTradeLtd/gorm"
+	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 )
 

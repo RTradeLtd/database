@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/RTradeLtd/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 // Record is an entry within a tns zone
