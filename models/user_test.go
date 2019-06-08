@@ -314,6 +314,15 @@ func TestUserManager_SignIn(t *testing.T) {
 			} else if valid != tt.wantValid {
 				t.Fatalf("SignIn() wantValid = %v, valid = %v", tt.wantValid, valid)
 			}
+
+			if valid, err := um.SignIn(
+				tt.args.email,
+				tt.args.password,
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("SignIn() wantErr = %v, error = %v", tt.wantErr, err.Error())
+			} else if valid != tt.wantValid {
+				t.Fatalf("SignIn() wantValid = %v, valid = %v", tt.wantValid, valid)
+			}
 		})
 	}
 }
