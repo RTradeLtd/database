@@ -277,15 +277,20 @@ func (um *UserManager) NewUserAccount(username, password, email string) (*User, 
 
 // SignIn is used to authenticate a user, and check if their account is enabled.
 // Returns bool on succesful login, or false with an error on failure
-func (um *UserManager) SignIn(username, password string) (bool, error) {
-	u, err := um.FindByUserName(username)
-	if err != nil {
-		return false, err
+func (um *UserManager) SignIn(usernameOrEmail, password string) (bool, error) {
+	var (
+		u   *User
+		err error
+	)
+	if u, err = um.FindByUserName(usernameOrEmail); err != nil {
+		if u, err = um.FindByEmail(usernameOrEmail); err != nil {
+			return false, err
+		}
 	}
 	if !u.AccountEnabled {
 		return false, errors.New("account is disabled")
 	}
-	validPassword, err := um.ComparePlaintextPasswordToHash(username, password)
+	validPassword, err := um.ComparePlaintextPasswordToHash(usernameOrEmail, password)
 	if err != nil {
 		return false, err
 	}
@@ -296,10 +301,15 @@ func (um *UserManager) SignIn(username, password string) (bool, error) {
 }
 
 // ComparePlaintextPasswordToHash is a helper method used to validate a users password
-func (um *UserManager) ComparePlaintextPasswordToHash(username, password string) (bool, error) {
-	u, err := um.FindByUserName(username)
-	if err != nil {
-		return false, err
+func (um *UserManager) ComparePlaintextPasswordToHash(usernameOrEmail, password string) (bool, error) {
+	var (
+		u   *User
+		err error
+	)
+	if u, err = um.FindByUserName(usernameOrEmail); err != nil {
+		if u, err = um.FindByEmail(usernameOrEmail); err != nil {
+			return false, err
+		}
 	}
 	passwordBytes, err := hex.DecodeString(u.HashedPassword)
 	if err != nil {
