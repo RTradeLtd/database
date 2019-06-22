@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/RTradeLtd/config/v2"
 	"github.com/RTradeLtd/database/v2/models"
@@ -100,5 +101,6 @@ func openDBConnection(opts dbOptions) (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to establish connection with database: %s", err.Error())
 	}
+	db.DB().SetConnMaxLifetime(time.Minute * 60)
 	return db, nil
 }
