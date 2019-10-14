@@ -13,8 +13,8 @@ func TestOrganizationManager_Full(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"Pass", args{"testorg", "mytestuser"}, false},
-		{"Fail", args{"testorg", "mytestuser"}, true},
+		{"Pass", args{"testorg", "mytestuserownerr"}, false},
+		{"Fail", args{"testorg22", "mytestuserownerr"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -23,6 +23,14 @@ func TestOrganizationManager_Full(t *testing.T) {
 				tt.args.owner,
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("NewOrganization() err %v, wantErr %v", err, tt.wantErr)
+			}
+			if _, err := om.RegisterOrgUser(
+				tt.args.name, tt.args.owner, "password123", "password123@example.org",
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("RegisterOrgUser err %v, wantErr %v", err, tt.wantErr)
+			}
+			if _, err := om.FindByName(tt.args.name); (err != nil) != tt.wantErr {
+				t.Fatalf("FindByName() err %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
