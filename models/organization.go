@@ -42,19 +42,39 @@ func (om *OrgManager) RegisterOrgUser(
 	password,
 	email string,
 ) (*User, error) {
-	um := NewUserManager(om.DB)
-	user, err := um.NewUserAccount(username, password, email)
+	// create the user account
+	user, err := NewUserManager(om.DB).NewUserAccount(
+		username,
+		password,
+		email,
+	)
 	if err != nil {
 		return nil, err
 	}
-	// TODO(postables): update user model as being part of organization
+	// update user model associated organization
+	user.Organization = name
+	// save updated user model
+	if err := om.DB.Model(user).Update(
+		"organization", user.Organization,
+	).Error; err != nil {
+		return nil, err
+	}
+	// update their tier to white-labeled
+	// which will enable organizational based billing
+	if err := NewUsageManager(om.DB).UpdateTier(
+		username,
+		WhiteLabeled,
+	); err != nil {
+		return nil, err
+	}
+	// find organization model
 	org, err := om.FindByName(name)
 	if err != nil {
 		return nil, err
 	}
-	// update registered users
+	// update organization registered users
 	org.RegisteredUsers = append(org.RegisteredUsers, username)
-	// update org model model
+	// save updated org model model
 	if err := om.DB.Model(org).Update(
 		"regisered_users",
 		org.RegisteredUsers,
