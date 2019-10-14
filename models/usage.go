@@ -155,7 +155,9 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		usage.PubSubMessagesAllowed = PaidPubSubLimit
 		usage.IPNSRecordsAllowed = PaidIPNSRecordLimit
 	case WhiteLabeled:
-		usage.MonthlyDataLimitBytes = math.MaxUint64
+		// math.MaxUint32 causes high-order bitset failures in psql
+		// see for more info: https://github.com/golang/go/issues/9373
+		usage.MonthlyDataLimitBytes = 1 << 63
 		usage.KeysAllowed = WhiteLabeledLimits
 		usage.PubSubMessagesAllowed = WhiteLabeledLimits
 		usage.IPNSRecordsAllowed = WhiteLabeledLimits
