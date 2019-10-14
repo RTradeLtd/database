@@ -28,6 +28,11 @@ type User struct {
 	Free                   bool    `gorm:"type:boolean"`
 	Credits                float64 `gorm:"type:float;default:0"`
 	CustomerObjectHash     string  `gorm:"type:varchar(255)"`
+	// the organization if any this user belongs to
+	// for organization user owners this will be empty.
+	// a non-nil organization field changes how the backend
+	// processes billing
+	Organization string `gorm:"type:varchar(255)"`
 	// IPFSKeyNames is an array of IPFS key name this user has created
 	IPFSKeyNames pq.StringArray `gorm:"type:text[];column:ipfs_key_names"`
 	// IPFSKeyIDs is an array of public key hashes for IPFS keys this user has created
