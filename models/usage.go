@@ -91,7 +91,7 @@ var (
 	PartnerIPNSLimit int64 = 200
 
 	// WhiteLabeledLimits is a generalized limitation for white-labeled accounts
-	WhiteLabeledLimits int64 = math.MaxInt64
+	WhiteLabeledLimits int64 = math.MaxInt64 - 1
 )
 
 // Usage is used to handle Usage of Temporal accounts
@@ -155,7 +155,7 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		usage.PubSubMessagesAllowed = PaidPubSubLimit
 		usage.IPNSRecordsAllowed = PaidIPNSRecordLimit
 	case WhiteLabeled:
-		// math.MaxUint32 causes high-order bitset failures in psql
+		// math.MaxUint64 causes high-order bitset failures in psql
 		// see for more info: https://github.com/golang/go/issues/9373
 		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
 		usage.KeysAllowed = WhiteLabeledLimits
