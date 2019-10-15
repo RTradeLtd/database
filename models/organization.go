@@ -95,3 +95,12 @@ func (om *OrgManager) FindByName(name string) (*Organization, error) {
 	}
 	return org, nil
 }
+
+// GetOrgUsers is used toreturn the registered users an organization has
+func (om *OrgManager) GetOrgUsers(name string) ([]string, error) {
+	org, err := om.FindByName(name)
+	if err != nil {
+		return nil, err
+	}
+	return org.RegisteredUsers, nil
+}

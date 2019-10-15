@@ -32,6 +32,20 @@ func TestOrganizationManager_Full(t *testing.T) {
 			if _, err := om.FindByName(tt.args.name); (err != nil) != tt.wantErr {
 				t.Fatalf("FindByName() err %v, wantErr %v", err, tt.wantErr)
 			}
+			if usrs, err := om.GetOrgUsers(tt.args.name) (err != nil) != tt.wantErr {
+				t.Fatalf("GetOrgUsers() err %v, wantErr %v", err, tt.wantErr)
+			} else if usrs != nil {
+				var found bool
+				for _, usr := range usrs {
+					if usr == tt.args.owner {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Fatal("failed to find user")
+				}
+			}
 		})
 	}
 	// do a cleanup
