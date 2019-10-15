@@ -157,7 +157,7 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 	case WhiteLabeled:
 		// math.MaxUint32 causes high-order bitset failures in psql
 		// see for more info: https://github.com/golang/go/issues/9373
-		usage.MonthlyDataLimitBytes = 1 << 63
+		usage.MonthlyDataLimitBytes = 1 << 61
 		usage.KeysAllowed = WhiteLabeledLimits
 		usage.PubSubMessagesAllowed = WhiteLabeledLimits
 		usage.IPNSRecordsAllowed = WhiteLabeledLimits
