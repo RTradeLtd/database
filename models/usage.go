@@ -306,7 +306,7 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 		b.PubSubMessagesAllowed = PaidPubSubLimit
 		b.IPNSRecordsAllowed = PaidIPNSRecordLimit
 	case WhiteLabeled:
-		b.MonthlyDataLimitBytes = math.MaxUint64
+		b.MonthlyDataLimitBytes = NonFreeUploadLimit
 		b.KeysAllowed = WhiteLabeledLimits
 		b.PubSubMessagesAllowed = WhiteLabeledLimits
 		b.IPNSRecordsAllowed = WhiteLabeledLimits
