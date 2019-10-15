@@ -24,18 +24,20 @@ func TestOrganizationManager_Full(t *testing.T) {
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("NewOrganization() err %v, wantErr %v", err, tt.wantErr)
 			}
-			if usr, err := om.RegisterOrgUser(
+			if _, err := om.RegisterOrgUser(
 				tt.args.name, tt.args.owner, "password123", "password123@example.org",
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("RegisterOrgUser err %v, wantErr %v", err, tt.wantErr)
-			} else if usr != nil {
-				defer om.DB.Unscoped().Delete(usr)
 			}
-			if model, err := om.FindByName(tt.args.name); (err != nil) != tt.wantErr {
+			if _, err := om.FindByName(tt.args.name); (err != nil) != tt.wantErr {
 				t.Fatalf("FindByName() err %v, wantErr %v", err, tt.wantErr)
-			} else if model != nil {
-				defer om.DB.Unscoped().Delete(model)
 			}
 		})
 	}
+	// do a cleanup
+	org, err := om.FindByName("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	om.DB.Unscoped().Delete(org)
 }
