@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"math"
 
 	"github.com/c2h5oh/datasize"
 
@@ -91,7 +90,7 @@ var (
 	PartnerIPNSLimit int64 = 200
 
 	// WhiteLabeledLimits is a generalized limitation for white-labeled accounts
-	WhiteLabeledLimits int64 = math.MaxInt64 - 1
+	WhiteLabeledLimits int64 = 2147483647
 )
 
 // Usage is used to handle Usage of Temporal accounts
