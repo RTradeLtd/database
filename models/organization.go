@@ -109,6 +109,10 @@ func (om *OrgManager) GetOrgUsers(name string) ([]string, error) {
 	return org.RegisteredUsers, nil
 }
 
+// BillingReport contains a summary
+// of an organizations entire active
+// user base in the last 30 days along with
+// the USD value currently owned by the account
 type BillingReport struct {
 	Name  string        `json:"name"`
 	Items []BillingItem `json:"items"`
@@ -116,11 +120,16 @@ type BillingReport struct {
 	AmountDue float64 `json:"amount_due"`
 }
 
+// BillingItem is an individual user's
+// billing history
 type BillingItem struct {
 	User    string   `json:"user"`
 	Uploads []Upload `json:"uploads"`
 }
 
+// GenerateBillingReport is used to generate a billing report object for an
+// organization's entire user base in the last 30 days. Care must be taken so that
+// only the organization owner may interact with this function, and is it returns sensitive information
 func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error) {
 	org, err := om.FindByName(name)
 	if err != nil {
