@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 )
@@ -12,6 +14,8 @@ type Organization struct {
 	Name string `gorm:"type:varchar(255);unique"`
 	// the corresponding temporal user account that manages this org
 	UserOwner string `gorm:"type:varchar(255);unique"`
+	// the usd value owed by the organization
+	AccountBalance float64 `gorm:"type:float"`
 	// the user accounts who have signed up under this organization
 	RegisteredUsers pq.StringArray `gorm:"type:text[];column:registered_users"`
 }
@@ -103,4 +107,57 @@ func (om *OrgManager) GetOrgUsers(name string) ([]string, error) {
 		return nil, err
 	}
 	return org.RegisteredUsers, nil
+}
+
+type BillingReport struct {
+	Name  string        `json:"name"`
+	Items []BillingItem `json:"items"`
+}
+
+type BillingItem struct {
+	User    string   `json:"user"`
+	Uploads []Upload `json:"uploads"`
+}
+
+func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error) {
+	org, err := om.FindByName(name)
+	if err != nil {
+		return nil, err
+	}
+	/*
+		maxGCDate := time.Now().AddDate(0, 0, days)
+		// find all uploads within the garbage collect period
+		if err := u.UP.DB.Model(&models.Upload{}).Where(
+			"garbage_collect_date BETWEEN ? AND ?",
+			time.Now(), maxGCDate,
+		).Find(&uploads).Error; err != nil {
+			return nil, err
+		}
+	*/
+	report := &BillingReport{Name: name}
+	for _, usr := range org.RegisteredUsers {
+		if _, err := NewUserManager(om.DB).FindByUserName(usr); err != nil {
+			// dont fail and return, just continue onto the next user
+			continue
+		}
+
+		var uploads []Upload
+		// find all uploads from the user that were
+		// updated in the last 30 days
+		if om.DB.Model(Upload{}).Where(
+			"user_name = ? AND updated_at BEWTEEN ? AND ?",
+			usr, time.Now().AddDate(0, 0, -30), time.Now(),
+		).Find(&uploads).Error != nil {
+			// dont fail and return, just continue onto the next user
+			continue
+		}
+		if len(uploads) == 0 {
+			continue
+		}
+		report.Items = append(report.Items, BillingItem{
+			User:    usr,
+			Uploads: uploads,
+		})
+	}
+	return report, nil
 }
