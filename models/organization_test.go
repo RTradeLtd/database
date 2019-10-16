@@ -7,7 +7,8 @@ import (
 
 func TestOrganizationManager_Full(t *testing.T) {
 	var om = NewOrgManager(newTestDB(t, &Organization{}))
-
+	om.DB.AutoMigrate(User{})
+	om.DB.AutoMigrate(Upload{})
 	type args struct {
 		name, owner string
 	}
@@ -61,6 +62,9 @@ func TestOrganizationManager_Full(t *testing.T) {
 
 func Test_BillingReport(t *testing.T) {
 	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	om.DB.AutoMigrate(User{})
+	om.DB.AutoMigrate(Upload{})
+	om.DB.AutoMigrate(Usage{})
 	// create the organization
 	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
 		t.Fatal(err)
@@ -81,6 +85,11 @@ func Test_BillingReport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer om.DB.Unscoped().Delete(usr1)
+	usage, err := NewUsageManager(om.DB).FindByUserName("testorg-user1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(usage)
 	report, err := om.GenerateBillingReport("testorg")
 	if err != nil {
 		t.Fatal(err)
