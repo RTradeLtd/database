@@ -151,3 +151,48 @@ func Test_AccountBalance(t *testing.T) {
 		t.Fatal("bad account balance")
 	}
 }
+
+func Test_TotalStorageUsed(t *testing.T) {
+	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	om.DB.AutoMigrate(User{})
+	om.DB.AutoMigrate(Upload{})
+	om.DB.AutoMigrate(Usage{})
+	// create the organization
+	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
+		t.Fatal(err)
+	}
+	org, err := om.FindByName("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(org)
+	usr, err := om.RegisterOrgUser(
+		"testorg",
+		"testorg-user",
+		"password123",
+		"testorg-user@example.org",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(usr)
+	usg, err := NewUsageManager(om.DB).
+		FindByUserName("testorg-user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(usg)
+	if err := NewUsageManager(om.DB).UpdateDataUsage(
+		"testorg-user",
+		100,
+	); err != nil {
+		t.Fatal(err)
+	}
+	amount, err := om.GetTotalStorageUsed("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if amount != 100 {
+		t.Fatal("bad amount returned")
+	}
+}
