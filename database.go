@@ -68,6 +68,7 @@ func (dbm *Manager) RunMigrations() {
 		&models.Zone{},
 		&models.Record{},
 		&models.Usage{},
+		&models.Organization{},
 	} {
 		dbm.DB.AutoMigrate(t)
 	}
