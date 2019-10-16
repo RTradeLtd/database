@@ -136,6 +136,28 @@ func (om *OrgManager) DecreaseAccountBalance(name string, amount float64) error 
 	return om.DB.Model(org).Update("account_balance", org.AccountBalance).Error
 }
 
+// GetTotalStorageUsed returns the total storage in bytes consumed
+// by the organization.
+func (om *OrgManager) GetTotalStorageUsed(name string) (uint64, error) {
+	org, err := om.FindByName(name)
+	if err != nil {
+		return 0, err
+	}
+	var total uint64
+	for _, user := range org.RegisteredUsers {
+		usage, err := NewUsageManager(om.DB).
+			FindByUserName(user)
+		if err != nil {
+			return 0, err
+		}
+		if total+usage.CurrentDataUsedBytes < total {
+			return 0, errors.New("overflow error")
+		}
+		total = total + usage.CurrentDataUsedBytes
+	}
+	return total, nil
+}
+
 // BillingReport contains a summary
 // of an organizations entire active
 // user base in the last 30 days along with
