@@ -118,3 +118,36 @@ func Test_BillingReport(t *testing.T) {
 	}
 	pp.Println(report)
 }
+
+func Test_AccountBalance(t *testing.T) {
+	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	om.DB.AutoMigrate(User{})
+	om.DB.AutoMigrate(Upload{})
+	om.DB.AutoMigrate(Usage{})
+	// create the organization
+	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
+		t.Fatal(err)
+	}
+	org, err := om.FindByName("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(org)
+	if err := om.IncreaseAccountBalance("testorg", 100); err != nil {
+		t.Fatal(err)
+	}
+	org, err = om.FindByName("testorg")
+	if org.AccountBalance != 100 {
+		t.Fatal("bad account balance")
+	}
+	if err := om.DecreaseAccountBalance("testorg", 60.5); err != nil {
+		t.Fatal(err)
+	}
+	org, err = om.FindByName("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if org.AccountBalance != 39.5 {
+		t.Fatal("bad account balance")
+	}
+}
