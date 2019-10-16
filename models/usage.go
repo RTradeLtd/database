@@ -53,8 +53,9 @@ var (
 	//			* 0.16GB/month after 100GB limit
 	Partner DataUsageTier = "partner"
 
-	// WhiteLabeled is a special billing system for resellers
-	//  partners have 0 limits, and have $0 pricing
+	// WhiteLabeled is a special billing system
+	// that enables resellers, and customized
+	// billing scenarios without having to modify much code
 	WhiteLabeled DataUsageTier = "white-labeled"
 
 	// FreeUploadLimit is the maximum data usage for free accounts
