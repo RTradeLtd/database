@@ -25,7 +25,7 @@ func (d DataUsageTier) PricePerGB() float64 {
 	case Partner:
 		return 0.05
 	case WhiteLabeled:
-		return 0.00
+		return 0.05
 	default:
 		// this is a catch-all for free tier
 		// free tier users will never encounter a charge call
