@@ -80,7 +80,7 @@ func (om *OrgManager) RegisterOrgUser(
 	org.RegisteredUsers = append(org.RegisteredUsers, username)
 	// save updated org model model
 	if err := om.DB.Model(org).Update(
-		"regisered_users",
+		"registered_users",
 		org.RegisteredUsers,
 	).Error; err != nil {
 		return nil, err
