@@ -86,6 +86,9 @@ func Test_BillingReport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer om.DB.Unscoped().Delete(usr1)
+	if usr1.Organization != "testorg" {
+		t.Fatal("bad organization set")
+	}
 	usage, err := NewUsageManager(om.DB).FindByUserName("testorg-user1")
 	if err != nil {
 		t.Fatal(err)
