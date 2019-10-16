@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -107,6 +108,32 @@ func (om *OrgManager) GetOrgUsers(name string) ([]string, error) {
 		return nil, err
 	}
 	return org.RegisteredUsers, nil
+}
+
+// IncreaseAccountBalance increases the amount owed by this account
+func (om *OrgManager) IncreaseAccountBalance(name string, amount float64) error {
+	org, err := om.FindByName(name)
+	if err != nil {
+		return err
+	}
+	if org.AccountBalance+amount < org.AccountBalance {
+		return errors.New("account balance overflow error")
+	}
+	org.AccountBalance = org.AccountBalance + amount
+	return om.DB.Model(org).Update("account_balance", org.AccountBalance).Error
+}
+
+// DecreaseAccountBalance decreases the amount owed by this account
+func (om *OrgManager) DecreaseAccountBalance(name string, amount float64) error {
+	org, err := om.FindByName(name)
+	if err != nil {
+		return err
+	}
+	if org.AccountBalance-amount > org.AccountBalance {
+		return errors.New("account balance overflow error")
+	}
+	org.AccountBalance = org.AccountBalance - amount
+	return om.DB.Model(org).Update("account_balance", org.AccountBalance).Error
 }
 
 // BillingReport contains a summary

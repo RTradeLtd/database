@@ -367,6 +367,11 @@ func (um *UserManager) RemoveCredits(username string, credits float64) (*User, e
 	if err != nil {
 		return nil, err
 	}
+	// check to see if they arep art of an organization
+	// if they are, invoke special handling
+	if user.Organization != "" {
+		// TODO(postables):
+	}
 	if user.Credits < credits {
 		return nil, errors.New("unable to remove credits, would result in negative balance")
 	}
