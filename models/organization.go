@@ -130,7 +130,7 @@ type BillingItem struct {
 // GenerateBillingReport is used to generate a billing report object for an
 // organization's entire user base in the last 30 days. Care must be taken so that
 // only the organization owner may interact with this function, and is it returns sensitive information
-func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error) {
+func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.Time) (*BillingReport, error) {
 	org, err := om.FindByName(name)
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error)
 		// create at since it is possible for uploads to be extended
 		if err := om.DB.Model(Upload{}).Where(
 			"user_name = ? AND updated_at BETWEEN ? AND ?",
-			usr, time.Now().AddDate(0, 0, -30), time.Now(),
+			usr, minTime, maxTime,
 		).Find(&uploads).Error; err != nil {
 			// dont fail and return, just continue onto the next user
 			continue

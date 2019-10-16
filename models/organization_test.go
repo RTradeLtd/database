@@ -2,6 +2,7 @@ package models
 
 import (
 	"testing"
+	"time"
 
 	"github.com/k0kubun/pp"
 )
@@ -105,7 +106,7 @@ func Test_BillingReport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer om.DB.Unscoped().Delete(upload)
-	report, err := om.GenerateBillingReport("testorg")
+	report, err := om.GenerateBillingReport("testorg", time.Now().AddDate(0, 0, -30), time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
