@@ -147,9 +147,7 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 			continue
 		}
 		var uploads []Upload
-		// find all uploads from the user that were
-		// updated in the last 30 days, we dont check
-		// create at since it is possible for uploads to be extended
+		// find all uploads for the given user in the specified range
 		if err := om.DB.Model(Upload{}).Where(
 			"user_name = ? AND updated_at BETWEEN ? AND ?",
 			usr, minTime, maxTime,
