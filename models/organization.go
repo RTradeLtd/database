@@ -126,16 +126,6 @@ func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error)
 	if err != nil {
 		return nil, err
 	}
-	/*
-		maxGCDate := time.Now().AddDate(0, 0, days)
-		// find all uploads within the garbage collect period
-		if err := u.UP.DB.Model(&models.Upload{}).Where(
-			"garbage_collect_date BETWEEN ? AND ?",
-			time.Now(), maxGCDate,
-		).Find(&uploads).Error; err != nil {
-			return nil, err
-		}
-	*/
 	report := &BillingReport{Name: name, AmountDue: org.AccountBalance}
 	for _, usr := range org.RegisteredUsers {
 		// sanity check that the user exists
@@ -149,10 +139,10 @@ func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error)
 		// find all uploads from the user that were
 		// updated in the last 30 days, we dont check
 		// create at since it is possible for uploads to be extended
-		if om.DB.Model(Upload{}).Where(
-			"user_name = ? AND updated_at BEWTEEN ? AND ?",
+		if err := om.DB.Model(Upload{}).Where(
+			"user_name = ? AND updated_at BETWEEN ? AND ?",
 			usr, time.Now().AddDate(0, 0, -30), time.Now(),
-		).Find(&uploads).Error != nil {
+		).Find(&uploads).Error; err != nil {
 			// dont fail and return, just continue onto the next user
 			continue
 		}

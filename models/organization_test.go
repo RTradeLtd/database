@@ -1,8 +1,9 @@
 package models
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/k0kubun/pp"
 )
 
 func TestOrganizationManager_Full(t *testing.T) {
@@ -90,9 +91,20 @@ func Test_BillingReport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer om.DB.Unscoped().Delete(usage)
+	// create an upload
+	upload, err := NewUploadManager(om.DB).NewUpload(
+		"testhash", "upload", UploadOptions{
+			NetworkName: "public",
+			Username:    "testorg-user1",
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(upload)
 	report, err := om.GenerateBillingReport("testorg")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Printf("%+v\n", report)
+	pp.Println(report)
 }
