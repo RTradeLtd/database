@@ -118,6 +118,8 @@ type BillingReport struct {
 	Items []BillingItem `json:"items"`
 	// amount owed in USD
 	AmountDue float64 `json:"amount_due"`
+	// the unix (nano) timestamp the report was finalized at
+	Time int64 `json:"time"`
 }
 
 // BillingItem is an individual user's
@@ -163,5 +165,7 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 			Uploads: uploads,
 		})
 	}
+	// finalize the report
+	report.Time = time.Now().UnixNano()
 	return report, nil
 }

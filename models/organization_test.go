@@ -110,5 +110,11 @@ func Test_BillingReport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if len(report.Items) == 0 {
+		t.Fatal("items length should be non 0")
+	}
+	if report.Time == 0 {
+		t.Fatal("time should be non 0")
+	}
 	pp.Println(report)
 }
