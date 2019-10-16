@@ -112,6 +112,8 @@ func (om *OrgManager) GetOrgUsers(name string) ([]string, error) {
 type BillingReport struct {
 	Name  string        `json:"name"`
 	Items []BillingItem `json:"items"`
+	// amount owed in USD
+	AmountDue float64 `json:"amount_due"`
 }
 
 type BillingItem struct {
@@ -134,13 +136,12 @@ func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error)
 			return nil, err
 		}
 	*/
-	report := &BillingReport{Name: name}
+	report := &BillingReport{Name: name, AmountDue: org.AccountBalance}
 	for _, usr := range org.RegisteredUsers {
 		if _, err := NewUserManager(om.DB).FindByUserName(usr); err != nil {
 			// dont fail and return, just continue onto the next user
 			continue
 		}
-
 		var uploads []Upload
 		// find all uploads from the user that were
 		// updated in the last 30 days
