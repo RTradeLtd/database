@@ -138,13 +138,17 @@ func (om *OrgManager) GenerateBillingReport(name string) (*BillingReport, error)
 	*/
 	report := &BillingReport{Name: name, AmountDue: org.AccountBalance}
 	for _, usr := range org.RegisteredUsers {
-		if _, err := NewUserManager(om.DB).FindByUserName(usr); err != nil {
+		// sanity check that the user exists
+		if _, err := NewUserManager(
+			om.DB,
+		).FindByUserName(usr); err != nil {
 			// dont fail and return, just continue onto the next user
 			continue
 		}
 		var uploads []Upload
 		// find all uploads from the user that were
-		// updated in the last 30 days
+		// updated in the last 30 days, we dont check
+		// create at since it is possible for uploads to be extended
 		if om.DB.Model(Upload{}).Where(
 			"user_name = ? AND updated_at BEWTEEN ? AND ?",
 			usr, time.Now().AddDate(0, 0, -30), time.Now(),

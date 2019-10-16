@@ -1,6 +1,9 @@
 package models
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestOrganizationManager_Full(t *testing.T) {
 	var om = NewOrgManager(newTestDB(t, &Organization{}))
@@ -54,4 +57,33 @@ func TestOrganizationManager_Full(t *testing.T) {
 		t.Fatal(err)
 	}
 	om.DB.Unscoped().Delete(org)
+}
+
+func Test_BillingReport(t *testing.T) {
+	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	// create the organization
+	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
+		t.Fatal(err)
+	}
+	org, err := om.FindByName("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(org)
+	// create an org user
+	usr1, err := om.RegisterOrgUser(
+		"testorg",
+		"testorg-user1",
+		"password123",
+		"testorg-user1@example.org",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(usr1)
+	report, err := om.GenerateBillingReport("testorg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%+v\n", report)
 }
