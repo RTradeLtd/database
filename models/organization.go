@@ -122,8 +122,21 @@ func (om *OrgManager) IncreaseAccountBalance(name string, amount float64) error 
 	if org.AccountBalance+amount < org.AccountBalance {
 		return errors.New("account balance overflow error")
 	}
+	// craete database tx handler
+	tx := om.DB.Begin()
 	org.AccountBalance = org.AccountBalance + amount
-	return om.DB.Model(org).Update("account_balance", org.AccountBalance).Error
+	// update model account_balance field transacationally
+	// rolling back all pending-transactinos if we detect an error
+	if check := tx.Model(org).
+		Update(
+			"account_balance",
+			org.AccountBalance,
+		); check.Error != nil {
+		tx.Rollback()
+		return err
+	}
+	// commit the transaction, returning an error (if any)
+	return tx.Commit().Error
 }
 
 // DecreaseAccountBalance decreases the amount owed by this account
@@ -135,8 +148,20 @@ func (om *OrgManager) DecreaseAccountBalance(name string, amount float64) error 
 	if org.AccountBalance-amount > org.AccountBalance {
 		return errors.New("account balance overflow error")
 	}
+	tx := om.DB.Begin()
 	org.AccountBalance = org.AccountBalance - amount
-	return om.DB.Model(org).Update("account_balance", org.AccountBalance).Error
+	// update model account_balance field transacationally
+	// rolling back all pending-transactinos if we detect an error
+	if check := tx.Model(org).
+		Update(
+			"account_balance",
+			org.AccountBalance,
+		); check.Error != nil {
+		tx.Rollback()
+		return err
+	}
+	// commit the transaction, returning an error (if any)
+	return tx.Commit().Error
 }
 
 // GetTotalStorageUsed returns the total storage in bytes consumed
