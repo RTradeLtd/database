@@ -24,7 +24,7 @@ func TestOrganizationManager_Full(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := om.NewOrganization(
+			if _, err := om.NewOrganization(
 				tt.args.name,
 				tt.args.owner,
 			); (err != nil) != tt.wantErr {
@@ -68,7 +68,8 @@ func Test_BillingReport(t *testing.T) {
 	om.DB.AutoMigrate(Upload{})
 	om.DB.AutoMigrate(Usage{})
 	// create the organization
-	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
+	// create the organization
+	if _, err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
 		t.Fatal(err)
 	}
 	org, err := om.FindByName("testorg")
@@ -125,7 +126,8 @@ func Test_AccountBalance(t *testing.T) {
 	om.DB.AutoMigrate(Upload{})
 	om.DB.AutoMigrate(Usage{})
 	// create the organization
-	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
+	// create the organization
+	if _, err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
 		t.Fatal(err)
 	}
 	org, err := om.FindByName("testorg")
@@ -158,7 +160,7 @@ func Test_TotalStorageUsed(t *testing.T) {
 	om.DB.AutoMigrate(Upload{})
 	om.DB.AutoMigrate(Usage{})
 	// create the organization
-	if err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
+	if _, err := om.NewOrganization("testorg", "testorg-owner"); err != nil {
 		t.Fatal(err)
 	}
 	org, err := om.FindByName("testorg")

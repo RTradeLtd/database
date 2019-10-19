@@ -32,17 +32,20 @@ func NewOrgManager(db *gorm.DB) *OrgManager {
 }
 
 // NewOrganization is used to create a new organization
-func (om *OrgManager) NewOrganization(name, owner string) error {
+func (om *OrgManager) NewOrganization(name, owner string) (*Organization, error) {
 	org := &Organization{
 		Name:      name,
 		UserOwner: owner,
 	}
-	return om.DB.Create(org).Error
+	if err := om.DB.Create(org).Error; err != nil {
+		return nil, err
+	}
+	return org, nil
 }
 
 // RegisterOrgUser registers an organization user
 func (om *OrgManager) RegisterOrgUser(
-	name,
+	orgName,
 	username,
 	password,
 	email string,
@@ -57,7 +60,7 @@ func (om *OrgManager) RegisterOrgUser(
 		return nil, err
 	}
 	// update user model associated organization
-	user.Organization = name
+	user.Organization = orgName
 	// save updated user model
 	if err := om.DB.Model(user).Update(
 		"organization", user.Organization,
@@ -73,7 +76,7 @@ func (om *OrgManager) RegisterOrgUser(
 		return nil, err
 	}
 	// find organization model
-	org, err := om.FindByName(name)
+	org, err := om.FindByName(orgName)
 	if err != nil {
 		return nil, err
 	}
