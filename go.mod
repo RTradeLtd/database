@@ -8,7 +8,6 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/ipfs/go-ipfs-addr v0.0.1
 	github.com/jinzhu/gorm v1.9.8
-	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/lib/pq v1.1.0
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/mr-tron/base58 v1.1.1 // indirect

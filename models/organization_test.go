@@ -3,8 +3,6 @@ package models
 import (
 	"testing"
 	"time"
-
-	"github.com/k0kubun/pp"
 )
 
 func TestOrganizationManager_Full(t *testing.T) {
@@ -117,7 +115,6 @@ func Test_BillingReport(t *testing.T) {
 	if report.Time == 0 {
 		t.Fatal("time should be non 0")
 	}
-	pp.Println(report)
 }
 
 func Test_AccountBalance(t *testing.T) {
