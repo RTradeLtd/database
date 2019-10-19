@@ -14,7 +14,7 @@ type Organization struct {
 	// the name of the organization
 	Name string `gorm:"type:varchar(255);unique"`
 	// the corresponding temporal user account that manages this org
-	UserOwner string `gorm:"type:varchar(255);unique"`
+	AccountOwner string `gorm:"type:varchar(255);unique"`
 	// the usd value owed by the organization
 	AccountBalance float64 `gorm:"type:float"`
 	// the user accounts who have signed up under this organization
@@ -34,8 +34,8 @@ func NewOrgManager(db *gorm.DB) *OrgManager {
 // NewOrganization is used to create a new organization
 func (om *OrgManager) NewOrganization(name, owner string) (*Organization, error) {
 	org := &Organization{
-		Name:      name,
-		UserOwner: owner,
+		Name:         name,
+		AccountOwner: owner,
 	}
 	if err := om.DB.Create(org).Error; err != nil {
 		return nil, err
