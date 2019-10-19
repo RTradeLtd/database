@@ -16,7 +16,7 @@ type Organization struct {
 	// the corresponding temporal user account that manages this org
 	AccountOwner string `gorm:"type:varchar(255);unique"`
 	// the usd value owed by the organization
-	AccountBalance float64 `gorm:"type:float"`
+	AmountOwed float64 `gorm:"type:float"`
 	// the user accounts who have signed up under this organization
 	RegisteredUsers pq.StringArray `gorm:"type:text[];column:registered_users"`
 }
@@ -113,24 +113,24 @@ func (om *OrgManager) GetOrgUsers(name string) ([]string, error) {
 	return org.RegisteredUsers, nil
 }
 
-// IncreaseAccountBalance increases the amount owed by this account
-func (om *OrgManager) IncreaseAccountBalance(name string, amount float64) error {
+// IncreaseAmountOwed increases the amount owed by this account
+func (om *OrgManager) IncreaseAmountOwed(name string, amount float64) error {
 	org, err := om.FindByName(name)
 	if err != nil {
 		return err
 	}
-	if org.AccountBalance+amount < org.AccountBalance {
+	if org.AmountOwed+amount < org.AmountOwed {
 		return errors.New("account balance overflow error")
 	}
 	// craete database tx handler
 	tx := om.DB.Begin()
-	org.AccountBalance = org.AccountBalance + amount
+	org.AmountOwed = org.AmountOwed + amount
 	// update model account_balance field transacationally
 	// rolling back all pending-transactinos if we detect an error
 	if check := tx.Model(org).
 		Update(
-			"account_balance",
-			org.AccountBalance,
+			"amount_owed",
+			org.AmountOwed,
 		); check.Error != nil {
 		tx.Rollback()
 		return err
@@ -139,23 +139,23 @@ func (om *OrgManager) IncreaseAccountBalance(name string, amount float64) error 
 	return tx.Commit().Error
 }
 
-// DecreaseAccountBalance decreases the amount owed by this account
-func (om *OrgManager) DecreaseAccountBalance(name string, amount float64) error {
+// DecreaseAmountOwed decreases the amount owed by this account
+func (om *OrgManager) DecreaseAmountOwed(name string, amount float64) error {
 	org, err := om.FindByName(name)
 	if err != nil {
 		return err
 	}
-	if org.AccountBalance-amount > org.AccountBalance {
+	if org.AmountOwed-amount > org.AmountOwed {
 		return errors.New("account balance overflow error")
 	}
 	tx := om.DB.Begin()
-	org.AccountBalance = org.AccountBalance - amount
+	org.AmountOwed = org.AmountOwed - amount
 	// update model account_balance field transacationally
 	// rolling back all pending-transactinos if we detect an error
 	if check := tx.Model(org).
 		Update(
-			"account_balance",
-			org.AccountBalance,
+			"amount_owed",
+			org.AmountOwed,
 		); check.Error != nil {
 		tx.Rollback()
 		return err
@@ -214,7 +214,7 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 	if err != nil {
 		return nil, err
 	}
-	report := &BillingReport{OrgName: name, AmountDue: org.AccountBalance}
+	report := &BillingReport{OrgName: name, AmountDue: org.AmountOwed}
 	for _, usr := range org.RegisteredUsers {
 		// sanity check that the user exists
 		if _, err := NewUserManager(

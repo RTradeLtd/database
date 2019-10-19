@@ -369,7 +369,7 @@ func (um *UserManager) RemoveCredits(username string, credits float64) (*User, e
 	// check to see if they arep art of an organization
 	// if they are, invoke special handling
 	if user.Organization != "" {
-		return user, NewOrgManager(um.DB).IncreaseAccountBalance(
+		return user, NewOrgManager(um.DB).IncreaseAmountOwed(
 			user.Organization,
 			credits,
 		)
