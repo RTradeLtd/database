@@ -29,7 +29,8 @@ type User struct {
 	Credits                float64 `gorm:"type:float;default:0"`
 	CustomerObjectHash     string  `gorm:"type:varchar(255)"`
 	// the organization if any this user belongs to otherwise empty string.
-	// A non-empty organization field changes how the backend processes billing
+	// A non-empty string changes how the backend processes billing to do
+	// organization based billing, not user-account billing
 	Organization string `gorm:"type:varchar(255)"`
 	// IPFSKeyNames is an array of IPFS key name this user has created
 	IPFSKeyNames pq.StringArray `gorm:"type:text[];column:ipfs_key_names"`
