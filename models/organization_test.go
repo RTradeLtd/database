@@ -155,15 +155,20 @@ func Test_AccountBalance(t *testing.T) {
 	// now register an org user to test RemoveCredits updating balance
 	usr, err := om.RegisterOrgUser(
 		"testorg",
-		"testorg-user",
+		"testorg-user33",
 		"password123",
-		"testorg-user2@example.org",
+		"testorg-user33@example.org",
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer om.DB.Unscoped().Delete(usr)
-	if _, err := NewUserManager(om.DB).RemoveCredits("testorg-user", 0.5); err != nil {
+	usg, err := NewUsageManager(om.DB).FindByUserName("testorg-user33")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer om.DB.Unscoped().Delete(usg)
+	if _, err := NewUserManager(om.DB).RemoveCredits("testorg-user33", 0.5); err != nil {
 		t.Fatal(err)
 	}
 	org, err = om.FindByName("testorg")
