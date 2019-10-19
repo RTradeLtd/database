@@ -163,8 +163,8 @@ func (om *OrgManager) GetTotalStorageUsed(name string) (uint64, error) {
 // user base in the last 30 days along with
 // the USD value currently owned by the account
 type BillingReport struct {
-	Name  string        `json:"name"`
-	Items []BillingItem `json:"items"`
+	OrgName string        `json:"org_name"`
+	Items   []BillingItem `json:"items"`
 	// amount owed in USD
 	AmountDue float64 `json:"amount_due"`
 	// the unix (nano) timestamp the report was finalized at
@@ -186,7 +186,7 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 	if err != nil {
 		return nil, err
 	}
-	report := &BillingReport{Name: name, AmountDue: org.AccountBalance}
+	report := &BillingReport{OrgName: name, AmountDue: org.AccountBalance}
 	for _, usr := range org.RegisteredUsers {
 		// sanity check that the user exists
 		if _, err := NewUserManager(
