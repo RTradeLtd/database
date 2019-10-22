@@ -34,14 +34,15 @@ func TestUserManager_NewAccount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if usr, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email); (err != nil) != tt.wantErr {
+			usr, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email)
+			if (err != nil) != tt.wantErr {
 				t.Fatalf("NewUserAccount err = %v, wantErr %v", err, tt.wantErr)
-			} else if usr == nil {
-				t.Fatal("user should not be nil")
-			} else {
-				if usr.Organization != "" {
-					t.Fatal("organization be empty")
-				}
+			}
+			if !tt.wantErr && usr == nil {
+				t.Fatal("user should not be bil")
+			}
+			if !tt.wantErr && usr != nil && usr.Organization != "" {
+				t.Fatal("organizatino should not be empty")
 			}
 		})
 	}
