@@ -36,8 +36,12 @@ func TestUserManager_NewAccount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if usr, err := um.NewUserAccount(tt.args.userName, tt.args.password, tt.args.email); (err != nil) != tt.wantErr {
 				t.Fatalf("NewUserAccount err = %v, wantErr %v", err, tt.wantErr)
-			} else if usr != nil && usr.Organization != "" {
-				t.Fatal("organization should be empty")
+			} else if usr == nil {
+				t.Fatal("user should not be nil")
+			} else {
+				if usr.Organization != "" {
+					t.Fatal("organization be empty")
+				}
 			}
 		})
 	}
