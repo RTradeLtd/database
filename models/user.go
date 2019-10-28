@@ -28,6 +28,10 @@ type User struct {
 	Free                   bool    `gorm:"type:boolean"`
 	Credits                float64 `gorm:"type:float;default:0"`
 	CustomerObjectHash     string  `gorm:"type:varchar(255)"`
+	// the organization if any this user belongs to otherwise empty string.
+	// A non-empty string changes how the backend processes billing to do
+	// organization based billing, not user-account billing
+	Organization string `gorm:"type:varchar(255)"`
 	// IPFSKeyNames is an array of IPFS key name this user has created
 	IPFSKeyNames pq.StringArray `gorm:"type:text[];column:ipfs_key_names"`
 	// IPFSKeyIDs is an array of public key hashes for IPFS keys this user has created
@@ -361,6 +365,14 @@ func (um *UserManager) RemoveCredits(username string, credits float64) (*User, e
 	user, err := um.FindByUserName(username)
 	if err != nil {
 		return nil, err
+	}
+	// check to see if they arep art of an organization
+	// if they are, invoke special handling
+	if user.Organization != "" {
+		return user, NewOrgManager(um.DB).IncreaseAmountOwed(
+			user.Organization,
+			credits,
+		)
 	}
 	if user.Credits < credits {
 		return nil, errors.New("unable to remove credits, would result in negative balance")

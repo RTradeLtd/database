@@ -24,6 +24,8 @@ func (d DataUsageTier) PricePerGB() float64 {
 		return 0.07
 	case Partner:
 		return 0.05
+	case WhiteLabeled:
+		return 0.05
 	default:
 		// this is a catch-all for free tier
 		// free tier users will never encounter a charge call
@@ -50,6 +52,11 @@ var (
 	//			* on-demand data encryption
 	//			* 0.16GB/month after 100GB limit
 	Partner DataUsageTier = "partner"
+
+	// WhiteLabeled is a special billing system
+	// that enables resellers, and customized
+	// billing scenarios without having to modify much code
+	WhiteLabeled DataUsageTier = "white-labeled"
 
 	// FreeUploadLimit is the maximum data usage for free accounts
 	// Currrently set to 3GB
@@ -82,6 +89,9 @@ var (
 	PartnerPubSubLimit int64 = 20000
 	// PartnerIPNSLimit defines how many ipns records partner accounts can publish
 	PartnerIPNSLimit int64 = 200
+
+	// WhiteLabeledLimits is a generalized limitation for white-labeled accounts
+	WhiteLabeledLimits int64 = 2147483647
 )
 
 // Usage is used to handle Usage of Temporal accounts
@@ -144,6 +154,13 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		usage.KeysAllowed = PaidKeyLimit
 		usage.PubSubMessagesAllowed = PaidPubSubLimit
 		usage.IPNSRecordsAllowed = PaidIPNSRecordLimit
+	case WhiteLabeled:
+		// math.MaxUint64 causes high-order bitset failures in psql
+		// see for more info: https://github.com/golang/go/issues/9373
+		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
+		usage.KeysAllowed = WhiteLabeledLimits
+		usage.PubSubMessagesAllowed = WhiteLabeledLimits
+		usage.IPNSRecordsAllowed = WhiteLabeledLimits
 	default:
 		return nil, errors.New("unsupported tier provided")
 	}
@@ -288,6 +305,11 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 		b.KeysAllowed = PaidKeyLimit
 		b.PubSubMessagesAllowed = PaidPubSubLimit
 		b.IPNSRecordsAllowed = PaidIPNSRecordLimit
+	case WhiteLabeled:
+		b.MonthlyDataLimitBytes = NonFreeUploadLimit
+		b.KeysAllowed = WhiteLabeledLimits
+		b.PubSubMessagesAllowed = WhiteLabeledLimits
+		b.IPNSRecordsAllowed = WhiteLabeledLimits
 	default:
 		return errors.New("unsupported tier provided")
 	}

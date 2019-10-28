@@ -22,6 +22,7 @@ func TestUsage(t *testing.T) {
 		{"Free", args{"free", Free, datasize.GB.Bytes()}, false},
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
 		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
+		{"WhiteLabelled", args{"whitelabelled", WhiteLabeled, datasize.GB.Bytes() * 100}, false},
 		{"Fail", args{"fail", Free, 1}, true},
 	}
 	for _, tt := range tests {
@@ -67,6 +68,10 @@ func TestUsage(t *testing.T) {
 			// an account may never enter free status once exiting
 			tiers := []DataUsageTier{Paid, Partner}
 			for _, tier := range tiers {
+				// skip white labelled acounts
+				if tt.args.tier == WhiteLabeled {
+					continue
+				}
 				if err := bm.UpdateTier(tt.args.username, tier); (err != nil) != tt.wantErr {
 					t.Fatalf("UpdateTier() err = %v, wantErr %v", err, tt.wantErr)
 				}
@@ -252,5 +257,26 @@ func Test_ReduceKeyCount(t *testing.T) {
 	}
 	if b.KeysCreated != 0 {
 		t.Fatal("bad key count")
+	}
+}
+
+func TestPricePerGB(t *testing.T) {
+	tests := []struct {
+		tier       DataUsageTier
+		wantPrice  float64
+		wantString string
+	}{
+		{Paid, 0.07, "paid"},
+		{Partner, 0.05, "partner"},
+		{WhiteLabeled, 0.05, "white-labeled"},
+		{Free, 9999, "free"},
+	}
+	for _, tt := range tests {
+		if tt.tier.PricePerGB() != tt.wantPrice {
+			t.Fatal("bad PricePerGB returned")
+		}
+		if tt.tier.String() != tt.wantString {
+			t.Fatal("bad string returned")
+		}
 	}
 }
