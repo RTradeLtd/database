@@ -31,7 +31,9 @@ type Upload struct {
 	UserName           string `gorm:"type:varchar(255);not null;"`
 	GarbageCollectDate time.Time
 	Encrypted          bool   `gorm:"type:bool"`
+	FileName           string `gorm:"type:varchar(255)"`
 	FileNameLowerCase  string `gorm:"type:varchar(255)"`
+	FileNameUpperCase  string `gorm:"type:varchar(255)"`
 }
 
 // UploadManager is used to manipulate upload objects in the database
@@ -72,7 +74,9 @@ func (um *UploadManager) NewUpload(contentHash, uploadType string, opts UploadOp
 		UserName:           opts.Username,
 		GarbageCollectDate: utils.CalculateGarbageCollectDate(holdInt),
 		Encrypted:          opts.Encrypted,
+		FileName:           opts.FileName,
 		FileNameLowerCase:  strings.ToLower(opts.FileName),
+		FileNameUpperCase:  strings.ToUpper(opts.FileName),
 	}
 	if check := um.DB.Create(&upload); check.Error != nil {
 		return nil, check.Error

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 )
@@ -92,7 +93,13 @@ func TestUpload(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if upload1.FileNameLowerCase != tt.args.fileName {
+			if upload1.FileName != tt.args.fileName {
+				t.Fatal("bad file name")
+			}
+			if upload1.FileNameUpperCase != strings.ToUpper(tt.args.fileName) {
+				t.Fatal("bad file name")
+			}
+			if upload1.FileNameLowerCase != strings.ToLower(tt.args.fileName) {
 				t.Fatal("bad file name")
 			}
 			defer um.DB.Unscoped().Delete(upload1)
@@ -110,7 +117,13 @@ func TestUpload(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if upload2.FileNameLowerCase != tt.args.fileName {
+			if upload2.FileName != tt.args.fileName {
+				t.Fatal("bad file name")
+			}
+			if upload2.FileNameUpperCase != strings.ToUpper(tt.args.fileName) {
+				t.Fatal("bad file name")
+			}
+			if upload2.FileNameLowerCase != strings.ToLower(tt.args.fileName) {
 				t.Fatal("bad file name")
 			}
 			defer um.DB.Unscoped().Delete(upload2)
