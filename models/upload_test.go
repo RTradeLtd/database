@@ -92,6 +92,9 @@ func TestUpload(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			if upload1.FileNameLowerCase != tt.args.fileName {
+				t.Fatal("bad file name")
+			}
 			defer um.DB.Unscoped().Delete(upload1)
 			upload2, err := um.NewUpload(
 				tt.args.hash,
@@ -106,6 +109,9 @@ func TestUpload(t *testing.T) {
 			)
 			if err != nil {
 				t.Fatal(err)
+			}
+			if upload2.FileNameLowerCase != tt.args.fileName {
+				t.Fatal("bad file name")
 			}
 			defer um.DB.Unscoped().Delete(upload2)
 			if _, err := um.NewUpload(
