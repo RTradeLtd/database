@@ -59,6 +59,7 @@ func TestUpload(t *testing.T) {
 	var um = NewUploadManager(newTestDB(t, &Upload{}))
 	type args struct {
 		hash       string
+		fileName   string
 		uploadType string
 		network    string
 		holdTime   int64
@@ -73,7 +74,7 @@ func TestUpload(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"User1-Hash1", args{"hash1", "file", "public", 5, "user1", "user2", time.Now(), time.Now().Add(time.Hour * 24), false}, false},
+		{"User1-Hash1", args{"hash1", "fileName", "file", "public", 5, "user1", "user2", time.Now(), time.Now().Add(time.Hour * 24), false}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -81,6 +82,7 @@ func TestUpload(t *testing.T) {
 				tt.args.hash,
 				tt.args.uploadType,
 				UploadOptions{
+					FileName:         tt.args.fileName,
 					NetworkName:      tt.args.network,
 					Username:         tt.args.userName1,
 					HoldTimeInMonths: tt.args.holdTime,
@@ -95,6 +97,7 @@ func TestUpload(t *testing.T) {
 				tt.args.hash,
 				tt.args.uploadType,
 				UploadOptions{
+					FileName:         tt.args.fileName,
 					NetworkName:      tt.args.network,
 					Username:         tt.args.userName2,
 					HoldTimeInMonths: tt.args.holdTime,
@@ -109,6 +112,7 @@ func TestUpload(t *testing.T) {
 				tt.args.hash,
 				tt.args.uploadType,
 				UploadOptions{
+					FileName:         tt.args.fileName,
 					NetworkName:      tt.args.network,
 					Username:         tt.args.userName2,
 					HoldTimeInMonths: tt.args.holdTime,
