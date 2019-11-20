@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,7 @@ type Upload struct {
 	FileName           string `gorm:"type:varchar(255)"`
 	FileNameLowerCase  string `gorm:"type:varchar(255)"`
 	FileNameUpperCase  string `gorm:"type:varchar(255)"`
+	Extension          string `gorm:"type:varchar(255)"`
 }
 
 // UploadManager is used to manipulate upload objects in the database
@@ -77,6 +79,7 @@ func (um *UploadManager) NewUpload(contentHash, uploadType string, opts UploadOp
 		FileName:           opts.FileName,
 		FileNameLowerCase:  strings.ToLower(opts.FileName),
 		FileNameUpperCase:  strings.ToUpper(opts.FileName),
+		Extension:          filepath.Ext(opts.FileName),
 	}
 	if check := um.DB.Create(&upload); check.Error != nil {
 		return nil, check.Error

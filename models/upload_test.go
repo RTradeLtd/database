@@ -75,7 +75,7 @@ func TestUpload(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"User1-Hash1", args{"hash1", "fileName", "file", "public", 5, "user1", "user2", time.Now(), time.Now().Add(time.Hour * 24), false}, false},
+		{"User1-Hash1", args{"hash1", "fileName.png", "file", "public", 5, "user1", "user2", time.Now(), time.Now().Add(time.Hour * 24), false}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -102,6 +102,9 @@ func TestUpload(t *testing.T) {
 			if upload1.FileNameLowerCase != strings.ToLower(tt.args.fileName) {
 				t.Fatal("bad file name")
 			}
+			if upload1.Extension != ".png" {
+				t.Fatal("bad extension")
+			}
 			defer um.DB.Unscoped().Delete(upload1)
 			upload2, err := um.NewUpload(
 				tt.args.hash,
@@ -125,6 +128,9 @@ func TestUpload(t *testing.T) {
 			}
 			if upload2.FileNameLowerCase != strings.ToLower(tt.args.fileName) {
 				t.Fatal("bad file name")
+			}
+			if upload2.Extension != ".png" {
+				t.Fatal("bad extension")
 			}
 			defer um.DB.Unscoped().Delete(upload2)
 			if _, err := um.NewUpload(
