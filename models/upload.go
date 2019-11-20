@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/RTradeLtd/database/v2/utils"
@@ -29,7 +30,10 @@ type Upload struct {
 	HoldTimeInMonths   int64  `gorm:"type:integer;not null;"`
 	UserName           string `gorm:"type:varchar(255);not null;"`
 	GarbageCollectDate time.Time
-	Encrypted          bool `gorm:"type:bool"`
+	Encrypted          bool   `gorm:"type:bool"`
+	FileName           string `gorm:"type:varchar(255)"`
+	FileNameLowerCase  string `gorm:"type:varchar(255)"`
+	FileNameUpperCase  string `gorm:"type:varchar(255)"`
 }
 
 // UploadManager is used to manipulate upload objects in the database
@@ -46,6 +50,7 @@ func NewUploadManager(db *gorm.DB) *UploadManager {
 type UploadOptions struct {
 	NetworkName      string
 	Username         string
+	FileName         string
 	HoldTimeInMonths int64
 	Encrypted        bool
 }
@@ -69,6 +74,9 @@ func (um *UploadManager) NewUpload(contentHash, uploadType string, opts UploadOp
 		UserName:           opts.Username,
 		GarbageCollectDate: utils.CalculateGarbageCollectDate(holdInt),
 		Encrypted:          opts.Encrypted,
+		FileName:           opts.FileName,
+		FileNameLowerCase:  strings.ToLower(opts.FileName),
+		FileNameUpperCase:  strings.ToUpper(opts.FileName),
 	}
 	if check := um.DB.Create(&upload); check.Error != nil {
 		return nil, check.Error
