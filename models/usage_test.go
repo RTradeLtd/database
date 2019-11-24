@@ -141,21 +141,23 @@ func Test_ENS(t *testing.T) {
 		name    string
 		args    args
 		wantErr bool
-		create  bool
 	}{
-		{"Register-Success", args{"testuser1", Paid}, false, true},
-		{"Register-Fail-Already-Claimed", args{"testuser1", Paid}, true, false},
-		{"Regiser-Fail-Free-Tier", args{"testuser2", Free}, true, true},
+		{"Register-Success", args{"testuser1", Paid}, false},
+		{"Register-Fail-Already-Claimed", args{"testuser1", Paid}, true},
+		{"Regiser-Fail-Free-Tier", args{"testuser2", Free}, true},
 	}
+	b, err := bm.NewUsageEntry("testuser1", Paid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
+	b, err = bm.NewUsageEntry("testuser2", Free)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.create {
-				b, err := bm.NewUsageEntry(tt.args.user, tt.args.tier)
-				if err != nil {
-					t.Fatal(err)
-				}
-				defer bm.DB.Unscoped().Delete(b)
-			}
 			if err := bm.ClaimENSName(tt.args.user); (err != nil) != tt.wantErr {
 				t.Fatalf("ClaimENSName() err %v, wantErr %v", err, tt.wantErr)
 			}
