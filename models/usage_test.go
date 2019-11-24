@@ -171,6 +171,12 @@ func Test_ENS(t *testing.T) {
 			}
 		})
 	}
+	if err := bm.UnclaimENSName("testuser1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := bm.UnclaimENSName("testuser1"); err == nil {
+		t.Fatal("error expected")
+	}
 }
 
 func Test_Tier_Upgrade(t *testing.T) {

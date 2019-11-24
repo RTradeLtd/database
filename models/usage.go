@@ -390,3 +390,18 @@ func (bm *UsageManager) ClaimENSName(username string) error {
 	}).Error
 
 }
+
+// UnclaimENSName is used to unclaim a users ens name
+func (bm *UsageManager) UnclaimENSName(username string) error {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	if !b.ClaimedENSName {
+		return errors.New("name already unclaimed")
+	}
+	b.ClaimedENSName = false
+	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
+		"claimed_ens_name": b.ClaimedENSName,
+	}).Error
+}
