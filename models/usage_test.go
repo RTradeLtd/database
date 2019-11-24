@@ -131,6 +131,45 @@ func TestUsage(t *testing.T) {
 	}
 }
 
+func Test_ENS(t *testing.T) {
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	type args struct {
+		user string
+		tier DataUsageTier
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		create  bool
+	}{
+		{"Register-Success", args{"testuser1", Paid}, false, true},
+		{"Register-Fail-Already-Claimed", args{"testuser1", Paid}, true, false},
+		{"Regiser-Fail-Free-Tier", args{"testuser2", Free}, true, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.create {
+				b, err := bm.NewUsageEntry(tt.args.user, tt.args.tier)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer bm.DB.Unscoped().Delete(b)
+			}
+			if err := bm.ClaimENSName(tt.args.user); (err != nil) != tt.wantErr {
+				t.Fatalf("ClaimENSName() err %v, wantErr %v", err, tt.wantErr)
+			}
+			b, err := bm.FindByUserName(tt.args.user)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if b.ClaimedENSName != !tt.wantErr {
+				t.Fatal("ens claim is incorrect")
+			}
+		})
+	}
+}
+
 func Test_Tier_Upgrade(t *testing.T) {
 	var bm = NewUsageManager(newTestDB(t, &Usage{}))
 	b, err := bm.NewUsageEntry("testuser", Free)

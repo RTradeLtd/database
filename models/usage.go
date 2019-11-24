@@ -116,6 +116,8 @@ type Usage struct {
 	KeysAllowed int64 `gorm:"type:integer;default:0"`
 	// keeps track of the tier the user belongs to
 	Tier DataUsageTier `gorm:"type:varchar(255)"`
+	// indicates whether or not the user has claimed their ens name
+	ClaimedENSName bool `gorm:"type:boolean"`
 }
 
 // UsageManager is used to manage Usage models
@@ -368,4 +370,23 @@ func (bm *UsageManager) ResetCounts(username string) error {
 		"ip_ns_records_published": b.IPNSRecordsPublished,
 		"pub_sub_messages_sent":   b.PubSubMessagesSent,
 	}).Error
+}
+
+// ClaimENSName is used to claim the users ens name
+func (bm *UsageManager) ClaimENSName(username string) error {
+	b, err := bm.FindByUserName(username)
+	if err != nil {
+		return err
+	}
+	if b.Tier == Free {
+		return errors.New("free accounts unable to claim ens names")
+	}
+	if b.ClaimedENSName {
+		return errors.New("already claimed ens name")
+	}
+	b.ClaimedENSName = true
+	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
+		"claimed_ens_name": b.ClaimedENSName,
+	}).Error
+
 }
