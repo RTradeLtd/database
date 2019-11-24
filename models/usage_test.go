@@ -138,13 +138,14 @@ func Test_ENS(t *testing.T) {
 		tier DataUsageTier
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name      string
+		args      args
+		wantErr   bool
+		wantClaim bool
 	}{
-		{"Register-Success", args{"testuser1", Paid}, false},
-		{"Register-Fail-Already-Claimed", args{"testuser1", Paid}, true},
-		{"Regiser-Fail-Free-Tier", args{"testuser2", Free}, true},
+		{"Register-Success", args{"testuser1", Paid}, false, true},
+		{"Register-Fail-Already-Claimed", args{"testuser1", Paid}, true, true},
+		{"Regiser-Fail-Free-Tier", args{"testuser2", Free}, true, false},
 	}
 	b, err := bm.NewUsageEntry("testuser1", Paid)
 	if err != nil {
@@ -165,7 +166,7 @@ func Test_ENS(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if b.ClaimedENSName != !tt.wantErr {
+			if b.ClaimedENSName != tt.wantClaim {
 				t.Fatal("ens claim is incorrect")
 			}
 		})
