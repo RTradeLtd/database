@@ -131,6 +131,54 @@ func TestUsage(t *testing.T) {
 	}
 }
 
+func Test_ENS(t *testing.T) {
+	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	type args struct {
+		user string
+		tier DataUsageTier
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantErr   bool
+		wantClaim bool
+	}{
+		{"Register-Success", args{"testuser1", Paid}, false, true},
+		{"Register-Fail-Already-Claimed", args{"testuser1", Paid}, true, true},
+		{"Regiser-Fail-Free-Tier", args{"testuser2", Free}, true, false},
+	}
+	b, err := bm.NewUsageEntry("testuser1", Paid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
+	b, err = bm.NewUsageEntry("testuser2", Free)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bm.DB.Unscoped().Delete(b)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := bm.ClaimENSName(tt.args.user); (err != nil) != tt.wantErr {
+				t.Fatalf("ClaimENSName() err %v, wantErr %v", err, tt.wantErr)
+			}
+			b, err := bm.FindByUserName(tt.args.user)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if b.ClaimedENSName != tt.wantClaim {
+				t.Fatal("ens claim is incorrect")
+			}
+		})
+	}
+	if err := bm.UnclaimENSName("testuser1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := bm.UnclaimENSName("testuser1"); err == nil {
+		t.Fatal("error expected")
+	}
+}
+
 func Test_Tier_Upgrade(t *testing.T) {
 	var bm = NewUsageManager(newTestDB(t, &Usage{}))
 	b, err := bm.NewUsageEntry("testuser", Free)
