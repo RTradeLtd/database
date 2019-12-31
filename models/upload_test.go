@@ -69,6 +69,7 @@ func TestUpload(t *testing.T) {
 		gcd        time.Time
 		newGCD     time.Time
 		encrypted  bool
+		size       int64
 	}
 	tests := []struct {
 		name    string
@@ -87,6 +88,7 @@ func TestUpload(t *testing.T) {
 			time.Now(),
 			time.Now().Add(time.Hour * 24),
 			false,
+			100,
 		}, false, ".png"},
 		{"User1-Hash2", args{
 			"hash2",
@@ -99,6 +101,7 @@ func TestUpload(t *testing.T) {
 			time.Now(),
 			time.Now().Add(time.Hour * 24),
 			false,
+			100,
 		}, false, ""},
 	}
 	for _, tt := range tests {
@@ -118,6 +121,9 @@ func TestUpload(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer um.DB.Unscoped().Delete(upload1)
+			if upload1.Size != tt.args.size {
+				t.Fatal("bad file size")
+			}
 			if upload1.FileName != tt.args.fileName {
 				t.Fatal("bad file name")
 			}
