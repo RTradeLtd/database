@@ -56,6 +56,7 @@ func TestExtendGCD(t *testing.T) {
 		t.Fatal("failed to properly calculate difference")
 	}
 }
+
 func TestUpload(t *testing.T) {
 	var um = NewUploadManager(newTestDB(t, &Upload{}))
 	type args struct {
@@ -115,6 +116,7 @@ func TestUpload(t *testing.T) {
 					Username:         tt.args.userName1,
 					HoldTimeInMonths: tt.args.holdTime,
 					Encrypted:        tt.args.encrypted,
+					Size:             tt.args.size,
 				},
 			)
 			if err != nil {
@@ -145,6 +147,7 @@ func TestUpload(t *testing.T) {
 					Username:         tt.args.userName2,
 					HoldTimeInMonths: tt.args.holdTime,
 					Encrypted:        tt.args.encrypted,
+					Size:             tt.args.size,
 				},
 			)
 			if err != nil {
@@ -172,6 +175,7 @@ func TestUpload(t *testing.T) {
 					Username:         tt.args.userName2,
 					HoldTimeInMonths: tt.args.holdTime,
 					Encrypted:        tt.args.encrypted,
+					Size:             tt.args.size,
 				},
 			); err == nil {
 				t.Fatal("expected error")
