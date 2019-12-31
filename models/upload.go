@@ -36,6 +36,7 @@ type Upload struct {
 	FileNameLowerCase  string `gorm:"type:varchar(255)"`
 	FileNameUpperCase  string `gorm:"type:varchar(255)"`
 	Extension          string `gorm:"type:varchar(255)"`
+	Size               int64  `gorm:"type:integer"` // upload size in bytes
 }
 
 // UploadManager is used to manipulate upload objects in the database
@@ -54,6 +55,7 @@ type UploadOptions struct {
 	Username         string
 	FileName         string
 	HoldTimeInMonths int64
+	Size             int64
 	Encrypted        bool
 }
 
@@ -80,6 +82,7 @@ func (um *UploadManager) NewUpload(contentHash, uploadType string, opts UploadOp
 		FileNameLowerCase:  strings.ToLower(opts.FileName),
 		FileNameUpperCase:  strings.ToUpper(opts.FileName),
 		Extension:          filepath.Ext(opts.FileName),
+		Size:               opts.Size,
 	}
 	if check := um.DB.Create(&upload); check.Error != nil {
 		return nil, check.Error
