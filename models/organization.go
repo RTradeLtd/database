@@ -205,7 +205,7 @@ func (om *OrgManager) GetUserUploads(orgName, username string) ([]Upload, error)
 	var uploads []Upload
 	return uploads, om.DB.Model(Upload{}).Where(
 		"user_name = ?", username,
-	).Find(uploads).Error
+	).Find(&uploads).Error
 }
 
 // BillingReport contains a summary
