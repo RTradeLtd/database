@@ -203,10 +203,9 @@ func (om *OrgManager) GetUserUploads(orgName, username string) ([]Upload, error)
 		return nil, errors.New("user does not belong to organization")
 	}
 	var uploads []Upload
-	err = om.DB.Model(
-		Upload{},
-	).Where("user_name = ?", username).Find(uploads).Error
-	return uploads, err
+	return uploads, om.DB.Model(Upload{}).Where(
+		"user_name = ?", username,
+	).Find(uploads).Error
 }
 
 // BillingReport contains a summary
