@@ -105,6 +105,12 @@ func Test_BillingReport(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer om.DB.Unscoped().Delete(upload)
+	if err := NewUsageManager(om.DB).UpdateDataUsage(
+		"testorg-user1",
+		100,
+	); err != nil {
+		t.Fatal(err)
+	}
 	report, err := om.GenerateBillingReport("testorg", time.Now().AddDate(0, 0, -30), time.Now())
 	if err != nil {
 		t.Fatal(err)
@@ -114,6 +120,29 @@ func Test_BillingReport(t *testing.T) {
 	}
 	if report.Time == 0 {
 		t.Fatal("time should be non 0")
+	}
+	for _, items := range report.Items {
+		if items.User == "testorg-user1" {
+			if items.CurrentDataUsedBytes != 100 {
+				t.Fatal("bad storage used")
+			}
+		}
+	}
+	uplds, err := om.GetUserUploads("testorg", "testorg-user1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(uplds) != 1 {
+		t.Fatal("bad number of uploads")
+	}
+	if uplds[0].Hash != "testhash" {
+		t.Fatal("bad upload hash")
+	}
+	if _, err := om.GetUserUploads("testorg", "notarealorguser"); err == nil {
+		t.Fatal("error expected")
+	}
+	if _, err := om.GetUserUploads("notarealorganization", ""); err == nil {
+		t.Fatal("error expected")
 	}
 }
 
