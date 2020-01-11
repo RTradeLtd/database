@@ -224,8 +224,10 @@ type BillingReport struct {
 // BillingItem is an individual user's
 // billing history
 type BillingItem struct {
-	User                 string `json:"user"`
-	NumberOfUploads      int    `json:"number_of_uploads"`
+	User string `json:"user"`
+	// this returns the number of new uploads from within the query range
+	NumberOfNewUploads int `json:"number_of_new_uploads"`
+	// this is the total data used by the account
 	CurrentDataUsedBytes uint64 `json:"total_data_used_bytes"`
 }
 
@@ -264,7 +266,7 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 		}
 		report.Items = append(report.Items, BillingItem{
 			User:                 usr,
-			NumberOfUploads:      len(uploads),
+			NumberOfNewUploads:   len(uploads),
 			CurrentDataUsedBytes: usg.CurrentDataUsedBytes,
 		})
 	}
