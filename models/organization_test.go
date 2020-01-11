@@ -126,6 +126,9 @@ func Test_BillingReport(t *testing.T) {
 			if items.CurrentDataUsedBytes != 100 {
 				t.Fatal("bad storage used")
 			}
+			if items.NumberOfNewUploads != 1 {
+				t.Fatal("bad number of new uploads")
+			}
 		}
 	}
 	uplds, err := om.GetUserUploads("testorg", "testorg-user1")
