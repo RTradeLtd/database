@@ -186,6 +186,28 @@ func (om *OrgManager) GetTotalStorageUsed(name string) (uint64, error) {
 	return total, nil
 }
 
+// GetUserUploads is used to return all uploads from the organization user
+func (om *OrgManager) GetUserUploads(orgName, username string) ([]Upload, error) {
+	_, err := om.FindByName(orgName)
+	if err != nil {
+		return nil, err
+	}
+	usr, err := NewUserManager(om.DB).FindByUserName(username)
+	if err != nil {
+		return nil, err
+	}
+	// prevent returning upload results for users that are not part of the organization
+	// this is to prevent exploiting users from examining other peoples data, however
+	// we still need to implement an auth check in the caller.
+	if usr.Organization != orgName {
+		return nil, errors.New("user does not belong to organization")
+	}
+	var uploads []Upload
+	return uploads, om.DB.Model(Upload{}).Where(
+		"user_name = ?", username,
+	).Find(&uploads).Error
+}
+
 // BillingReport contains a summary
 // of an organizations entire active
 // user base in the last 30 days along with
@@ -202,8 +224,11 @@ type BillingReport struct {
 // BillingItem is an individual user's
 // billing history
 type BillingItem struct {
-	User    string   `json:"user"`
-	Uploads []Upload `json:"uploads"`
+	User string `json:"user"`
+	// this returns the number of new uploads from within the query range
+	NumberOfNewUploads int `json:"number_of_new_uploads"`
+	// this is the total data used by the account
+	CurrentDataUsedBytes uint64 `json:"total_data_used_bytes"`
 }
 
 // GenerateBillingReport is used to generate a billing report object for an
@@ -223,6 +248,10 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 			// dont fail and return, just continue onto the next user
 			continue
 		}
+		usg, err := NewUsageManager(om.DB).FindByUserName(usr)
+		if err != nil {
+			continue
+		}
 		var uploads []Upload
 		// find all uploads for the given user in the specified range
 		if err := om.DB.Model(Upload{}).Where(
@@ -236,8 +265,9 @@ func (om *OrgManager) GenerateBillingReport(name string, minTime, maxTime time.T
 			continue
 		}
 		report.Items = append(report.Items, BillingItem{
-			User:    usr,
-			Uploads: uploads,
+			User:                 usr,
+			NumberOfNewUploads:   len(uploads),
+			CurrentDataUsedBytes: usg.CurrentDataUsedBytes,
 		})
 	}
 	// finalize the report
