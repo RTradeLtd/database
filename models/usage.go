@@ -297,6 +297,11 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	b.Tier = tier
 	// set tier based restrictions
 	switch tier {
+	case Free:
+		b.MonthlyDataLimitBytes = FreeUploadLimit
+		b.KeysAllowed = FreeKeyLimit
+		b.PubSubMessagesAllowed = FreePubSubLimit
+		b.IPNSRecordsAllowed = FreeIPNSLimit
 	case Partner:
 		b.MonthlyDataLimitBytes = NonFreeUploadLimit
 		b.KeysAllowed = PartnerKeyLimit
