@@ -287,7 +287,6 @@ func (bm *UsageManager) ReduceKeyCount(username string, count int64) error {
 }
 
 // UpdateTier is used to update the Usage tier associated with an account
-// accounts may never be downgraded back to Free
 func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	b, err := bm.FindByUserName(username)
 	if err != nil {
@@ -297,6 +296,11 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	b.Tier = tier
 	// set tier based restrictions
 	switch tier {
+	case Free:
+		b.MonthlyDataLimitBytes = FreeUploadLimit
+		b.KeysAllowed = FreeKeyLimit
+		b.PubSubMessagesAllowed = FreePubSubLimit
+		b.IPNSRecordsAllowed = FreeIPNSLimit
 	case Partner:
 		b.MonthlyDataLimitBytes = NonFreeUploadLimit
 		b.KeysAllowed = PartnerKeyLimit
