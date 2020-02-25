@@ -73,12 +73,14 @@ func TestUpload(t *testing.T) {
 		newGCD     time.Time
 		encrypted  bool
 		size       int64
+		directory  bool
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 		wantExt string
+		wantDir bool
 	}{
 		{"User1-Hash1", args{
 			"hash1",
@@ -92,7 +94,8 @@ func TestUpload(t *testing.T) {
 			time.Now().Add(time.Hour * 24),
 			false,
 			100,
-		}, false, ".png"},
+			false,
+		}, false, ".png", false},
 		{"User1-Hash2", args{
 			"hash2",
 			"",
@@ -105,7 +108,8 @@ func TestUpload(t *testing.T) {
 			time.Now().Add(time.Hour * 24),
 			false,
 			100,
-		}, false, ""},
+			true,
+		}, false, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -119,6 +123,7 @@ func TestUpload(t *testing.T) {
 					HoldTimeInMonths: tt.args.holdTime,
 					Encrypted:        tt.args.encrypted,
 					Size:             tt.args.size,
+					Directory:        tt.args.directory,
 				},
 			)
 			if err != nil {
@@ -140,6 +145,9 @@ func TestUpload(t *testing.T) {
 			if upload1.Extension != tt.wantExt {
 				t.Fatal("bad extension")
 			}
+			if upload1.Directory != tt.wantDir {
+				t.Fatal("incorrect directory settings")
+			}
 			upload2, err := um.NewUpload(
 				tt.args.hash,
 				tt.args.uploadType,
@@ -150,6 +158,7 @@ func TestUpload(t *testing.T) {
 					HoldTimeInMonths: tt.args.holdTime,
 					Encrypted:        tt.args.encrypted,
 					Size:             tt.args.size,
+					Directory:        tt.args.directory,
 				},
 			)
 			if err != nil {
@@ -167,6 +176,9 @@ func TestUpload(t *testing.T) {
 			}
 			if upload2.Extension != tt.wantExt {
 				t.Fatal("bad extension")
+			}
+			if upload2.Directory != tt.wantDir {
+				t.Fatal("incorrect directory setting")
 			}
 			if _, err := um.NewUpload(
 				tt.args.hash,
