@@ -70,7 +70,7 @@ func TestUploadSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer um.DB.Unscoped().Delete(u1)
-	u2, err := um.NewUpload("hash1", "pin", UploadOptions{
+	u2, err := um.NewUpload("hash2", "pin", UploadOptions{
 		NetworkName: "public",
 		Username:    "testuser",
 		FileName:    "catpic1.jpg",
@@ -79,7 +79,7 @@ func TestUploadSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer um.DB.Unscoped().Delete(u2)
-	u3, err := um.NewUpload("hash1", "pin", UploadOptions{
+	u3, err := um.NewUpload("hash3", "pin", UploadOptions{
 		NetworkName: "public",
 		Username:    "testuser",
 		FileName:    "dogfood.jpg",
