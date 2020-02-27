@@ -189,7 +189,8 @@ func (um *UploadManager) ExtendGarbageCollectionPeriod(username, hash, network s
 
 // Search is used return all uploads matching the fileName
 //
-// To search for all uploads that start with the name `dog` provide the `dog%` query
+// To search for all uploads that start with the name `dog` provide the `dog%` query.
+// To search for all uplodas with the name `dog` somewhere in the filename, provide `%dog%`
 // All postgresql ruules for LIKE searches apply
 func (um *UploadManager) Search(username, fileName string) ([]Upload, error) {
 	var (
