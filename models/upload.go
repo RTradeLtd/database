@@ -197,5 +197,5 @@ func (um *UploadManager) Search(username, fileName string) ([]Upload, error) {
 		fileNameLower = strings.ToLower(fileName)
 		uploads       []Upload
 	)
-	return uploads, um.DB.Model(&Upload{}).Find(&uploads, "user_name = ? AND file_name_lower LIKE ?", fileNameLower).Error
+	return uploads, um.DB.Model(&Upload{}).Find(&uploads).Where("user_name = ? AND file_name_lower_case LIKE ?", fileNameLower).Error
 }
