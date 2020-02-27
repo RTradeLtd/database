@@ -82,7 +82,7 @@ func TestUploadSearch(t *testing.T) {
 	u3, err := um.NewUpload("hash3", "pin", UploadOptions{
 		NetworkName: "public",
 		Username:    "testuser",
-		FileName:    "dogfood.jpg",
+		FileName:    "dogfoodpic.jpg",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -93,7 +93,36 @@ func TestUploadSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(uploads) != 2 {
-		t.Fatal("bad number of uploads found")
+		t.Fatal("bad number of uploads")
+	}
+	for _, upload := range uploads {
+		switch upload.FileNameLowerCase {
+		case "dogpic1.jpg":
+			break
+		case "dogfoodpic.jpg":
+			break
+		default:
+			t.Fatal("bad upload")
+		}
+	}
+	uploads, err = um.Search("testuser", "%pic%")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(uploads) != 3 {
+		t.Fatal("bad number of uploads")
+	}
+	for _, upload := range uploads {
+		switch upload.FileNameLowerCase {
+		case "dogpic1.jpg":
+			break
+		case "dogfoodpic.jpg":
+			break
+		case "catpic1.jpg":
+			break
+		default:
+			t.Fatal("bad upload")
+		}
 	}
 }
 
