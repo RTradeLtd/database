@@ -362,6 +362,12 @@ func TestPinRM(t *testing.T) {
 			Username:         "pinrmtestaccount",
 			Size:             int64(datasize.KB.Bytes()), // 1 MB measure in kilobytes
 		}}, false},
+		{"-1", args{"testhash-1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()), // 1 MB measure in kilobytes
+		}}, false},
 	}
 	var uploadsToRemove []*Upload
 	defer func() {
@@ -374,6 +380,11 @@ func TestPinRM(t *testing.T) {
 			upld, err := um.NewUpload(tt.args.hash, tt.args.uploadType, tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("NewUpload() err %v, wantErr %v", err, tt.wantErr)
+			}
+			// override this uploads garbage collection date to ensure
+			// we have a test of the less than or equal to 24 hours
+			if upld != nil && tt.name == "-1" {
+				upld.GarbageCollectDate = time.Now().AddDate(0, 0, -1)
 			}
 			if upld != nil {
 				uploadsToRemove = append(uploadsToRemove, upld)

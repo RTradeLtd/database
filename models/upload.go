@@ -237,11 +237,17 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// 	* Refunds aren't a required feature of the platform as specified in Terms And Service
 	//  * The pin wont actually be removed from the underlying IPFS node for up to 4 weeks
 	//  * Prevent exploits to gain perpetual free credits due to rounding errors
+	//  * Time spent processing the data
+	// Whenever removing a pin, there is a 72 hour buffer, which means even
+	// if you pin data, and remove it immediately, you will still be charged 72 hours worth of data storage
+	// this helps mitigate abuse of the system by having to have our nodes be under sustained GC load as removing
+	// data from the system isn't a cheap process due to extreme inefficiencies with go-ipfs
 	var refundHours float64
-	if (daysRemaining - daysStored).Hours() > 24 {
+	// if less than or equal to 24 hours, don't refund anything
+	if (daysRemaining - daysStored).Hours() <= (time.Hour.Hours() * 48) {
 		refundHours = 0
 	} else {
-		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 24)
+		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 48)
 	}
 	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
 	if err != nil {
