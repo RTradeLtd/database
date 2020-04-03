@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/RTradeLtd/database/v2/utils"
+	"github.com/c2h5oh/datasize"
 	"github.com/jinzhu/gorm"
 )
 
@@ -185,4 +186,73 @@ func (um *UploadManager) ExtendGarbageCollectionPeriod(username, hash, network s
 	upload.GarbageCollectDate = upload.GarbageCollectDate.AddDate(0, holdTimeInMonths, 0)
 	// save the updated model
 	return um.DB.Model(upload).Update("garbage_collect_date", upload.GarbageCollectDate).Error
+}
+
+// PinRM allows removing a pin and refunding extra data costs
+func (um *UploadManager) PinRM(username, hash, network string) error {
+	upload, err := um.FindUploadByHashAndUserAndNetwork(username, hash, network)
+	if err != nil {
+		return err
+	}
+	// get the amount to refund the user
+	refundAmt, err := um.CalculateRefundCost(upload)
+	if err != nil {
+		return err
+	}
+	// will be greater than 0 if they are not free
+	// as only non-free users will need to have their credits refunded
+	if refundAmt > 0 {
+		// add credits to the user's balance
+		_, err = NewUserManager(um.DB).AddCredits(username, refundAmt)
+		if err != nil {
+			return err
+		}
+	}
+	// remove the upload and return an error if any
+	return um.DB.Delete(upload).Error
+}
+
+// CalculateRefundCost returns the amount of credits to refund the user
+// when they invoke pinRM
+func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
+	var (
+		startDate  time.Time
+		removeDate = upload.GarbageCollectDate
+	)
+	if upload.UpdatedAt == nilTime {
+		startDate = upload.CreatedAt
+	} else {
+		startDate = upload.UpdatedAt
+	}
+	now := time.Now()
+	// indicates the number of days we have stored this object for
+	daysStored := now.Sub(startDate)
+	// get the number of hours remaining so we can calculate a refund
+	daysRemaining := removeDate.Sub(now)
+	// total number of hours to refund minus 24 hour buffer
+	refundHours := (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 24)
+	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
+	if err != nil {
+		return 0, err
+	}
+	if usg.Tier == Free {
+		return 0, nil
+	}
+	// calculates a refund based on the size of the object
+	return calculateSizeRefund(refundHours, upload.Size, usg)
+}
+
+func calculateSizeRefund(refundHours float64, size int64, usage *Usage) (float64, error) {
+	gigabytesFloat := float64(datasize.GB.Bytes())
+	sizeFloat := float64(size)
+	// returns how many gigabytes this upload is
+	sizeGigabytesFloat := sizeFloat / gigabytesFloat
+	// if they are free tier, they don't incur data charges
+	if usage.Tier == Free || usage.Tier == WhiteLabeled {
+		return 0, nil
+	}
+	// return the cost of the refund calculated by:
+	// * number of hours remaining * gigabytes per hour = size cost multipliier
+	// * size of data multiplied by size cost multiplier
+	return sizeGigabytesFloat * (usage.Tier.PricePerGBPerHour() * refundHours), nil
 }

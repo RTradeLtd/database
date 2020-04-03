@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/c2h5oh/datasize"
 )
 
 func TestExtendGCD(t *testing.T) {
@@ -281,4 +283,158 @@ func TestUpload(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPinRM(t *testing.T) {
+	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	um.DB.AutoMigrate(Usage{})
+	um.DB.AutoMigrate(User{})
+	usr, err := NewUserManager(um.DB).NewUserAccount("pinrmtestaccount", "password123", "pinrmtest@example.org")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(usr)
+	if err := NewUsageManager(um.DB).UpdateTier("pinrmtestaccount", Paid); err != nil {
+		t.Fatal(err)
+	}
+	usg, err := NewUsageManager(um.DB).FindByUserName("pinrmtestaccount")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(usg)
+	if _, err = NewUserManager(um.DB).AddCredits("pinrmtestaccount", 1000); err != nil {
+		t.Fatal(err)
+	}
+	type args struct {
+		hash, uploadType string
+		opts             UploadOptions
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"25", args{"testhash25", "file", UploadOptions{
+			HoldTimeInMonths: 5,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.GB.Bytes()) * 2, // 100 mb
+		}}, false},
+		{"24", args{"testhash24", "file", UploadOptions{
+			HoldTimeInMonths: 25,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.GB.Bytes() * 1), // 100 mb
+		}}, false},
+		{"20", args{"testhash20", "file", UploadOptions{
+			HoldTimeInMonths: 20,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+		}}, false},
+		{"15", args{"testhash15", "file", UploadOptions{
+			HoldTimeInMonths: 15,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+		}}, false},
+		{"10", args{"testhash10", "file", UploadOptions{
+			HoldTimeInMonths: 10,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+		}}, false},
+		{"5", args{"testhash5", "file", UploadOptions{
+			HoldTimeInMonths: 5,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+		}}, false},
+		{"3", args{"testhash3", "file", UploadOptions{
+			HoldTimeInMonths: 3,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 250), // 250 mb
+		}}, false},
+		{"1", args{"testhash1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()), // 1 MB measure in kilobytes
+		}}, false},
+	}
+	var uploadsToRemove []*Upload
+	defer func() {
+		for _, upld := range uploadsToRemove {
+			um.DB.Unscoped().Delete(upld)
+		}
+	}()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			upld, err := um.NewUpload(tt.args.hash, tt.args.uploadType, tt.args.opts)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("NewUpload() err %v, wantErr %v", err, tt.wantErr)
+			}
+			if upld != nil {
+				uploadsToRemove = append(uploadsToRemove, upld)
+			}
+			upldCost, err := calculateUploadCost(
+				tt.args.opts.Username, tt.args.opts.HoldTimeInMonths, tt.args.opts.Size,
+				NewUsageManager(um.DB),
+			)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("upload cost calculation err %v, wantErr %v", err, tt.wantErr)
+			}
+			// get current credits
+			usr, err := NewUserManager(um.DB).FindByUserName(tt.args.opts.Username)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("username search failure err %v, wantErr %v", err, tt.wantErr)
+			}
+			// prevent panic for test failures but ensure we can continue
+			if usr == nil {
+				usr = &User{UserName: tt.args.opts.Username, Credits: 99999}
+			}
+			creditsBeforeRemove := usr.Credits
+			_, err = NewUserManager(um.DB).RemoveCredits(tt.args.opts.Username, upldCost)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("remove credits failur err %v, wantErr %v", err, tt.wantErr)
+			}
+			if err := um.PinRM(tt.args.opts.Username, tt.args.hash, "public"); (err != nil) != tt.wantErr {
+				t.Fatalf("PinRM err %v, wantErr %v", err, tt.wantErr)
+			}
+			// do not  continue processing if we are expecintg an error
+			if tt.wantErr {
+				return
+			}
+			// get credits after refund
+			// get current credits
+			usr, err = NewUserManager(um.DB).FindByUserName(tt.args.opts.Username)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("username search failure err %v, wantErr %v", err, tt.wantErr)
+			}
+			fmt.Println("before refund: ", creditsBeforeRemove)
+			fmt.Println("after refund: ", usr.Credits)
+			if usr.Credits > creditsBeforeRemove {
+				t.Fatal("too much credits refunded")
+			}
+		})
+	}
+}
+
+func calculateUploadCost(username string, holdTimeInMonths, size int64, um *UsageManager) (float64, error) {
+	gigabytesFloat := float64(datasize.GB.Bytes())
+	sizeFloat := float64(size)
+	sizeGigabytesFloat := sizeFloat / gigabytesFloat
+	// get the users usage model
+	usage, err := um.FindByUserName(username)
+	if err != nil {
+		return 0, err
+	}
+	// if they are free tier, they don't incur data charges
+	if usage.Tier == Free || usage.Tier == WhiteLabeled {
+		return 0, nil
+	}
+	// dynamic pricing based on their usage tier
+	costPerMonthFloat := sizeGigabytesFloat * usage.Tier.PricePerGB()
+	return costPerMonthFloat * float64(holdTimeInMonths), nil
 }

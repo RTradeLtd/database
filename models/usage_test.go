@@ -310,18 +310,22 @@ func Test_ReduceKeyCount(t *testing.T) {
 
 func TestPricePerGB(t *testing.T) {
 	tests := []struct {
-		tier       DataUsageTier
-		wantPrice  float64
-		wantString string
+		tier             DataUsageTier
+		wantPriceMonthly float64
+		wantPriceHourly  float64
+		wantString       string
 	}{
-		{Paid, 0.07, "paid"},
-		{Partner, 0.05, "partner"},
-		{WhiteLabeled, 0.05, "white-labeled"},
-		{Free, 9999, "free"},
+		{Paid, 0.07, 0.07 / 730, "paid"},
+		{Partner, 0.05, 0.05 / 730, "partner"},
+		{WhiteLabeled, 0.05, 0.05 / 730, "white-labeled"},
+		{Free, 9999, 9999, "free"},
 	}
 	for _, tt := range tests {
-		if tt.tier.PricePerGB() != tt.wantPrice {
+		if tt.tier.PricePerGB() != tt.wantPriceMonthly {
 			t.Fatal("bad PricePerGB returned")
+		}
+		if tt.tier.PricePerGBPerHour() != tt.wantPriceHourly {
+			t.Fatal("bad hourly price returned")
 		}
 		if tt.tier.String() != tt.wantString {
 			t.Fatal("bad string returned")
