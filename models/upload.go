@@ -37,7 +37,7 @@ type Upload struct {
 	FileNameLowerCase  string `gorm:"type:varchar(255)"`
 	FileNameUpperCase  string `gorm:"type:varchar(255)"`
 	Extension          string `gorm:"type:varchar(255)"`
-	Size               int64  `gorm:"type:integer"` // upload size in bytes
+	Size               int64  `gorm:"type:bigint"` // upload size in bytes
 	Directory          bool   `gorm:"type:bool;default:false"`
 }
 
