@@ -237,7 +237,12 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// 	* Refunds aren't a required feature of the platform as specified in Terms And Service
 	//  * The pin wont actually be removed from the underlying IPFS node for up to 4 weeks
 	//  * Prevent exploits to gain perpetual free credits due to rounding errors
-	refundHours := (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 24)
+	var refundHours float64
+	if (daysRemaining - daysStored).Hours() > 24 {
+		refundHours = 0
+	} else {
+		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 24)
+	}
 	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
 	if err != nil {
 		return 0, err
