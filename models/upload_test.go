@@ -315,58 +315,64 @@ func TestPinRM(t *testing.T) {
 		wantErr bool
 	}{
 		{"25", args{"testhash25", "file", UploadOptions{
-			HoldTimeInMonths: 5,
-			NetworkName:      "public",
-			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.GB.Bytes()) * 2, // 100 mb
-		}}, false},
-		{"24", args{"testhash24", "file", UploadOptions{
 			HoldTimeInMonths: 25,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.GB.Bytes() * 1), // 100 mb
+			Size:             int64(datasize.GB.Bytes()) * 2,
+		}}, false},
+		{"24", args{"testhash24", "file", UploadOptions{
+			HoldTimeInMonths: 24,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.GB.Bytes() * 1),
 		}}, false},
 		{"20", args{"testhash20", "file", UploadOptions{
 			HoldTimeInMonths: 20,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+			Size:             int64(datasize.MB.Bytes() * 100),
 		}}, false},
 		{"15", args{"testhash15", "file", UploadOptions{
 			HoldTimeInMonths: 15,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+			Size:             int64(datasize.MB.Bytes() * 100),
 		}}, false},
 		{"10", args{"testhash10", "file", UploadOptions{
 			HoldTimeInMonths: 10,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+			Size:             int64(datasize.MB.Bytes() * 100),
 		}}, false},
 		{"5", args{"testhash5", "file", UploadOptions{
 			HoldTimeInMonths: 5,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.MB.Bytes() * 100), // 100 mb
+			Size:             int64(datasize.MB.Bytes() * 100),
 		}}, false},
 		{"3", args{"testhash3", "file", UploadOptions{
 			HoldTimeInMonths: 3,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.MB.Bytes() * 250), // 250 mb
+			Size:             int64(datasize.MB.Bytes() * 250),
 		}}, false},
 		{"1", args{"testhash1", "file", UploadOptions{
 			HoldTimeInMonths: 1,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.KB.Bytes()), // 1 MB measure in kilobytes
+			Size:             int64(datasize.KB.Bytes()),
 		}}, false},
 		{"-1", args{"testhash-1", "file", UploadOptions{
 			HoldTimeInMonths: 1,
 			NetworkName:      "public",
 			Username:         "pinrmtestaccount",
-			Size:             int64(datasize.KB.Bytes()), // 1 MB measure in kilobytes
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		{"-2", args{"testhash-2", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
 		}}, false},
 	}
 	var uploadsToRemove []*Upload
@@ -385,6 +391,9 @@ func TestPinRM(t *testing.T) {
 			// we have a test of the less than or equal to 24 hours
 			if upld != nil && tt.name == "-1" {
 				upld.GarbageCollectDate = time.Now().AddDate(0, 0, -1)
+			}
+			if upld != nil && tt.name == "-2" {
+				upld.GarbageCollectDate = time.Now().AddDate(0, 0, -2)
 			}
 			if upld != nil {
 				uploadsToRemove = append(uploadsToRemove, upld)

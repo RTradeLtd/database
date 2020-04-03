@@ -228,8 +228,8 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// indicates the number of days we have stored this object for
 	daysStored := now.Sub(startDate)
 	// get the number of hours remaining so we can calculate a refund
-	// make sure to truncate it down 24 hours
-	daysRemaining := removeDate.Sub(now).Truncate(time.Hour * 24)
+	// shave of 72 hour buffer from refund amount
+	daysRemaining := removeDate.AddDate(0, 0, -3).Sub(now).Truncate(time.Hour)
 	// total number of hours to refund minus an additional 24 hour buffer
 	// helps to ensure that on all edge cases we dont refund the user extra
 	// but they will be refunded slightly less, however this is deemed acceptable
@@ -243,11 +243,11 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// this helps mitigate abuse of the system by having to have our nodes be under sustained GC load as removing
 	// data from the system isn't a cheap process due to extreme inefficiencies with go-ipfs
 	var refundHours float64
-	// if less than or equal to 24 hours, don't refund anything
-	if (daysRemaining - daysStored).Hours() <= (time.Hour.Hours() * 48) {
+	// if less than or equal to 72 hours, don't refund anything
+	if (daysRemaining - daysStored).Hours() <= (time.Hour.Hours() * 72) {
 		refundHours = 0
 	} else {
-		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 48)
+		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 72)
 	}
 	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
 	if err != nil {
