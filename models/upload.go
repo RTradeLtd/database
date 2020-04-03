@@ -228,8 +228,15 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// indicates the number of days we have stored this object for
 	daysStored := now.Sub(startDate)
 	// get the number of hours remaining so we can calculate a refund
-	daysRemaining := removeDate.Sub(now)
-	// total number of hours to refund minus 24 hour buffer
+	// make sure to truncate it down 24 hours
+	daysRemaining := removeDate.Sub(now).Truncate(time.Hour * 24)
+	// total number of hours to refund minus an additional 24 hour buffer
+	// helps to ensure that on all edge cases we dont refund the user extra
+	// but they will be refunded slightly less, however this is deemed acceptable
+	// for a few reasons:
+	// 	* Refunds aren't a required feature of the platform as specified in Terms And Service
+	//  * The pin wont actually be removed from the underlying IPFS node for up to 4 weeks
+	//  * Prevent exploits to gain perpetual free credits due to rounding errors
 	refundHours := (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 24)
 	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
 	if err != nil {
