@@ -224,7 +224,6 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Printf("%+v\n", upload)
 	if usg.Tier == Free {
 		return 0, nil
 	}
