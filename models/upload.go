@@ -188,8 +188,8 @@ func (um *UploadManager) ExtendGarbageCollectionPeriod(username, hash, network s
 	return um.DB.Model(upload).Update("garbage_collect_date", upload.GarbageCollectDate).Error
 }
 
-// PinRM allows removing a pin and refunding extra data costs
-func (um *UploadManager) PinRM(username, hash, network string) error {
+// RemovePin allows removing a pin and refunding extra data costs
+func (um *UploadManager) RemovePin(username, hash, network string) error {
 	upload, err := um.FindUploadByHashAndUserAndNetwork(username, hash, network)
 	if err != nil {
 		return err
@@ -267,14 +267,14 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 }
 
 func calculateSizeRefund(refundHours float64, size int64, usage *Usage) (float64, error) {
-	gigabytesFloat := float64(datasize.GB.Bytes())
-	sizeFloat := float64(size)
-	// returns how many gigabytes this upload is
-	sizeGigabytesFloat := sizeFloat / gigabytesFloat
 	// if they are free tier, they don't incur data charges
 	if usage.Tier == Free || usage.Tier == WhiteLabeled {
 		return 0, nil
 	}
+	gigabytesFloat := float64(datasize.GB.Bytes())
+	sizeFloat := float64(size)
+	// returns how many gigabytes this upload is
+	sizeGigabytesFloat := sizeFloat / gigabytesFloat
 	// return the cost of the refund calculated by:
 	// * number of hours remaining * gigabytes per hour = size cost multipliier
 	// * size of data multiplied by size cost multiplier

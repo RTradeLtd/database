@@ -442,6 +442,12 @@ func TestPinRM(t *testing.T) {
 			Username:         "pinrmtestaccount",
 			Size:             int64(datasize.KB.Bytes()),
 		}}, false},
+		{"-0", args{"testhash-1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "pinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
 		{"-1", args{"testhash-1", "file", UploadOptions{
 			HoldTimeInMonths: 1,
 			NetworkName:      "public",
@@ -503,6 +509,12 @@ func TestPinRM(t *testing.T) {
 			Username:         "freepinrmtestaccount",
 			Size:             int64(datasize.KB.Bytes()),
 		}}, false},
+		{"-0-free", args{"testhash-1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
 		{"-1-free", args{"testhash-1", "file", UploadOptions{
 			HoldTimeInMonths: 1,
 			NetworkName:      "public",
@@ -536,13 +548,25 @@ func TestPinRM(t *testing.T) {
 			); (err != nil) != tt.wantErr {
 				t.Fatalf("UpdateDataUsage() err %v, wantErr %v", err, tt.wantErr)
 			}
+			if upld != nil && strings.Contains(tt.name, "-0") {
+				upld.GarbageCollectDate = time.Now()
+				if err := um.DB.Save(upld).Error; err != nil {
+					t.Fatal(err)
+				}
+			}
 			// override this uploads garbage collection date to ensure
 			// we have a test of the less than or equal to 24 hours
-			if upld != nil && tt.name == "-1" {
+			if upld != nil && strings.Contains(tt.name, "-1") {
 				upld.GarbageCollectDate = time.Now().AddDate(0, 0, -1)
+				if err := um.DB.Save(upld).Error; err != nil {
+					t.Fatal(err)
+				}
 			}
-			if upld != nil && tt.name == "-2" {
+			if upld != nil && strings.Contains(tt.name, "-2") {
 				upld.GarbageCollectDate = time.Now().AddDate(0, 0, -2)
+				if err := um.DB.Save(upld).Error; err != nil {
+					t.Fatal(err)
+				}
 			}
 			if upld != nil {
 				uploadsToRemove = append(uploadsToRemove, upld)
@@ -572,8 +596,8 @@ func TestPinRM(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("FindByUsername err %v, wantErr %v", err, tt.wantErr)
 			}
-			if err := um.PinRM(tt.args.opts.Username, tt.args.hash, "public"); (err != nil) != tt.wantErr {
-				t.Fatalf("PinRM err %v, wantErr %v", err, tt.wantErr)
+			if err := um.RemovePin(tt.args.opts.Username, tt.args.hash, "public"); (err != nil) != tt.wantErr {
+				t.Fatalf("RemovePin err %v, wantErr %v", err, tt.wantErr)
 			}
 			// do not  continue processing if we are expecintg an error
 			if tt.wantErr {
