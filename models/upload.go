@@ -194,9 +194,13 @@ func (um *UploadManager) PinRM(username, hash, network string) error {
 	if err != nil {
 		return err
 	}
-	// get the amount to refund the user
+	// get the amount to refund the user before removing the upload
 	refundAmt, err := um.CalculateRefundCost(upload)
 	if err != nil {
+		return err
+	}
+	// remove upload returning if this fails
+	if err := um.DB.Delete(upload).Error; err != nil {
 		return err
 	}
 	// will be greater than 0 if they are not free
@@ -208,13 +212,22 @@ func (um *UploadManager) PinRM(username, hash, network string) error {
 			return err
 		}
 	}
-	// remove the upload and return an error if any
-	return um.DB.Delete(upload).Error
+	// reduce user's storage consumption
+	return NewUsageManager(um.DB).ReduceDataUsage(username, uint64(upload.Size))
 }
 
 // CalculateRefundCost returns the amount of credits to refund the user
 // when they invoke pinRM
 func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
+	// do this first to not waste time processing needlessly
+	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Printf("%+v\n", upload)
+	if usg.Tier == Free {
+		return 0, nil
+	}
 	var (
 		startDate  time.Time
 		removeDate = upload.GarbageCollectDate
@@ -248,13 +261,6 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 		refundHours = 0
 	} else {
 		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 72)
-	}
-	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
-	if err != nil {
-		return 0, err
-	}
-	if usg.Tier == Free {
-		return 0, nil
 	}
 	// calculates a refund based on the size of the object
 	return calculateSizeRefund(refundHours, upload.Size, usg)

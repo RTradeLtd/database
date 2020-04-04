@@ -294,6 +294,11 @@ func TestPinRM(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer um.DB.Unscoped().Delete(usr)
+	usr2, err := NewUserManager(um.DB).NewUserAccount("freepinrmtestaccount", "password123", "freepinrmtestaccount@example.org")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(usr2)
 	if err := NewUsageManager(um.DB).UpdateTier("pinrmtestaccount", Paid); err != nil {
 		t.Fatal(err)
 	}
@@ -302,6 +307,11 @@ func TestPinRM(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer um.DB.Unscoped().Delete(usg)
+	usg2, err := NewUsageManager(um.DB).FindByUserName("freepinrmtestaccount")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(usg2)
 	if _, err = NewUserManager(um.DB).AddCredits("pinrmtestaccount", 1000); err != nil {
 		t.Fatal(err)
 	}
@@ -374,6 +384,67 @@ func TestPinRM(t *testing.T) {
 			Username:         "pinrmtestaccount",
 			Size:             int64(datasize.KB.Bytes()),
 		}}, false},
+		// end paid account start free account test
+		{"25-free", args{"testhash25", "file", UploadOptions{
+			HoldTimeInMonths: 25,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.GB.Bytes()) * 2,
+		}}, false},
+		{"24-free", args{"testhash24", "file", UploadOptions{
+			HoldTimeInMonths: 24,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.GB.Bytes() * 1),
+		}}, false},
+		{"20-free", args{"testhash20", "file", UploadOptions{
+			HoldTimeInMonths: 20,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"15-free", args{"testhash15", "file", UploadOptions{
+			HoldTimeInMonths: 15,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"10-free", args{"testhash10", "file", UploadOptions{
+			HoldTimeInMonths: 10,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"5-free", args{"testhash5", "file", UploadOptions{
+			HoldTimeInMonths: 5,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"3-free", args{"testhash3", "file", UploadOptions{
+			HoldTimeInMonths: 3,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 250),
+		}}, false},
+		{"1-free", args{"testhash1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		{"-1-free", args{"testhash-1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		{"-2-free", args{"testhash-2", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
 	}
 	var uploadsToRemove []*Upload
 	defer func() {
@@ -386,6 +457,14 @@ func TestPinRM(t *testing.T) {
 			upld, err := um.NewUpload(tt.args.hash, tt.args.uploadType, tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("NewUpload() err %v, wantErr %v", err, tt.wantErr)
+			}
+			if err := NewUsageManager(
+				um.DB,
+			).UpdateDataUsage(
+				tt.args.opts.Username,
+				uint64(tt.args.opts.Size),
+			); (err != nil) != tt.wantErr {
+				t.Fatalf("UpdateDataUsage() err %v, wantErr %v", err, tt.wantErr)
 			}
 			// override this uploads garbage collection date to ensure
 			// we have a test of the less than or equal to 24 hours
@@ -419,12 +498,28 @@ func TestPinRM(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("remove credits failur err %v, wantErr %v", err, tt.wantErr)
 			}
+			usg, err := NewUsageManager(um.DB).FindByUserName(tt.args.opts.Username)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("FindByUsername err %v, wantErr %v", err, tt.wantErr)
+			}
 			if err := um.PinRM(tt.args.opts.Username, tt.args.hash, "public"); (err != nil) != tt.wantErr {
 				t.Fatalf("PinRM err %v, wantErr %v", err, tt.wantErr)
 			}
 			// do not  continue processing if we are expecintg an error
 			if tt.wantErr {
 				return
+			}
+			prevDataUsed := usg.CurrentDataUsedBytes
+			usg, err = NewUsageManager(um.DB).FindByUserName(tt.args.opts.Username)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("FindByUsername err %v, wantErr %v", err, tt.wantErr)
+			}
+			current := usg.CurrentDataUsedBytes
+			if current+uint64(tt.args.opts.Size) != prevDataUsed {
+				t.Fatal("failed to properly reduce data usage")
+			}
+			if _, err := um.FindUploadByHashAndUserAndNetwork(tt.args.opts.Username, tt.args.hash, "public"); err == nil {
+				t.Fatal("shouldn't have found an upload")
 			}
 			// get credits after refund
 			// get current credits
