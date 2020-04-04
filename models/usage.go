@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"time"
 
 	"github.com/c2h5oh/datasize"
 
@@ -49,14 +48,6 @@ func (d DataUsageTier) PricePerGBPerHour() float64 {
 		// free tier users will never encounter a charge call
 		return 9999
 	}
-}
-
-func beginningOfMonth(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
-}
-
-func endOfMonth(t time.Time) time.Time {
-	return beginningOfMonth(t).AddDate(0, 1, 0).Add(-time.Second)
 }
 
 var (
