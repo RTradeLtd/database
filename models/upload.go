@@ -243,14 +243,15 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// get the number of hours remaining so we can calculate a refund
 	// shave of 72 hour buffer from refund amount
 	daysRemaining := removeDate.AddDate(0, 0, -3).Sub(now).Truncate(time.Hour)
-	// total number of hours to refund minus an additional 24 hour buffer
+	// total number of hours to refund minus an additional 72 hour buffer
 	// helps to ensure that on all edge cases we dont refund the user extra
-	// but they will be refunded slightly less, however this is deemed acceptable
-	// for a few reasons:
+	// but they will be refunded slightly less, however this is deemed
+	// acceptable, and is intentional for a few reasons:
 	// 	* Refunds aren't a required feature of the platform as specified in Terms And Service
 	//  * The pin wont actually be removed from the underlying IPFS node for up to 4 weeks
 	//  * Prevent exploits to gain perpetual free credits due to rounding errors
-	//  * Time spent processing the data
+	//  * Time spent processing the data as creating many pins and then removing them isn't cheap
+	//	* Unpinning data requires bringing nodes offline and needs to be scheduled, thus this increases maintenance duties
 	// Whenever removing a pin, there is a 72 hour buffer, which means even
 	// if you pin data, and remove it immediately, you will still be charged 72 hours worth of data storage
 	// this helps mitigate abuse of the system by having to have our nodes be under sustained GC load as removing
