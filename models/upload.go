@@ -186,3 +186,16 @@ func (um *UploadManager) ExtendGarbageCollectionPeriod(username, hash, network s
 	// save the updated model
 	return um.DB.Model(upload).Update("garbage_collect_date", upload.GarbageCollectDate).Error
 }
+
+// Search is used return all uploads matching the fileName
+//
+// To search for all uploads that start with the name `dog` provide the `dog%` query.
+// To search for all uplodas with the name `dog` somewhere in the filename, provide `%dog%`
+// All postgresql ruules for LIKE searches apply
+func (um *UploadManager) Search(username, fileName string) ([]Upload, error) {
+	var (
+		fileNameLower = strings.ToLower(fileName)
+		uploads       []Upload
+	)
+	return uploads, um.DB.Model(&Upload{}).Find(&uploads, "user_name = ? AND file_name_lower_case LIKE ?", username, fileNameLower).Error
+}
