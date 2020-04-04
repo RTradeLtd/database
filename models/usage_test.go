@@ -23,7 +23,7 @@ func TestUsage(t *testing.T) {
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
 		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
 		{"WhiteLabelled", args{"whitelabelled", WhiteLabeled, datasize.GB.Bytes() * 100}, false},
-		{"Fail", args{"fail", Free, 1}, true},
+		{"Fail", args{"fail", DataUsageTier("fail"), 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -37,7 +37,10 @@ func TestUsage(t *testing.T) {
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("NewUsage() err = %v, wantErr %v", err, tt.wantErr)
 				}
-				defer bm.DB.Unscoped().Delete(usage)
+				// prevent panics
+				if err == nil {
+					defer bm.DB.Unscoped().Delete(usage)
+				}
 			}
 			// test find by username
 			if _, err := bm.FindByUserName(tt.args.username); (err != nil) != tt.wantErr {
