@@ -61,6 +61,73 @@ func TestExtendGCD(t *testing.T) {
 	}
 }
 
+func TestUploadSearch(t *testing.T) {
+	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	u1, err := um.NewUpload("hash1", "pin", UploadOptions{
+		NetworkName: "public",
+		Username:    "testuser",
+		FileName:    "dogpic1.jpg",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(u1)
+	u2, err := um.NewUpload("hash2", "pin", UploadOptions{
+		NetworkName: "public",
+		Username:    "testuser",
+		FileName:    "catpic1.jpg",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(u2)
+	u3, err := um.NewUpload("hash3", "pin", UploadOptions{
+		NetworkName: "public",
+		Username:    "testuser",
+		FileName:    "dogfoodpic.jpg",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(u3)
+	uploads, err := um.Search("testuser", "dog%")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(uploads) != 2 {
+		t.Fatal("bad number of uploads")
+	}
+	for _, upload := range uploads {
+		switch upload.FileNameLowerCase {
+		case "dogpic1.jpg":
+			break
+		case "dogfoodpic.jpg":
+			break
+		default:
+			t.Fatal("bad upload")
+		}
+	}
+	uploads, err = um.Search("testuser", "%pic%")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(uploads) != 3 {
+		t.Fatal("bad number of uploads")
+	}
+	for _, upload := range uploads {
+		switch upload.FileNameLowerCase {
+		case "dogpic1.jpg":
+			break
+		case "dogfoodpic.jpg":
+			break
+		case "catpic1.jpg":
+			break
+		default:
+			t.Fatal("bad upload")
+		}
+	}
+}
+
 func TestUpload(t *testing.T) {
 	var um = NewUploadManager(newTestDB(t, &Upload{}))
 	type args struct {
