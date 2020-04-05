@@ -195,7 +195,7 @@ func (um *UploadManager) RemovePin(username, hash, network string) error {
 		return err
 	}
 	// get the amount to refund the user before removing the upload
-	refundAmt, err := um.CalculateRefundCost(upload)
+	refundAmt, err := um.CalculateRefundCost(upload, time.Now().UTC())
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (um *UploadManager) RemovePin(username, hash, network string) error {
 
 // CalculateRefundCost returns the amount of credits to refund the user
 // when they invoke pinRM
-func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
+func (um *UploadManager) CalculateRefundCost(upload *Upload, now time.Time) (float64, error) {
 	// do this first to not waste time processing needlessly
 	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
 	if err != nil {
@@ -227,21 +227,15 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	if usg.Tier == Free {
 		return 0, nil
 	}
-	var (
-		startDate  time.Time
-		removeDate = upload.GarbageCollectDate.UTC()
-	)
-	if upload.UpdatedAt == nilTime {
-		startDate = upload.CreatedAt.UTC()
-	} else {
-		startDate = upload.UpdatedAt.UTC()
+	// prevent any weird errors such as an empty time object
+	// being used for credit exploitation
+	if now == nilTime {
+		return 0, errors.New("should not be empty time")
 	}
-	now := time.Now().UTC()
-	// indicates the number of days we have stored this object for
-	daysStored := now.Sub(startDate)
-	// get the number of hours remaining so we can calculate a refund
-	// shave of 72 hour buffer from refund amount
-	daysRemaining := removeDate.AddDate(0, 0, -3).UTC().Sub(now).Truncate(time.Hour)
+	removeDate := upload.GarbageCollectDate.UTC()
+	// indicates the hours remaining until garbage collection should occur
+	// we shave off 72 hours to account for the buffer time
+	hoursRemaining := removeDate.AddDate(0, 0, -3).UTC().Sub(now).Truncate(time.Hour).Hours()
 	// total number of hours to refund minus an additional 72 hour buffer
 	// helps to ensure that on all edge cases we dont refund the user extra
 	// but they will be refunded slightly less, however this is deemed
@@ -257,10 +251,10 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	// data from the system isn't a cheap process due to extreme inefficiencies with go-ipfs
 	var refundHours float64
 	// if less than or equal to 72 hours, don't refund anything
-	if (daysRemaining - daysStored).Hours() <= (time.Hour.Hours() * 72) {
+	if hoursRemaining <= (time.Hour.Hours() * 72) {
 		refundHours = 0
 	} else {
-		refundHours = (daysRemaining - daysStored).Hours() - (time.Hour.Hours() * 72)
+		refundHours = hoursRemaining - (time.Hour.Hours() * 72)
 	}
 	// calculates a refund based on the size of the object
 	return calculateSizeRefund(refundHours, upload.Size, usg)

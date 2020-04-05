@@ -723,6 +723,192 @@ func TestPinRM(t *testing.T) {
 	}
 }
 
+func TestCalculateRefundCost(t *testing.T) {
+	db := newTestDB(t, &Upload{})
+	t.Cleanup(func() {
+		// clear all uploads first
+		var uploads []Upload
+		if err := db.Model(&Upload{}).Find(&uploads).Error; err != nil {
+			t.Fatal(err)
+		}
+		for _, upload := range uploads {
+			db.Unscoped().Delete(upload)
+		}
+		var users []User
+		if err := db.Model(&User{}).Find(&users).Error; err != nil {
+			t.Fatal(err)
+		}
+		for _, user := range users {
+			db.Unscoped().Delete(user)
+		}
+		var usages []Usage
+		if err := db.Model(&Usage{}).Find(&usages).Error; err != nil {
+			t.Fatal(err)
+		}
+		for _, usage := range usages {
+			db.Unscoped().Delete(usage)
+		}
+		db.Close()
+	})
+	var um = NewUploadManager(db)
+	um.DB.AutoMigrate(Usage{})
+	um.DB.AutoMigrate(User{})
+	usrm := NewUserManager(um.DB)
+	usgm := NewUsageManager(um.DB)
+	_, err := usrm.NewUserAccount("refundcost1", "password123", "testuser1refund@example.org")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := usgm.UpdateTier("refundcost1", Paid); err != nil {
+		t.Fatal(err)
+	}
+	type args struct {
+		now              time.Time
+		hash, uploadType string
+		opts             UploadOptions
+	}
+	tests := []struct {
+		name           string
+		args           args
+		wantErr        bool
+		wantZeroRefund bool
+	}{
+		{"CurrentDate-1Month", args{
+			time.Now(),
+			"testhash1", "file", UploadOptions{
+				HoldTimeInMonths: 1,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, false},
+		{"2Months-1Month", args{
+			time.Now().AddDate(0, 2, 0).UTC(),
+			"testhash2", "file", UploadOptions{
+				HoldTimeInMonths: 1,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"2Months-2Month", args{
+			time.Now().AddDate(0, 2, 0).UTC(),
+			"testhash3", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"1.5Months-2Month", args{
+			time.Now().AddDate(0, 0, 45).UTC(),
+			"testhash4", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, false},
+		// start buffer tests, all of these should return 0
+		{"59Days-2Month", args{ // this handles the buffer
+			time.Now().AddDate(0, 0, 59).UTC(),
+			"testhash5", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"58Days-2Month", args{ // this handles the buffer
+			time.Now().AddDate(0, 0, 58).UTC(),
+			"testhash6", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"57Days-2Month", args{ // this handles the buffer
+			time.Now().AddDate(0, 0, 57).UTC(),
+			"testhash7", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"56Days-2Month", args{ // this handles the buffer
+			time.Now().AddDate(0, 0, 56).UTC(),
+			"testhash8", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"55Days-2Month", args{ // this handles the buffer
+			time.Now().AddDate(0, 0, 55).UTC(),
+			"testhash9", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"54Days-2Month", args{ // this handles the buffer
+			time.Now().AddDate(0, 0, 54).UTC(),
+			"testhash10", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, false},
+		{"3Months-2Month", args{
+			time.Now().AddDate(0, 3, 0).UTC(),
+			"testhash11", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		{"EmptyTime-2Month", args{
+			nilTime,
+			"testhash12", "file", UploadOptions{
+				HoldTimeInMonths: 2,
+				NetworkName:      "public",
+				Username:         "refundcost1",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, true, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fmt.Println(tt.args.now)
+			upload, err := um.NewUpload(tt.args.hash, tt.args.uploadType, tt.args.opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fmt.Printf("%+v\n", upload)
+			cost, err := um.CalculateRefundCost(upload, tt.args.now)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("CalculateRefundCost() err %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.wantErr {
+				return
+			}
+			fmt.Println("refunded credits: ", cost)
+			if cost > 0 && tt.wantZeroRefund {
+				t.Fatal("this refund should return 0 credits")
+			}
+			if cost == 0 && !tt.wantZeroRefund {
+				t.Fatal("got 0 refunded credits but wanted 0")
+			}
+		})
+	}
+}
+
 func calculateUploadCost(username string, holdTimeInMonths, size int64, um *UsageManager) (float64, error) {
 	gigabytesFloat := float64(datasize.GB.Bytes())
 	sizeFloat := float64(size)
