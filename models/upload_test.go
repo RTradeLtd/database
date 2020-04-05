@@ -382,6 +382,9 @@ func TestPinRM(t *testing.T) {
 	if err := NewUsageManager(um.DB).UpdateTier("pinrmtestaccount", Paid); err != nil {
 		t.Fatal(err)
 	}
+	if err := NewUsageManager(um.DB).UpdateTier("partnerrmtestaccount", Partner); err != nil {
+		t.Fatal(err)
+	}
 	if err := NewUsageManager(um.DB).UpdateTier("freepinrmtestaccount", Free); err != nil {
 		t.Fatal(err)
 	}
