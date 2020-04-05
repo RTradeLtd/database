@@ -229,19 +229,19 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload) (float64, error) {
 	}
 	var (
 		startDate  time.Time
-		removeDate = upload.GarbageCollectDate
+		removeDate = upload.GarbageCollectDate.UTC()
 	)
 	if upload.UpdatedAt == nilTime {
-		startDate = upload.CreatedAt
+		startDate = upload.CreatedAt.UTC()
 	} else {
-		startDate = upload.UpdatedAt
+		startDate = upload.UpdatedAt.UTC()
 	}
-	now := time.Now()
+	now := time.Now().UTC()
 	// indicates the number of days we have stored this object for
 	daysStored := now.Sub(startDate)
 	// get the number of hours remaining so we can calculate a refund
 	// shave of 72 hour buffer from refund amount
-	daysRemaining := removeDate.AddDate(0, 0, -3).Sub(now).Truncate(time.Hour)
+	daysRemaining := removeDate.AddDate(0, 0, -3).UTC().Sub(now).Truncate(time.Hour)
 	// total number of hours to refund minus an additional 72 hour buffer
 	// helps to ensure that on all edge cases we dont refund the user extra
 	// but they will be refunded slightly less, however this is deemed
