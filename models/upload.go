@@ -224,7 +224,10 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload, now time.Time) (flo
 	if err != nil {
 		return 0, err
 	}
-	if usg.Tier == Free {
+	// white labelled accounts are under different billing systems
+	// if we didn't check this then there would be an exploit
+	// where white labelled users could get perpetual credits
+	if usg.Tier == Free || usg.Tier == WhiteLabeled {
 		return 0, nil
 	}
 	// prevent any weird errors such as an empty time object

@@ -759,7 +759,18 @@ func TestCalculateRefundCost(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	_, err = usrm.NewUserAccount("whitelabeledrefund", "password123", "whitelabeledrefund@example.org")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = usrm.NewUserAccount("freerefund", "password123", "freerefund@example.org")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := usgm.UpdateTier("refundcost1", Paid); err != nil {
+		t.Fatal(err)
+	}
+	if err := usgm.UpdateTier("whitelabeledrefund", WhiteLabeled); err != nil {
 		t.Fatal(err)
 	}
 	type args struct {
@@ -882,6 +893,26 @@ func TestCalculateRefundCost(t *testing.T) {
 				Size:             int64(datasize.GB.Bytes() * 1),
 			},
 		}, true, false},
+		// just to ensure that whitelabelled users trigger the catch
+		{"CurrentDate-1Month-WhiteLabelled", args{
+			time.Now(),
+			"testhash1", "file", UploadOptions{
+				HoldTimeInMonths: 1,
+				NetworkName:      "public",
+				Username:         "whitelabeledrefund",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
+		// ensure that free users trigger the catch
+		{"CurrentDate-1Month-Free", args{
+			time.Now(),
+			"testhash1", "file", UploadOptions{
+				HoldTimeInMonths: 1,
+				NetworkName:      "public",
+				Username:         "freerefund",
+				Size:             int64(datasize.GB.Bytes() * 1),
+			},
+		}, false, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
