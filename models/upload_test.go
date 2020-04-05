@@ -374,6 +374,11 @@ func TestPinRM(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer um.DB.Unscoped().Delete(usr2)
+	usr3, err := NewUserManager(um.DB).NewUserAccount("partnerrmtestaccount", "password123", "partnerpinrmtestaccount@example.org")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(usr3)
 	if err := NewUsageManager(um.DB).UpdateTier("pinrmtestaccount", Paid); err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +395,15 @@ func TestPinRM(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer um.DB.Unscoped().Delete(usg2)
+	usg3, err := NewUsageManager(um.DB).FindByUserName("partnerrmtestaccount")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer um.DB.Unscoped().Delete(usg3)
 	if _, err = NewUserManager(um.DB).AddCredits("pinrmtestaccount", 1000); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = NewUserManager(um.DB).AddCredits("partnerrmtestaccount", 1000); err != nil {
 		t.Fatal(err)
 	}
 	type args struct {
@@ -533,6 +546,73 @@ func TestPinRM(t *testing.T) {
 			HoldTimeInMonths: 1,
 			NetworkName:      "public",
 			Username:         "freepinrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		// end partner tests
+		{"25-partner", args{"testhash25", "file", UploadOptions{
+			HoldTimeInMonths: 25,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.GB.Bytes()) * 2,
+		}}, false},
+		{"24-partner", args{"testhash24", "file", UploadOptions{
+			HoldTimeInMonths: 24,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.GB.Bytes() * 1),
+		}}, false},
+		{"20-partner", args{"testhash20", "file", UploadOptions{
+			HoldTimeInMonths: 20,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"15-partner", args{"testhash15", "file", UploadOptions{
+			HoldTimeInMonths: 15,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"10-partner", args{"testhash10", "file", UploadOptions{
+			HoldTimeInMonths: 10,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"5-partner", args{"testhash5", "file", UploadOptions{
+			HoldTimeInMonths: 5,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 100),
+		}}, false},
+		{"3-partner", args{"testhash3", "file", UploadOptions{
+			HoldTimeInMonths: 3,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.MB.Bytes() * 250),
+		}}, false},
+		{"1-partner", args{"testhash1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		{"-0-partner", args{"testhash-1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		{"-1-partner", args{"testhash-1", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
+			Size:             int64(datasize.KB.Bytes()),
+		}}, false},
+		{"-2-partner", args{"testhash-2", "file", UploadOptions{
+			HoldTimeInMonths: 1,
+			NetworkName:      "public",
+			Username:         "partnerrmtestaccount",
 			Size:             int64(datasize.KB.Bytes()),
 		}}, false},
 	}
