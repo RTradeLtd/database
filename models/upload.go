@@ -227,7 +227,7 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload, now time.Time) (flo
 	// white labelled accounts are under different billing systems
 	// if we didn't check this then there would be an exploit
 	// where white labelled users could get perpetual credits
-	if usg.Tier == Free || usg.Tier == WhiteLabeled {
+	if usg.Tier.ZeroCreditRefunds() {
 		return 0, nil
 	}
 	// prevent any weird errors such as an empty time object
@@ -265,7 +265,7 @@ func (um *UploadManager) CalculateRefundCost(upload *Upload, now time.Time) (flo
 
 func calculateSizeRefund(refundHours float64, size int64, usage *Usage) (float64, error) {
 	// if they are free tier, they don't incur data charges
-	if usage.Tier == Free || usage.Tier == WhiteLabeled {
+	if usage.Tier.ZeroCreditRefunds() {
 		return 0, nil
 	}
 	gigabytesFloat := float64(datasize.GB.Bytes())

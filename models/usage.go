@@ -17,6 +17,18 @@ func (d DataUsageTier) String() string {
 	return string(d)
 }
 
+// ZeroCreditRefunds indicates whether this tier can never get refunds
+// this either because they are free, or a tier such
+// as whitelabelled which has a different billing system
+func (d DataUsageTier) ZeroCreditRefunds() bool {
+	switch d {
+	case Free, WhiteLabeled:
+		return true
+	default:
+		return false
+	}
+}
+
 // PricePerGB returns the price per gb of a usage tier
 func (d DataUsageTier) PricePerGB() float64 {
 	switch d {
