@@ -10,7 +10,9 @@ import (
 )
 
 func TestExtendGCD(t *testing.T) {
-	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	db := newTestDB(t, &Upload{})
+	defer db.Close()
+	var um = NewUploadManager(db)
 	upload, err := um.NewUpload("testcontenthash", "file", UploadOptions{
 		NetworkName: "public",
 		Username:    "testuser1",
@@ -62,7 +64,9 @@ func TestExtendGCD(t *testing.T) {
 }
 
 func TestUploadSearch(t *testing.T) {
-	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	db := newTestDB(t, &Upload{})
+	defer db.Close()
+	var um = NewUploadManager(db)
 	u1, err := um.NewUpload("hash1", "pin", UploadOptions{
 		NetworkName: "public",
 		Username:    "testuser",
@@ -129,7 +133,9 @@ func TestUploadSearch(t *testing.T) {
 }
 
 func TestUpload(t *testing.T) {
-	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	db := newTestDB(t, &Upload{})
+	defer db.Close()
+	var um = NewUploadManager(db)
 	type args struct {
 		hash       string
 		fileName   string
@@ -353,7 +359,9 @@ func TestUpload(t *testing.T) {
 }
 
 func TestPinRM(t *testing.T) {
-	var um = NewUploadManager(newTestDB(t, &Upload{}))
+	db := newTestDB(t, &Upload{})
+	defer db.Close()
+	var um = NewUploadManager(db)
 	um.DB.AutoMigrate(Usage{})
 	um.DB.AutoMigrate(User{})
 	usr, err := NewUserManager(um.DB).NewUserAccount("pinrmtestaccount", "password123", "pinrmtest@example.org")

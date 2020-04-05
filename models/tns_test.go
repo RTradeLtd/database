@@ -5,7 +5,9 @@ import (
 )
 
 func TestZone(t *testing.T) {
-	var zm = NewZoneManager(newTestDB(t, &Zone{}))
+	db := newTestDB(t, &Zone{})
+	defer db.Close()
+	var zm = NewZoneManager(db)
 	args := struct {
 		username           string
 		zoneName           string

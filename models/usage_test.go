@@ -8,7 +8,9 @@ import (
 )
 
 func TestUsage(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	type args struct {
 		username       string
 		tier           DataUsageTier
@@ -135,7 +137,9 @@ func TestUsage(t *testing.T) {
 }
 
 func Test_ENS(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	type args struct {
 		user string
 		tier DataUsageTier
@@ -183,7 +187,9 @@ func Test_ENS(t *testing.T) {
 }
 
 func Test_Tier_Upgrade(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Free)
 	if err != nil {
 		t.Fatal(err)
@@ -211,7 +217,9 @@ func Test_Tier_Upgrade(t *testing.T) {
 }
 
 func Test_UpdateDataUsage_Free(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Free)
 	if err != nil {
 		t.Fatal(err)
@@ -240,7 +248,9 @@ func Test_UpdateDataUsage_Free(t *testing.T) {
 }
 
 func Test_ReduceDataUsage(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Paid)
 	if err != nil {
 		t.Fatal(err)
@@ -277,7 +287,9 @@ func Test_ReduceDataUsage(t *testing.T) {
 }
 
 func Test_ReduceKeyCount(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Paid)
 	if err != nil {
 		t.Fatal(err)

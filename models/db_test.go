@@ -56,6 +56,9 @@ func TestAutoMigrate(t *testing.T) {
 		{"user", args{&User{}}},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) { newTestDB(t, tt.args.model) })
+		t.Run(tt.name, func(t *testing.T) {
+			db := newTestDB(t, tt.args.model)
+			defer db.Close()
+		})
 	}
 }

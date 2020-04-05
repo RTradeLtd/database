@@ -6,7 +6,9 @@ import (
 )
 
 func TestOrganizationManager_Full(t *testing.T) {
-	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	db := newTestDB(t, &Organization{})
+	defer db.Close()
+	var om = NewOrgManager(db)
 	om.DB.AutoMigrate(User{})
 	om.DB.AutoMigrate(Upload{})
 	type args struct {
@@ -61,7 +63,9 @@ func TestOrganizationManager_Full(t *testing.T) {
 }
 
 func Test_BillingReport(t *testing.T) {
-	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	db := newTestDB(t, &Organization{})
+	defer db.Close()
+	var om = NewOrgManager(db)
 	om.DB.AutoMigrate(User{})
 	om.DB.AutoMigrate(Upload{})
 	om.DB.AutoMigrate(Usage{})
@@ -150,7 +154,9 @@ func Test_BillingReport(t *testing.T) {
 }
 
 func Test_AccountBalance(t *testing.T) {
-	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	db := newTestDB(t, &Organization{})
+	defer db.Close()
+	var om = NewOrgManager(db)
 	om.DB.AutoMigrate(User{})
 	om.DB.AutoMigrate(Upload{})
 	om.DB.AutoMigrate(Usage{})
@@ -210,7 +216,9 @@ func Test_AccountBalance(t *testing.T) {
 }
 
 func Test_TotalStorageUsed(t *testing.T) {
-	var om = NewOrgManager(newTestDB(t, &Organization{}))
+	db := newTestDB(t, &Organization{})
+	defer db.Close()
+	var om = NewOrgManager(db)
 	om.DB.AutoMigrate(User{})
 	om.DB.AutoMigrate(Upload{})
 	om.DB.AutoMigrate(Usage{})

@@ -6,8 +6,9 @@ import (
 )
 
 func TestHostedNetworkManager_Access(t *testing.T) {
-	var hm = NewHostedNetworkManager(newTestDB(t, &HostedNetwork{}))
-	defer hm.DB.Close()
+	db := newTestDB(t, &HostedNetwork{})
+	defer db.Close()
+	var hm = NewHostedNetworkManager(db)
 	network, err := hm.CreateHostedPrivateNetwork(
 		"myveryrandomnetworkname",
 		"such swarm much protec",
@@ -34,8 +35,9 @@ func TestHostedNetworkManager_Access(t *testing.T) {
 }
 
 func TestHostedNetworkManager_GetOfflineNetworks(t *testing.T) {
-	var hm = NewHostedNetworkManager(newTestDB(t, &HostedNetwork{}))
-	defer hm.DB.Close()
+	db := newTestDB(t, &HostedNetwork{})
+	defer db.Close()
+	var hm = NewHostedNetworkManager(db)
 
 	hm.SaveNetwork(&HostedNetwork{
 		Name: "online",

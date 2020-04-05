@@ -14,7 +14,9 @@ var (
 )
 
 func TestIpnsManager_NewEntry(t *testing.T) {
-	var im = NewIPNSManager(newTestDB(t, &IPNS{}))
+	db := newTestDB(t, &IPNS{})
+	defer db.Close()
+	var im = NewIPNSManager(db)
 	type args struct {
 		ipnsHash    string
 		ipfsHash    string
@@ -66,7 +68,9 @@ func TestIpnsManager_NewEntry(t *testing.T) {
 }
 
 func TestIpnsManager_UpdateEntry(t *testing.T) {
-	var im = NewIPNSManager(newTestDB(t, &IPNS{}))
+	db := newTestDB(t, &IPNS{})
+	defer db.Close()
+	var im = NewIPNSManager(db)
 	type args struct {
 		ipnsHash    string
 		ipfsHash    string
@@ -116,7 +120,9 @@ func TestIpnsManager_UpdateEntry(t *testing.T) {
 }
 
 func TestIpnsManager_FindByIPNSHash(t *testing.T) {
-	var im = NewIPNSManager(newTestDB(t, &IPNS{}))
+	db := newTestDB(t, &IPNS{})
+	defer db.Close()
+	var im = NewIPNSManager(db)
 	type args struct {
 		ipnsHash    string
 		ipfsHash    string
@@ -159,7 +165,9 @@ func TestIpnsManager_FindByIPNSHash(t *testing.T) {
 }
 
 func TestIpnsManager_FindByUser(t *testing.T) {
-	var im = NewIPNSManager(newTestDB(t, &IPNS{}))
+	db := newTestDB(t, &IPNS{})
+	defer db.Close()
+	var im = NewIPNSManager(db)
 	type args struct {
 		ipnsHash    string
 		ipfsHash    string

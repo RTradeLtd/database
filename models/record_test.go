@@ -5,7 +5,9 @@ import (
 )
 
 func TestRecord(t *testing.T) {
-	var rm = NewRecordManager(newTestDB(t, &Record{}))
+	db := newTestDB(t, &Record{})
+	defer db.Close()
+	var rm = NewRecordManager(db)
 	type args struct {
 		username      string
 		recordName    string
