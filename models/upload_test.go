@@ -623,7 +623,9 @@ func TestPinRM(t *testing.T) {
 			}
 			fmt.Println("before refund: ", creditsBeforeRemove)
 			fmt.Println("after refund: ", usr.Credits)
-			if usr.Credits > creditsBeforeRemove {
+			// we should never do an exact refund, however we not evaluate this condition
+			// if it is being performed on a free tier, because 0+0, or 0-0 is always 0
+			if usr.Credits >= creditsBeforeRemove && !strings.Contains(tt.name, "free") {
 				t.Fatal("too much credits refunded")
 			}
 		})
