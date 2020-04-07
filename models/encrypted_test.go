@@ -5,7 +5,9 @@ import (
 )
 
 func TestEncryptedUploads(t *testing.T) {
-	var ecm = NewEncryptedUploadManager(newTestDB(t, &EncryptedUpload{}))
+	db := newTestDB(t, &EncryptedUpload{})
+	defer db.Close()
+	var ecm = NewEncryptedUploadManager(db)
 	type args struct {
 		user    string
 		file    string

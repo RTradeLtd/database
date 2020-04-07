@@ -17,6 +17,18 @@ func (d DataUsageTier) String() string {
 	return string(d)
 }
 
+// ZeroCreditRefunds indicates whether this tier can never get refunds
+// this either because they are free, or a tier such
+// as whitelabelled which has a different billing system
+func (d DataUsageTier) ZeroCreditRefunds() bool {
+	switch d {
+	case Free, WhiteLabeled:
+		return true
+	default:
+		return false
+	}
+}
+
 // PricePerGB returns the price per gb of a usage tier
 func (d DataUsageTier) PricePerGB() float64 {
 	switch d {
@@ -28,6 +40,23 @@ func (d DataUsageTier) PricePerGB() float64 {
 		return 0.05
 	default:
 		// this is a catch-all for free tier
+		// free tier users will never encounter a charge call
+		return 9999
+	}
+}
+
+// PricePerGBPerHour returns the price per gb per hour
+// we use an approximation of 730 hours
+func (d DataUsageTier) PricePerGBPerHour() float64 {
+	switch d {
+	case Paid:
+		return 0.07 / 730
+	case Partner:
+		return 0.05 / 730
+	case WhiteLabeled:
+		return 0.05 / 730
+	default:
+		// this is a catch all for free tier
 		// free tier users will never encounter a charge call
 		return 9999
 	}

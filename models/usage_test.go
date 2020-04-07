@@ -8,7 +8,9 @@ import (
 )
 
 func TestUsage(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	type args struct {
 		username       string
 		tier           DataUsageTier
@@ -23,7 +25,7 @@ func TestUsage(t *testing.T) {
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
 		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
 		{"WhiteLabelled", args{"whitelabelled", WhiteLabeled, datasize.GB.Bytes() * 100}, false},
-		{"Fail", args{"fail", Free, 1}, true},
+		{"Fail", args{"fail", DataUsageTier("fail"), 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -37,7 +39,10 @@ func TestUsage(t *testing.T) {
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("NewUsage() err = %v, wantErr %v", err, tt.wantErr)
 				}
-				defer bm.DB.Unscoped().Delete(usage)
+				// prevent panics
+				if err == nil {
+					defer bm.DB.Unscoped().Delete(usage)
+				}
 			}
 			// test find by username
 			if _, err := bm.FindByUserName(tt.args.username); (err != nil) != tt.wantErr {
@@ -132,7 +137,9 @@ func TestUsage(t *testing.T) {
 }
 
 func Test_ENS(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	type args struct {
 		user string
 		tier DataUsageTier
@@ -180,7 +187,9 @@ func Test_ENS(t *testing.T) {
 }
 
 func Test_Tier_Upgrade(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Free)
 	if err != nil {
 		t.Fatal(err)
@@ -208,7 +217,9 @@ func Test_Tier_Upgrade(t *testing.T) {
 }
 
 func Test_UpdateDataUsage_Free(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Free)
 	if err != nil {
 		t.Fatal(err)
@@ -237,7 +248,9 @@ func Test_UpdateDataUsage_Free(t *testing.T) {
 }
 
 func Test_ReduceDataUsage(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Paid)
 	if err != nil {
 		t.Fatal(err)
@@ -274,7 +287,9 @@ func Test_ReduceDataUsage(t *testing.T) {
 }
 
 func Test_ReduceKeyCount(t *testing.T) {
-	var bm = NewUsageManager(newTestDB(t, &Usage{}))
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
 	b, err := bm.NewUsageEntry("testuser", Paid)
 	if err != nil {
 		t.Fatal(err)
@@ -310,18 +325,22 @@ func Test_ReduceKeyCount(t *testing.T) {
 
 func TestPricePerGB(t *testing.T) {
 	tests := []struct {
-		tier       DataUsageTier
-		wantPrice  float64
-		wantString string
+		tier             DataUsageTier
+		wantPriceMonthly float64
+		wantPriceHourly  float64
+		wantString       string
 	}{
-		{Paid, 0.07, "paid"},
-		{Partner, 0.05, "partner"},
-		{WhiteLabeled, 0.05, "white-labeled"},
-		{Free, 9999, "free"},
+		{Paid, 0.07, 0.07 / 730, "paid"},
+		{Partner, 0.05, 0.05 / 730, "partner"},
+		{WhiteLabeled, 0.05, 0.05 / 730, "white-labeled"},
+		{Free, 9999, 9999, "free"},
 	}
 	for _, tt := range tests {
-		if tt.tier.PricePerGB() != tt.wantPrice {
+		if tt.tier.PricePerGB() != tt.wantPriceMonthly {
 			t.Fatal("bad PricePerGB returned")
+		}
+		if tt.tier.PricePerGBPerHour() != tt.wantPriceHourly {
+			t.Fatal("bad hourly price returned")
 		}
 		if tt.tier.String() != tt.wantString {
 			t.Fatal("bad string returned")

@@ -5,7 +5,9 @@ import (
 )
 
 func TestPaymentManager_NewPayment(t *testing.T) {
-	var pm = NewPaymentManager(newTestDB(t, &Payments{}))
+	db := newTestDB(t, &Payments{})
+	defer db.Close()
+	var pm = NewPaymentManager(db)
 	type args struct {
 		depositAddress string
 		txHash         string

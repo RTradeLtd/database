@@ -21,7 +21,9 @@ type args struct {
 }
 
 func TestUserManager_NewAccount(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -49,7 +51,9 @@ func TestUserManager_NewAccount(t *testing.T) {
 }
 
 func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -75,7 +79,9 @@ func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
 }
 
 func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -95,7 +101,9 @@ func TestUserManager_CheckIfUserHasAccessToNetwork(t *testing.T) {
 }
 
 func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -130,7 +138,9 @@ func TestUserManager_AddandRemoveIPFSNetworkForUSer(t *testing.T) {
 }
 
 func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -154,7 +164,9 @@ func TestUserManager_AddIPFSKeyForUser(t *testing.T) {
 }
 
 func TestUserManager_GetKeysForUser(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -174,7 +186,9 @@ func TestUserManager_GetKeysForUser(t *testing.T) {
 }
 
 func TestUserManager_GetKeyIDByName(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	type args struct {
 		userName string
 		email    string
@@ -211,7 +225,9 @@ func TestUserManager_GetKeyIDByName(t *testing.T) {
 }
 
 func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	type args struct {
 		userName string
 		email    string
@@ -251,7 +267,9 @@ func TestUserManager_CheckIfKeyOwnedByUser(t *testing.T) {
 }
 
 func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name        string
 		args        args
@@ -276,7 +294,9 @@ func TestUserManager_CheckIfAccountEnabled(t *testing.T) {
 }
 
 func TestUserManager_ChangePassword(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name        string
 		args        args
@@ -300,7 +320,9 @@ func TestUserManager_ChangePassword(t *testing.T) {
 }
 
 func TestUserManager_SignIn(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name      string
 		args      args
@@ -335,7 +357,9 @@ func TestUserManager_SignIn(t *testing.T) {
 }
 
 func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name      string
 		args      args
@@ -363,7 +387,9 @@ func TestUserManager_ComparePlaintextPasswordToHash(t *testing.T) {
 }
 
 func TestUserManager_FindUserByUserName(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -387,7 +413,9 @@ func TestUserManager_FindUserByUserName(t *testing.T) {
 }
 
 func TestUserManager_Credits(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -431,7 +459,9 @@ func TestUserManager_Credits(t *testing.T) {
 	}
 }
 func TestUserManager_ResetPassword(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	tests := []struct {
 		name    string
 		args    args
@@ -454,7 +484,9 @@ func TestUserManager_ResetPassword(t *testing.T) {
 }
 
 func TestUserManager_Customer_Hash(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	type newArgs struct {
 		args
 		firstHash  string
@@ -500,7 +532,9 @@ func TestUserManager_Customer_Hash(t *testing.T) {
 }
 
 func TestUserManager_RemoveIPFSKeys(t *testing.T) {
-	var um = NewUserManager(newTestDB(t, &User{}))
+	db := newTestDB(t, &User{})
+	defer db.Close()
+	var um = NewUserManager(db)
 	type args struct {
 		userName string
 		email    string

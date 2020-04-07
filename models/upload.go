@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/RTradeLtd/database/v2/utils"
+	"github.com/c2h5oh/datasize"
 	"github.com/jinzhu/gorm"
 )
 
@@ -36,7 +37,7 @@ type Upload struct {
 	FileNameLowerCase  string `gorm:"type:varchar(255)"`
 	FileNameUpperCase  string `gorm:"type:varchar(255)"`
 	Extension          string `gorm:"type:varchar(255)"`
-	Size               int64  `gorm:"type:integer"` // upload size in bytes
+	Size               int64  `gorm:"type:bigint"` // upload size in bytes
 	Directory          bool   `gorm:"type:bool;default:false"`
 }
 
@@ -185,6 +186,96 @@ func (um *UploadManager) ExtendGarbageCollectionPeriod(username, hash, network s
 	upload.GarbageCollectDate = upload.GarbageCollectDate.AddDate(0, holdTimeInMonths, 0)
 	// save the updated model
 	return um.DB.Model(upload).Update("garbage_collect_date", upload.GarbageCollectDate).Error
+}
+
+// RemovePin allows removing a pin and refunding extra data costs
+func (um *UploadManager) RemovePin(username, hash, network string) error {
+	upload, err := um.FindUploadByHashAndUserAndNetwork(username, hash, network)
+	if err != nil {
+		return err
+	}
+	// get the amount to refund the user before removing the upload
+	refundAmt, err := um.CalculateRefundCost(upload, time.Now().UTC())
+	if err != nil {
+		return err
+	}
+	// remove upload returning if this fails
+	if err := um.DB.Delete(upload).Error; err != nil {
+		return err
+	}
+	// will be greater than 0 if they are not free
+	// as only non-free users will need to have their credits refunded
+	if refundAmt > 0 {
+		// add credits to the user's balance
+		_, err = NewUserManager(um.DB).AddCredits(username, refundAmt)
+		if err != nil {
+			return err
+		}
+	}
+	// reduce user's storage consumption
+	return NewUsageManager(um.DB).ReduceDataUsage(username, uint64(upload.Size))
+}
+
+// CalculateRefundCost returns the amount of credits to refund the user
+// when they invoke pinRM
+func (um *UploadManager) CalculateRefundCost(upload *Upload, now time.Time) (float64, error) {
+	// do this first to not waste time processing needlessly
+	usg, err := NewUsageManager(um.DB).FindByUserName(upload.UserName)
+	if err != nil {
+		return 0, err
+	}
+	// white labelled accounts are under different billing systems
+	// if we didn't check this then there would be an exploit
+	// where white labelled users could get perpetual credits
+	if usg.Tier.ZeroCreditRefunds() {
+		return 0, nil
+	}
+	// prevent any weird errors such as an empty time object
+	// being used for credit exploitation
+	if now == nilTime {
+		return 0, errors.New("should not be empty time")
+	}
+	removeDate := upload.GarbageCollectDate.UTC()
+	// indicates the hours remaining until garbage collection should occur
+	// we shave off 72 hours to account for the buffer time
+	hoursRemaining := removeDate.AddDate(0, 0, -3).UTC().Sub(now).Truncate(time.Hour).Hours()
+	// total number of hours to refund minus an additional 72 hour buffer
+	// helps to ensure that on all edge cases we dont refund the user extra
+	// but they will be refunded slightly less, however this is deemed
+	// acceptable, and is intentional for a few reasons:
+	// 	* Refunds aren't a required feature of the platform as specified in Terms And Service
+	//  * The pin wont actually be removed from the underlying IPFS node for up to 4 weeks
+	//  * Prevent exploits to gain perpetual free credits due to rounding errors
+	//  * Time spent processing the data as creating many pins and then removing them isn't cheap
+	//	* Unpinning data requires bringing nodes offline and needs to be scheduled, thus this increases maintenance duties
+	// Whenever removing a pin, there is a 72 hour buffer, which means even
+	// if you pin data, and remove it immediately, you will still be charged 72 hours worth of data storage
+	// this helps mitigate abuse of the system by having to have our nodes be under sustained GC load as removing
+	// data from the system isn't a cheap process due to extreme inefficiencies with go-ipfs
+	var refundHours float64
+	// if less than or equal to 72 hours, don't refund anything
+	if hoursRemaining <= (time.Hour.Hours() * 72) {
+		refundHours = 0
+	} else {
+		refundHours = hoursRemaining - (time.Hour.Hours() * 72)
+	}
+	// calculates a refund based on the size of the object
+	return calculateSizeRefund(refundHours, upload.Size, usg)
+}
+
+func calculateSizeRefund(refundHours float64, size int64, usage *Usage) (float64, error) {
+	// if they are free tier, they don't incur data charges
+	if usage.Tier.ZeroCreditRefunds() {
+		return 0, nil
+	}
+	gigabytesFloat := float64(datasize.GB.Bytes())
+	sizeFloat := float64(size)
+	// returns how many gigabytes this upload is
+	sizeGigabytesFloat := sizeFloat / gigabytesFloat
+	// return the cost of the refund calculated by:
+	// * number of hours remaining * gigabytes per hour = size cost multipliier
+	// * size of data multiplied by size cost multiplier
+	return sizeGigabytesFloat * (usage.Tier.PricePerGBPerHour() * refundHours), nil
 }
 
 // Search is used return all uploads matching the fileName
