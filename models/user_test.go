@@ -48,6 +48,14 @@ func TestUserManager_NewAccount(t *testing.T) {
 			}
 		})
 	}
+	usgm := NewUsageManager(db)
+	usg, err := usgm.FindByUserName(username)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if usg.Tier != Unverified {
+		t.Fatal("bad default tier")
+	}
 }
 
 func TestUserManager_GetPrivateIPFSNetworksForUSer(t *testing.T) {
