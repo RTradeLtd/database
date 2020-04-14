@@ -773,6 +773,9 @@ func TestCalculateRefundCost(t *testing.T) {
 	if err := usgm.UpdateTier("whitelabeledrefund", WhiteLabeled); err != nil {
 		t.Fatal(err)
 	}
+	if err := usgm.UpdateTier("freerefund", Free); err != nil {
+		t.Fatal(err)
+	}
 	type args struct {
 		now              time.Time
 		hash, uploadType string
