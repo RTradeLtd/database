@@ -63,6 +63,13 @@ func (d DataUsageTier) PricePerGBPerHour() float64 {
 }
 
 var (
+	// Unverified is the default tier you get placed into before validating your email address.
+	// After validation you are placed into the free tier
+	// Restrictions of unverified:
+	//			* no on-demand data encryption
+	//			* 100MB/month
+	//			* No IPNS, No Keys, nothin else
+	Unverified DataUsageTier = "unverified"
 	// Free is what every signed up user is automatically registered as
 	// Restrictions of free:
 	//			* No on-demand data encryption
@@ -86,6 +93,9 @@ var (
 	// that enables resellers, and customized
 	// billing scenarios without having to modify much code
 	WhiteLabeled DataUsageTier = "white-labeled"
+	// UnverifiedUploadLimit is the maximum data usage for unverified accounts
+	// Currently set to 100MB
+	UnverifiedUploadLimit = datasize.MB.Bytes() * 100
 
 	// FreeUploadLimit is the maximum data usage for free accounts
 	// Currrently set to 3GB
@@ -97,6 +107,12 @@ var (
 	// but since usage limit checking is needed for free
 	// accounts, we set an artificial limit.
 	NonFreeUploadLimit = datasize.TB.Bytes() * 1000
+	// UnverifiedKeyLimit prevents unverified account access to keys
+	UnverifiedKeyLimit int64 = 0
+	// UnverifiedPubSubLimit prevents unverified account access to pubsub
+	UnverifiedPubSubLimit int64 = 0
+	// UnverifiedIPNSLimit prevents unverified account access to IPNS
+	UnverifiedIPNSLimit int64 = 0
 
 	// FreeKeyLimit defines how many keys free accounts can create
 	FreeKeyLimit int64 = 5
@@ -170,6 +186,11 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 	usage.Tier = tier
 	// set tier based restrictions
 	switch tier {
+	case Unverified:
+		usage.MonthlyDataLimitBytes = UnverifiedUploadLimit
+		usage.KeysAllowed = UnverifiedKeyLimit
+		usage.PubSubMessagesAllowed = UnverifiedPubSubLimit
+		usage.IPNSRecordsAllowed = UnverifiedIPNSLimit
 	case Free:
 		usage.MonthlyDataLimitBytes = FreeUploadLimit
 		usage.KeysAllowed = FreeKeyLimit
@@ -325,6 +346,11 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	b.Tier = tier
 	// set tier based restrictions
 	switch tier {
+	case Unverified:
+		b.MonthlyDataLimitBytes = UnverifiedUploadLimit
+		b.KeysAllowed = UnverifiedKeyLimit
+		b.PubSubMessagesAllowed = UnverifiedPubSubLimit
+		b.IPNSRecordsAllowed = UnverifiedIPNSLimit
 	case Free:
 		b.MonthlyDataLimitBytes = FreeUploadLimit
 		b.KeysAllowed = FreeKeyLimit
