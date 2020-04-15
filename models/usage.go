@@ -182,39 +182,8 @@ func (bm *UsageManager) NewUsageEntry(username string, tier DataUsageTier) (*Usa
 		UserName: username,
 		Tier:     tier,
 	}
-	// set tier
-	usage.Tier = tier
-	// set tier based restrictions
-	switch tier {
-	case Unverified:
-		usage.MonthlyDataLimitBytes = UnverifiedUploadLimit
-		usage.KeysAllowed = UnverifiedKeyLimit
-		usage.PubSubMessagesAllowed = UnverifiedPubSubLimit
-		usage.IPNSRecordsAllowed = UnverifiedIPNSLimit
-	case Free:
-		usage.MonthlyDataLimitBytes = FreeUploadLimit
-		usage.KeysAllowed = FreeKeyLimit
-		usage.PubSubMessagesAllowed = FreePubSubLimit
-		usage.IPNSRecordsAllowed = FreeIPNSLimit
-	case Partner:
-		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
-		usage.KeysAllowed = PartnerKeyLimit
-		usage.PubSubMessagesAllowed = PartnerPubSubLimit
-		usage.IPNSRecordsAllowed = PartnerIPNSLimit
-	case Paid:
-		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
-		usage.KeysAllowed = PaidKeyLimit
-		usage.PubSubMessagesAllowed = PaidPubSubLimit
-		usage.IPNSRecordsAllowed = PaidIPNSRecordLimit
-	case WhiteLabeled:
-		// math.MaxUint64 causes high-order bitset failures in psql
-		// see for more info: https://github.com/golang/go/issues/9373
-		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
-		usage.KeysAllowed = WhiteLabeledLimits
-		usage.PubSubMessagesAllowed = WhiteLabeledLimits
-		usage.IPNSRecordsAllowed = WhiteLabeledLimits
-	default:
-		return nil, errors.New("unsupported tier provided")
+	if err := bm.setTier(usage, tier); err != nil {
+		return nil, err
 	}
 	if err := bm.DB.Create(usage).Error; err != nil {
 		return nil, err
@@ -342,39 +311,9 @@ func (bm *UsageManager) UpdateTier(username string, tier DataUsageTier) error {
 	if err != nil {
 		return err
 	}
-	// set tier
-	b.Tier = tier
-	// set tier based restrictions
-	switch tier {
-	case Unverified:
-		b.MonthlyDataLimitBytes = UnverifiedUploadLimit
-		b.KeysAllowed = UnverifiedKeyLimit
-		b.PubSubMessagesAllowed = UnverifiedPubSubLimit
-		b.IPNSRecordsAllowed = UnverifiedIPNSLimit
-	case Free:
-		b.MonthlyDataLimitBytes = FreeUploadLimit
-		b.KeysAllowed = FreeKeyLimit
-		b.PubSubMessagesAllowed = FreePubSubLimit
-		b.IPNSRecordsAllowed = FreeIPNSLimit
-	case Partner:
-		b.MonthlyDataLimitBytes = NonFreeUploadLimit
-		b.KeysAllowed = PartnerKeyLimit
-		b.PubSubMessagesAllowed = PartnerPubSubLimit
-		b.IPNSRecordsAllowed = PartnerIPNSLimit
-	case Paid:
-		b.MonthlyDataLimitBytes = NonFreeUploadLimit
-		b.KeysAllowed = PaidKeyLimit
-		b.PubSubMessagesAllowed = PaidPubSubLimit
-		b.IPNSRecordsAllowed = PaidIPNSRecordLimit
-	case WhiteLabeled:
-		b.MonthlyDataLimitBytes = NonFreeUploadLimit
-		b.KeysAllowed = WhiteLabeledLimits
-		b.PubSubMessagesAllowed = WhiteLabeledLimits
-		b.IPNSRecordsAllowed = WhiteLabeledLimits
-	default:
-		return errors.New("unsupported tier provided")
+	if err := bm.setTier(b, tier); err != nil {
+		return err
 	}
-
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
 		"tier":                     b.Tier,
 		"keys_allowed":             b.KeysAllowed,
@@ -463,4 +402,42 @@ func (bm *UsageManager) UnclaimENSName(username string) error {
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
 		"claimed_ens_name": b.ClaimedENSName,
 	}).Error
+}
+
+func (bm *UsageManager) setTier(usage *Usage, tier DataUsageTier) error {
+	// set tier
+	usage.Tier = tier
+	// set tier based restrictions
+	switch tier {
+	case Unverified:
+		usage.MonthlyDataLimitBytes = UnverifiedUploadLimit
+		usage.KeysAllowed = UnverifiedKeyLimit
+		usage.PubSubMessagesAllowed = UnverifiedPubSubLimit
+		usage.IPNSRecordsAllowed = UnverifiedIPNSLimit
+	case Free:
+		usage.MonthlyDataLimitBytes = FreeUploadLimit
+		usage.KeysAllowed = FreeKeyLimit
+		usage.PubSubMessagesAllowed = FreePubSubLimit
+		usage.IPNSRecordsAllowed = FreeIPNSLimit
+	case Partner:
+		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
+		usage.KeysAllowed = PartnerKeyLimit
+		usage.PubSubMessagesAllowed = PartnerPubSubLimit
+		usage.IPNSRecordsAllowed = PartnerIPNSLimit
+	case Paid:
+		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
+		usage.KeysAllowed = PaidKeyLimit
+		usage.PubSubMessagesAllowed = PaidPubSubLimit
+		usage.IPNSRecordsAllowed = PaidIPNSRecordLimit
+	case WhiteLabeled:
+		// math.MaxUint64 causes high-order bitset failures in psql
+		// see for more info: https://github.com/golang/go/issues/9373
+		usage.MonthlyDataLimitBytes = NonFreeUploadLimit
+		usage.KeysAllowed = WhiteLabeledLimits
+		usage.PubSubMessagesAllowed = WhiteLabeledLimits
+		usage.IPNSRecordsAllowed = WhiteLabeledLimits
+	default:
+		return errors.New("unsupported tier provided")
+	}
+	return nil
 }
