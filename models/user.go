@@ -273,7 +273,7 @@ func (um *UserManager) NewUserAccount(username, password, email string) (*User, 
 		return nil, check.Error
 	}
 	usageManager := NewUsageManager(um.DB)
-	if _, err := usageManager.NewUsageEntry(username, Free); err != nil {
+	if _, err := usageManager.NewUsageEntry(username, Unverified); err != nil {
 		return nil, err
 	}
 	return user, nil

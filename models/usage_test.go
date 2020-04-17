@@ -21,6 +21,7 @@ func TestUsage(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
+		{"Unverified", args{"unverified", Unverified, datasize.MB.Bytes() * 100}, false},
 		{"Free", args{"free", Free, datasize.GB.Bytes()}, false},
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
 		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
@@ -54,16 +55,19 @@ func TestUsage(t *testing.T) {
 			} else if !tt.wantErr && price != usage.Tier.PricePerGB() {
 				t.Fatal("failed to get correct price per gb")
 			}
-			// test ipns publish check
-			if err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)
-			}
-			// test ipns publish check
-			if err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("CanPublishPubSub() err = %v, wantErr %v", err, tt.wantErr)
-			}
-			if err := bm.CanCreateKey(tt.args.username); (err != nil) != tt.wantErr {
-				t.Fatalf("CanCreateKey() err = %v, wantErr %v", err, tt.wantErr)
+			// dont run these tests against unverified user, we will have a special test for them
+			if tt.args.tier != Unverified {
+				// test ipns publish check
+				if err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
+					t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)
+				}
+				// test ipns publish check
+				if err := bm.CanPublishPubSub(tt.args.username); (err != nil) != tt.wantErr {
+					t.Fatalf("CanPublishPubSub() err = %v, wantErr %v", err, tt.wantErr)
+				}
+				if err := bm.CanCreateKey(tt.args.username); (err != nil) != tt.wantErr {
+					t.Fatalf("CanCreateKey() err = %v, wantErr %v", err, tt.wantErr)
+				}
 			}
 			// test update data usage
 			if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {
@@ -133,6 +137,27 @@ func TestUsage(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestUnverified(t *testing.T) {
+	db := newTestDB(t, &Usage{})
+	defer db.Close()
+	var bm = NewUsageManager(db)
+	b, err := bm.NewUsageEntry("testuserunverified", Unverified)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Unscoped().Delete(b)
+	// test ipns publish check
+	if err := bm.CanPublishIPNS("testuserunverified"); err == nil {
+		t.Fatal("error expected")
+	}
+	if err := bm.CanPublishPubSub("testuserunverified"); err == nil {
+		t.Fatal("error expected")
+	}
+	if err := bm.CanCreateKey("testuserunverified"); err == nil {
+		t.Fatal("error expected")
 	}
 }
 
