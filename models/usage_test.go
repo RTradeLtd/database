@@ -21,7 +21,7 @@ func TestUsage(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"Unverified", args{"unverified", Unverified, datasize.MB.Bytes() * 100}, false},
+		{"Unverified", args{"unverified", Unverified, 0}, false},
 		{"Free", args{"free", Free, datasize.GB.Bytes()}, false},
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
 		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
@@ -57,6 +57,9 @@ func TestUsage(t *testing.T) {
 			}
 			// dont run these tests against unverified user, we will have a special test for them
 			if tt.args.tier != Unverified {
+				if err := bm.UpdateDataUsage(tt.args.username, 1); err == nil {
+					t.Error("should have not been able to upload any data")
+				}
 				// test ipns publish check
 				if err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
 					t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)

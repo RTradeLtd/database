@@ -94,8 +94,8 @@ var (
 	// billing scenarios without having to modify much code
 	WhiteLabeled DataUsageTier = "white-labeled"
 	// UnverifiedUploadLimit is the maximum data usage for unverified accounts
-	// Currently set to 100MB
-	UnverifiedUploadLimit = datasize.MB.Bytes() * 100
+	// Currently set to  0MB
+	UnverifiedUploadLimit = uint64(0)
 
 	// FreeUploadLimit is the maximum data usage for free accounts
 	// Currrently set to 3GB
@@ -256,14 +256,14 @@ func (bm *UsageManager) UpdateDataUsage(username string, uploadSizeBytes uint64)
 	if err != nil {
 		return err
 	}
+	if b.Tier == Unverified {
+		return errors.New("unverified accounts must verify before being able to upload")
+	}
 	// update total data used
 	b.CurrentDataUsedBytes = b.CurrentDataUsedBytes + uploadSizeBytes
 	// perform upload limit checks
-	if b.Tier == Free {
-		// if they are free, they will need to upgrade their plan
-		if b.CurrentDataUsedBytes >= FreeUploadLimit {
-			return errors.New("upload limit will be reached, please upload smaller content or upgrade your plan")
-		}
+	if b.Tier == Free && b.CurrentDataUsedBytes >= FreeUploadLimit {
+		return errors.New("upload limit will be reached, please upload smaller content or upgrade your plan")
 	}
 	// save updated columns and return
 	return bm.DB.Model(b).UpdateColumns(map[string]interface{}{
