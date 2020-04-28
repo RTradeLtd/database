@@ -17,7 +17,7 @@ To setup the certificates you'll want to generate at a minimum:
 
 ```shell
 $> ./gen_certs.sh ca ./cert-dir ./ca-key-dir
-$> ./gen_certs.sh node ./cert-dir ./ca-key-dir 192.168.1.201
+$> ./gen_certs.sh node ./cert-dir ./ca-key-dir/ca.key 192.168.1.201
 $> ./gen_certs.sh client ./cert-dir ./ca-key-dir/ca.key temporal
 ```
 
