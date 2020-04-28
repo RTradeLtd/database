@@ -18,3 +18,7 @@ test
 *.out
 
 roach_clip/cockroach-data/
+
+roach_clip/scripts/safe-dir/
+
+roach_clip/scripts/cert-dir/
