@@ -36,4 +36,5 @@ setup-test-node:
 		sql \
 		--certs-dir=certs \
 		--user=root \
-		--host=localhost:26257
+		--host=localhost:26257 \
+		--execute="CREATE USER temporaladmin WITH PASSWORD 'temporaladmin'"

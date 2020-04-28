@@ -32,3 +32,5 @@ $> cockroach start-single --certs-dir=cert-dir --listen-addr=localhost:26257 --h
 # NOtes
 
 * [golang + gorm + cockroachdb](https://www.cockroachlabs.com/docs/stable/build-a-go-app-with-cockroachdb-gorm.html)
+* [certificate information](https://www.cockroachlabs.com/docs/v19.2/cockroach-cert.html)
+* [cockroach sql information](https://www.cockroachlabs.com/docs/v19.2/cockroach-sql.html)
