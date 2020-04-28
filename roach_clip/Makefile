@@ -9,10 +9,17 @@ install:
 single-node:
 	cockroach start-single-node $(FLAGS)
 
+
+.PHONY: start-testenv
+start-testenv: cleanup gen-test-certs start-test-node setup-test-node
+
+.PHONY: cleanup
+cleanup:
+	rm -rf certs cockroach-data safe-dir
+
 # used to generate the required certificates for our test node
 .PHONY: gen-test-certs
 gen-test-certs:
-	rm -rf certs safe-dir cockroach-data
 	mkdir certs && mkdir safe-dir
 	./scripts/gen_certs.sh ca ./certs ./safe-dir/ca.key
 	./scripts/gen_certs.sh node ./certs ./safe-dir/ca.key localhost
@@ -29,12 +36,27 @@ start-test-node:
 		--http-addr=localhost:8080 \
 		--background
 
+# stops the test node
+.PHONY: stop-test-node
+stop-test-node:
+	cockroach \
+		quit \
+		--certs-dir=certs
+
 # setups the database after it starts
 .PHONY: setup-test-node
 setup-test-node:
+	@echo setting up admin user
 	cockroach \
 		sql \
 		--certs-dir=certs \
 		--user=root \
 		--host=localhost:26257 \
 		--execute="CREATE USER temporaladmin WITH PASSWORD 'temporaladmin'"
+	@echo creating database
+	cockroach \
+		sql \
+		--certs-dir=certs \
+		--user=root \
+		--host=localhost:26257 \
+		--execute="CREATE DATABASE temporal"
