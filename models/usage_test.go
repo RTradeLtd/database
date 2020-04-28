@@ -21,7 +21,7 @@ func TestUsage(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"Unverified", args{"unverified", Unverified, datasize.MB.Bytes() * 100}, false},
+		{"Unverified", args{"unverified", Unverified, 0}, false},
 		{"Free", args{"free", Free, datasize.GB.Bytes()}, false},
 		{"Partner", args{"partner", Partner, datasize.GB.Bytes() * 10}, false},
 		{"Paid", args{"paid", Paid, datasize.GB.Bytes() * 100}, false},
@@ -57,6 +57,9 @@ func TestUsage(t *testing.T) {
 			}
 			// dont run these tests against unverified user, we will have a special test for them
 			if tt.args.tier != Unverified {
+				if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {
+					t.Fatalf("UpdateDataUsage() err = %v, wantErr %v", err, tt.wantErr)
+				}
 				// test ipns publish check
 				if err := bm.CanPublishIPNS(tt.args.username); (err != nil) != tt.wantErr {
 					t.Fatalf("CanPublishIPNS() err = %v, wantErr %v", err, tt.wantErr)
@@ -68,10 +71,6 @@ func TestUsage(t *testing.T) {
 				if err := bm.CanCreateKey(tt.args.username); (err != nil) != tt.wantErr {
 					t.Fatalf("CanCreateKey() err = %v, wantErr %v", err, tt.wantErr)
 				}
-			}
-			// test update data usage
-			if err := bm.UpdateDataUsage(tt.args.username, tt.args.testUploadSize); (err != nil) != tt.wantErr {
-				t.Fatalf("UpdateDataUsage() err = %v, wantErr %v", err, tt.wantErr)
 			}
 			// test update tiers for all tier types
 			// an account may never enter free status once exiting
@@ -149,6 +148,12 @@ func TestUnverified(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Unscoped().Delete(b)
+	if err := bm.UpdateDataUsage("testuserunverified", 1); err == nil {
+		t.Fatal("error expected")
+	}
+	if err := bm.UpdateDataUsage("testuserunverified", 0); err == nil {
+		t.Fatal("error expected")
+	}
 	// test ipns publish check
 	if err := bm.CanPublishIPNS("testuserunverified"); err == nil {
 		t.Fatal("error expected")
