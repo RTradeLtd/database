@@ -28,3 +28,7 @@ After generating the certificates you can deploy a single node cockroach cluster
 ```shell
 $> cockroach start-single --certs-dir=cert-dir --listen-addr=localhost:26257 --http-addr=localhost:8080 --background
 ```
+
+# NOtes
+
+* [golang + gorm + cockroachdb](https://www.cockroachlabs.com/docs/stable/build-a-go-app-with-cockroachdb-gorm.html)

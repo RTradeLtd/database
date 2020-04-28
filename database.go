@@ -25,6 +25,15 @@ type Options struct {
 	SSLModeDisable bool
 	LogMode        bool
 	Logger         Logger
+	SecOpts        *SecureOptions
+}
+
+// SecureOptions enables securely connecting to a database
+// mainly intended for use with cockroachdb
+type SecureOptions struct {
+	SSLRootCert string
+	SSLKey      string
+	SSLCert     string
 }
 
 // New is used to init our connection to a database, and return a manager struct
@@ -84,8 +93,18 @@ type dbOptions struct {
 	Address        string
 	Port           string
 	SSLModeDisable bool
+	Secure         *SecureOptions
 }
 
+/*
+   const addr = "
+	   postgresql://maxroach@localhost:26257/bank?
+	   ssl=true &
+	   sslmode=require &
+	   sslrootcert=certs/ca.crt &
+	   sslkey=certs/client.maxroach.key &
+	   sslcert=certs/client.maxroach.crt"
+*/
 // openDBConnection is used to create a database connection
 func openDBConnection(opts dbOptions) (*gorm.DB, error) {
 	if opts.User == "" {
@@ -104,4 +123,20 @@ func openDBConnection(opts dbOptions) (*gorm.DB, error) {
 	}
 	db.DB().SetConnMaxLifetime(time.Minute * 60)
 	return db, nil
+}
+
+func getConnURL(opts dbOptions) string {
+	if opts.Secure != nil {
+		return fmt.Sprintf(
+			//
+			"postgresql://%s@%s:%s/temporal?ssl=true&sslmode=require&sslrootcert=%s&sslkey=%s&sslcert=%s",
+			opts.User, opts.Address, opts.Port, opts.Secure.SSLRootCert, opts.Secure.SSLKey, opts.Secure.SSLCert,
+		)
+	}
+	dbConnURL := fmt.Sprintf("host=%s port=%s user=%s dbname=temporal password=%s",
+		opts.Address, opts.Port, opts.User, opts.Password)
+	if opts.SSLModeDisable {
+		dbConnURL = "sslmode=disable " + dbConnURL
+	}
+	return dbConnURL
 }

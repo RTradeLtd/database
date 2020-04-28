@@ -12,11 +12,12 @@ single-node:
 # used to generate the required certificates for our test node
 .PHONY: gen-test-certs
 gen-test-certs:
-	rm -rf certs safe-dir
+	rm -rf certs safe-dir cockroach-data
 	mkdir certs && mkdir safe-dir
 	./scripts/gen_certs.sh ca ./certs ./safe-dir/ca.key
 	./scripts/gen_certs.sh node ./certs ./safe-dir/ca.key localhost
 	./scripts/gen_certs.sh client ./certs ./safe-dir/ca.key temporal
+	./scripts/gen_certs.sh client ./certs ./safe-dir/ca.key root
 
 # used to start our secure single-node test server
 .PHONY: start-test-node
@@ -25,4 +26,14 @@ start-test-node:
 		start-single-node \
 		--certs-dir=certs \
 		--listen-addr=localhost:26257 \
-		--http-addr=localhost:8080
+		--http-addr=localhost:8080 \
+		--background
+
+# setups the database after it starts
+.PHONY: setup-test-node
+setup-test-node:
+	cockroach \
+		sql \
+		--certs-dir=certs \
+		--user=root \
+		--host=localhost:26257
