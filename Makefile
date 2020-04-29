@@ -12,13 +12,11 @@ build: vendor
 
 .PHONY: testenv
 testenv:
-	(cd roach_clip ; make start-testenv)
-#	$(COMPOSECOMMAND) up -d postgres
+	(cd testenv/roach_clip ; make start-testenv)
 
 .PHONY: clean
 clean:
-	(cd roach_clip ; make stop-test-node)
-#	$(COMPOSECOMMAND) down
+	(cd testenv/roach_clip ; make stop-test-node)
 
 .PHONY: test
 test: vendor
