@@ -27,7 +27,7 @@ gen-test-certs:
 	./scripts/gen_certs.sh client ./certs ./safe-dir/ca.key temporaladmin
 	./scripts/gen_certs.sh client ./certs ./safe-dir/ca.key root
 	./scripts/gen_certs.sh client ./certs ./safe-dir/ca.key dbadmin
-	
+
 # used to start our secure single-node test server
 .PHONY: start-test-node
 start-test-node:
@@ -35,7 +35,7 @@ start-test-node:
 	cockroach \
 		start-single-node \
 		--certs-dir=certs \
-		--listen-addr=localhost:26257 \
+		--listen-addr=localhost:5432 \
 		--http-addr=localhost:8080 \
 		--background
 
@@ -44,6 +44,7 @@ start-test-node:
 stop-test-node:
 	cockroach \
 		quit \
+		--host=localhost:5432 \
 		--certs-dir=certs
 
 # setups the database after it starts
@@ -54,32 +55,37 @@ setup-test-node:
 		sql \
 		--certs-dir=certs \
 		--user=root \
-		--host=localhost:26257 \
+		--host=localhost:5432 \
 		--execute="CREATE DATABASE temporal"
 	@echo creating temporal database administrator
 	cockroach \
 		sql \
 		--certs-dir=certs \
 		--user=root \
-		--host=localhost:26257 \
+		--host=localhost:5432 \
 		--execute="CREATE USER temporaladmin WITH PASSWORD 'temporaladmin'"
 	@echo creating general database administrator
 	cockroach \
 		sql \
 		--certs-dir=certs \
 		--user=root \
-		--host=localhost:26257 \
+		--host=localhost:5432 \
 		--execute="CREATE USER dbadmin WITH PASSWORD 'dbadmin'"
 	@echo setting up user permissions
 	cockroach \
 		sql \
 		--certs-dir=certs \
 		--user=root \
-		--host=localhost:26257 \
-		--execute="GRANT SELECT ON DATABASE temporal TO temporaladmin;"
+		--host=localhost:5432 \
+		--execute="GRANT ALL ON DATABASE temporal TO temporaladmin;"
 	cockroach \
 		sql \
 		--certs-dir=certs \
 		--user=root \
-		--host=localhost:26257 \
+		--host=localhost:5432 \
 		--execute="GRANT admin TO dbadmin;"
+
+.PHONY: run-migrations
+run-migrations:
+	@echo running database migrations
+	temporal --config config.json migrate

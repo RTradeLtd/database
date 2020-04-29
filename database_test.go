@@ -17,15 +17,14 @@ func TestNew(t *testing.T) {
 		db, err := New(&config.TemporalConfig{
 			Database: config.Database{
 				Name:     "temporal",
-				URL:      "127.0.0.1",
-				Port:     "5433",
-				Username: "postgres",
-				Password: "password123",
+				URL:      "localhost",
+				Port:     "5432",
+				Username: "temporaladmin",
+				Password: "temporaladmin",
 			},
 		}, Options{
-			RunMigrations:  true,
-			SSLModeDisable: true,
-			Logger:         NewZapLogger(LogLevelInfo, zap.NewExample().Sugar())})
+			RunMigrations: true,
+			Logger:        NewZapLogger(LogLevelInfo, zap.NewExample().Sugar())})
 		if err != nil {
 			t.Fatal(err)
 		}

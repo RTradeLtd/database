@@ -48,6 +48,7 @@ func New(cfg *config.TemporalConfig, opts Options) (*Manager, error) {
 		Address:        cfg.Database.URL,
 		Port:           cfg.Database.Port,
 		SSLModeDisable: opts.SSLModeDisable,
+		Secure:         opts.SecOpts,
 	})
 	if err != nil {
 		return nil, err
