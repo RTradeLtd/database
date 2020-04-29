@@ -88,4 +88,5 @@ setup-test-node:
 .PHONY: run-migrations
 run-migrations:
 	@echo running database migrations
+	./scripts/run_migrations.sh
 	temporal --config config.json migrate
