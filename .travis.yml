@@ -7,7 +7,7 @@ sudo: required
 install:
   - go get -u golang.org/x/lint/golint
   - GO111MODULE=on go mod vendor
-  - cd roach_clip && make install
+  - (cd roach_clip && make install)
 before_script:
   - go vet ./...
   - go build ./...
