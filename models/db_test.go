@@ -19,8 +19,8 @@ func newTestDB(t *testing.T, model interface{}) *gorm.DB {
 	}
 
 	db, err := gorm.Open("postgres",
-		fmt.Sprintf("host=%s port=%s user=postgres dbname=temporal password=%s",
-			cfg.Database.URL, cfg.Database.Port, cfg.Database.Password))
+		fmt.Sprintf("host=%s port=%s user=%s dbname=temporal password=%s",
+			cfg.Database.URL, cfg.Database.Port, cfg.Database.Username, cfg.Database.Password))
 	if err != nil {
 		t.Fatal(err)
 	}
