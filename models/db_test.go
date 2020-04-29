@@ -1,10 +1,8 @@
 package models
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/RTradeLtd/config/v2"
 	"github.com/jinzhu/gorm"
 )
 
@@ -13,14 +11,7 @@ type testLogger struct{ t *testing.T }
 func (t *testLogger) Print(args ...interface{}) { t.t.Log(args...) }
 
 func newTestDB(t *testing.T, model interface{}) *gorm.DB {
-	cfg, err := config.LoadConfig("../testenv/config.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	db, err := gorm.Open("postgres",
-		fmt.Sprintf("host=127.0.0.1 port=%s user=postgres dbname=temporal password=%s sslmode=disable",
-			cfg.Database.Port, cfg.Database.Password))
+	db, err := gorm.Open("postgres", "host=localhost port=5432 user=temporaladmin dbname=temporal password=temporaladmin")
 	if err != nil {
 		t.Fatal(err)
 	}
